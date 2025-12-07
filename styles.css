@@ -1,5 +1,3 @@
-[file name]: styles.css
-[file content begin]
 /* ========== CSS VARIABLES & RESET ========== */
 :root {
     /* Primary Color Palette - Space & Tech Theme */
@@ -1329,7 +1327,6 @@ body:not(.dark-theme) .running-text-container {
     font-weight: 500;
     font-family: var(--font-sans);
     will-change: transform;
-    backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
 }
 
@@ -2060,4 +2057,3 @@ textarea:focus,
         left: var(--space-md);
     }
 }
-[file content end]

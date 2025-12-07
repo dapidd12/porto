@@ -1,17 +1,15 @@
-[file name]: config.js
-[file content begin]
 // Configuration for SpaceTeam | Dev
 const CONFIG = {
-    // Supabase Configuration
+    // Supabase Configuration - UPDATE WITH YOUR CREDENTIALS
     supabaseUrl: 'https://your-project.supabase.co',
     supabaseKey: 'your-anon-key',
     
-    // Admin credentials
+    // Admin credentials - CHANGE THESE IN PRODUCTION!
     adminEmail: 'mission@spaceteam.dev',
     adminPassword: 'SpaceTeam2024!',
     
-    // Gemini AI Configuration
-    geminiApiKey: 'AIzaSyBNFp4JFNfx2bd37V0SgFueK4vEEKIZHsk',
+    // Gemini AI Configuration - SET YOUR API KEY IN PRODUCTION
+    geminiApiKey: 'AIzaSyBNFp4JFNfx2bd37V0SgFueK4vEEKIZHsk', // Leave empty or set your actual API key
     
     // Application defaults
     defaults: {
@@ -59,4 +57,3 @@ if (CONFIG.supabaseUrl && CONFIG.supabaseKey &&
 // Export configuration
 window.CONFIG = CONFIG;
 window.supabaseClient = supabaseClient;
-[file content end]

@@ -1,43 +1,51 @@
-[file name]: app.js
-[file content begin]
 // Main Application - SpaceTeam | Dev
 class SpaceTeamApp {
     constructor() {
-        // Fix: Proper dark mode initialization
-        const savedDarkMode = localStorage.getItem('darkMode');
-        const defaultDarkMode = true; // Default to dark mode
-        
-        this.state = {
-            darkMode: savedDarkMode !== null ? savedDarkMode === 'true' : defaultDarkMode,
-            chatOpen: false,
-            isAdmin: false,
-            currentAdminSection: 'dashboard',
-            editingId: null,
-            developers: [],
-            projects: [],
-            blogPosts: [],
-            settings: {},
-            messages: [],
-            chatMessages: [],
-            skillsChart: null,
-            projectIdCounter: 1,
-            developerIdCounter: 1,
-            blogIdCounter: 1,
-            messageIdCounter: 1
-        };
+        try {
+            // Fix: Proper dark mode initialization
+            const savedDarkMode = localStorage.getItem('darkMode');
+            const defaultDarkMode = true; // Default to dark mode
+            
+            this.state = {
+                darkMode: savedDarkMode !== null ? savedDarkMode === 'true' : defaultDarkMode,
+                chatOpen: false,
+                isAdmin: false,
+                currentAdminSection: 'dashboard',
+                editingId: null,
+                developers: [],
+                projects: [],
+                blogPosts: [],
+                settings: {},
+                messages: [],
+                chatMessages: [],
+                skillsChart: null,
+                projectIdCounter: 1,
+                developerIdCounter: 1,
+                blogIdCounter: 1,
+                messageIdCounter: 1,
+                resizeHandler: null
+            };
 
-        // Bind methods to maintain context
-        this.init = this.init.bind(this);
-        this.toggleDarkMode = this.toggleDarkMode.bind(this);
-        this.toggleMobileMenu = this.toggleMobileMenu.bind(this);
-        this.handleContactSubmit = this.handleContactSubmit.bind(this);
-        this.handleAdminLogin = this.handleAdminLogin.bind(this);
-        this.toggleChat = this.toggleChat.bind(this);
-        this.sendChatMessage = this.sendChatMessage.bind(this);
-        this.showAdminSection = this.showAdminSection.bind(this);
-        this.switchAdminTab = this.switchAdminTab.bind(this);
-        
-        this.init();
+            // Bind methods to maintain context
+            this.init = this.init.bind(this);
+            this.toggleDarkMode = this.toggleDarkMode.bind(this);
+            this.toggleMobileMenu = this.toggleMobileMenu.bind(this);
+            this.handleContactSubmit = this.handleContactSubmit.bind(this);
+            this.handleAdminLogin = this.handleAdminLogin.bind(this);
+            this.toggleChat = this.toggleChat.bind(this);
+            this.sendChatMessage = this.sendChatMessage.bind(this);
+            this.showAdminSection = this.showAdminSection.bind(this);
+            this.switchAdminTab = this.switchAdminTab.bind(this);
+            this.handleDeveloperFormSubmit = this.handleDeveloperFormSubmit.bind(this);
+            this.handleProjectFormSubmit = this.handleProjectFormSubmit.bind(this);
+            this.handleBlogFormSubmit = this.handleBlogFormSubmit.bind(this);
+            this.handleSettingsFormSubmit = this.handleSettingsFormSubmit.bind(this);
+            
+            this.init();
+        } catch (error) {
+            console.error('App constructor error:', error);
+            throw error;
+        }
     }
 
     async init() {
@@ -389,7 +397,7 @@ class SpaceTeamApp {
                     <h3 style="color: var(--secondary);">Mission Crew Assembling</h3>
                     <p style="color: var(--gray); max-width: 400px; margin: 0 auto;">Our elite space engineers are preparing for mission. Stand by for crew manifest!</p>
                     ${this.state.isAdmin ? `
-                        <button class="btn btn-primary" onclick="window.app.showAdminSection('developers')" style="margin-top: var(--space-md);">
+                        <button class="btn btn-primary" onclick="window.showAdminSection('developers')" style="margin-top: var(--space-md);">
                             <i class="fas fa-user-astronaut"></i> Assign First Crew Member
                         </button>
                     ` : ''}
@@ -463,7 +471,7 @@ class SpaceTeamApp {
                         ${filter === 'all' ? 'No missions completed yet. Preparing for launch!' : `No ${filter} missions found. Adjust mission parameters!`}
                     </p>
                     ${this.state.isAdmin ? `
-                        <button class="btn btn-primary" onclick="window.app.showAdminSection('projects')" style="margin-top: var(--space-md);">
+                        <button class="btn btn-primary" onclick="window.showAdminSection('projects')" style="margin-top: var(--space-md);">
                             <i class="fas fa-rocket"></i> Log First Mission
                         </button>
                     ` : ''}
@@ -508,7 +516,7 @@ class SpaceTeamApp {
                                     <i class="fas fa-external-link-alt"></i> Launch
                                 </a>
                             ` : `
-                                <button class="btn btn-sm btn-primary" onclick="window.app.viewProjectDetails(${project.id})">
+                                <button class="btn btn-sm btn-primary" onclick="window.viewProjectDetails(${project.id})">
                                     <i class="fas fa-eye"></i> Mission Details
                                 </button>
                             `}
@@ -536,7 +544,7 @@ class SpaceTeamApp {
                     <h3 style="color: var(--secondary);">Mission Briefings Pending</h3>
                     <p style="color: var(--gray); max-width: 400px; margin: 0 auto;">Stand by for mission briefings and tech discoveries!</p>
                     ${this.state.isAdmin ? `
-                        <button class="btn btn-primary" onclick="window.app.showAdminSection('blog')" style="margin-top: var(--space-md);">
+                        <button class="btn btn-primary" onclick="window.showAdminSection('blog')" style="margin-top: var(--space-md);">
                             <i class="fas fa-edit"></i> Create First Briefing
                         </button>
                     ` : ''}
@@ -563,7 +571,7 @@ class SpaceTeamApp {
                         <p class="blog-excerpt">${excerpt}</p>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
                             <span><i class="fas fa-user-astronaut"></i> ${post.author || 'Mission Control'}</span>
-                            <button class="btn btn-sm btn-outline" onclick="window.app.viewBlogPost(${post.id})">
+                            <button class="btn btn-sm btn-outline" onclick="window.viewBlogPost(${post.id})">
                                 Read Briefing
                             </button>
                         </div>
@@ -594,6 +602,13 @@ class SpaceTeamApp {
         // Destroy existing chart if it exists
         if (this.state.skillsChart) {
             this.state.skillsChart.destroy();
+            this.state.skillsChart = null;
+            
+            // Remove resize listener
+            if (this.state.resizeHandler) {
+                window.removeEventListener('resize', this.state.resizeHandler);
+                this.state.resizeHandler = null;
+            }
         }
         
         // Aggregate skills from all developers
@@ -625,7 +640,7 @@ class SpaceTeamApp {
                     <h3 style="color: var(--secondary);">Tech Galaxy Map Unavailable</h3>
                     <p style="color: var(--gray);">Assign crew members with skills to map the tech galaxy</p>
                     ${this.state.isAdmin ? `
-                        <button class="btn btn-primary" onclick="window.app.showAdminSection('developers')" style="margin-top: var(--space-md);">
+                        <button class="btn btn-primary" onclick="window.showAdminSection('developers')" style="margin-top: var(--space-md);">
                             <i class="fas fa-user-astronaut"></i> Assign Crew Members
                         </button>
                     ` : ''}
@@ -721,15 +736,15 @@ class SpaceTeamApp {
             });
             
             // Handle window resize
-            const resizeHandler = () => {
+            this.state.resizeHandler = () => {
                 if (this.state.skillsChart) {
                     this.state.skillsChart.resize();
                 }
             };
             
             // Remove existing listener and add new one
-            window.removeEventListener('resize', resizeHandler);
-            window.addEventListener('resize', resizeHandler);
+            window.removeEventListener('resize', this.state.resizeHandler);
+            window.addEventListener('resize', this.state.resizeHandler);
             
         } catch (error) {
             console.error('Error creating skills chart:', error);
@@ -1419,13 +1434,13 @@ class SpaceTeamApp {
                         <div>
                             <h3>Mission Controls</h3>
                             <div style="display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap;">
-                                <button class="btn btn-primary" onclick="window.app.showAdminSection('developers')">
+                                <button class="btn btn-primary" onclick="window.showAdminSection('developers')">
                                     <i class="fas fa-user-astronaut"></i> Manage Crew
                                 </button>
-                                <button class="btn btn-secondary" onclick="window.app.showAdminSection('projects')">
+                                <button class="btn btn-secondary" onclick="window.showAdminSection('projects')">
                                     <i class="fas fa-rocket"></i> Manage Missions
                                 </button>
-                                <button class="btn btn-outline" onclick="window.app.showAdminSection('blog')">
+                                <button class="btn btn-outline" onclick="window.showAdminSection('blog')">
                                     <i class="fas fa-edit"></i> Manage Briefings
                                 </button>
                             </div>
@@ -1446,7 +1461,7 @@ class SpaceTeamApp {
                                     `).join('')}
                                 </div>
                                 ${unreadMessages > 0 ? `
-                                    <button class="btn btn-sm btn-primary" onclick="window.app.showAdminSection('messages')" style="margin-top: 10px;">
+                                    <button class="btn btn-sm btn-primary" onclick="window.showAdminSection('messages')" style="margin-top: 10px;">
                                         <i class="fas fa-satellite"></i> View All Transmissions (${unreadMessages} unread)
                                     </button>
                                 ` : ''}
@@ -1526,26 +1541,30 @@ class SpaceTeamApp {
             const form = document.getElementById('admin-developer-form');
             if (form) {
                 // Remove existing listeners and add new one
-                form.removeEventListener('submit', this.handleDeveloperFormSubmit);
-                form.addEventListener('submit', (e) => this.handleDeveloperFormSubmit(e));
+                const newForm = form.cloneNode(true);
+                form.parentNode.replaceChild(newForm, form);
+                newForm.addEventListener('submit', this.handleDeveloperFormSubmit);
             }
         } else if (section === 'projects') {
             const form = document.getElementById('admin-project-form');
             if (form) {
-                form.removeEventListener('submit', this.handleProjectFormSubmit);
-                form.addEventListener('submit', (e) => this.handleProjectFormSubmit(e));
+                const newForm = form.cloneNode(true);
+                form.parentNode.replaceChild(newForm, form);
+                newForm.addEventListener('submit', this.handleProjectFormSubmit);
             }
         } else if (section === 'blog') {
             const form = document.getElementById('admin-blog-form');
             if (form) {
-                form.removeEventListener('submit', this.handleBlogFormSubmit);
-                form.addEventListener('submit', (e) => this.handleBlogFormSubmit(e));
+                const newForm = form.cloneNode(true);
+                form.parentNode.replaceChild(newForm, form);
+                newForm.addEventListener('submit', this.handleBlogFormSubmit);
             }
         } else if (section === 'settings') {
             const form = document.getElementById('admin-settings-form');
             if (form) {
-                form.removeEventListener('submit', this.handleSettingsFormSubmit);
-                form.addEventListener('submit', (e) => this.handleSettingsFormSubmit(e));
+                const newForm = form.cloneNode(true);
+                form.parentNode.replaceChild(newForm, form);
+                newForm.addEventListener('submit', this.handleSettingsFormSubmit);
             }
         }
     }
@@ -1583,10 +1602,10 @@ class SpaceTeamApp {
                     <small style="color: var(--gray);">${Array.isArray(dev.skills) ? dev.skills.slice(0, 3).join(', ') : dev.skills || ''}</small>
                 </div>
                 <div class="admin-list-actions">
-                    <button class="btn btn-sm" onclick="window.app.editDeveloper(${dev.id})">
+                    <button class="btn btn-sm" onclick="window.editDeveloper(${dev.id})">
                         <i class="fas fa-edit"></i> Edit
                     </button>
-                    <button class="btn btn-sm btn-danger" onclick="window.app.deleteDeveloper(${dev.id})">
+                    <button class="btn btn-sm btn-danger" onclick="window.deleteDeveloper(${dev.id})">
                         <i class="fas fa-trash"></i> Delete
                     </button>
                 </div>
@@ -1614,7 +1633,7 @@ class SpaceTeamApp {
                             <i class="fas fa-user-astronaut fa-3x" style="color: var(--gray); margin-bottom: var(--space-md);"></i>
                             <h3 style="color: var(--dark);">No Crew Assigned</h3>
                             <p style="color: var(--gray);">Assign your first crew member to begin operations!</p>
-                            <button class="btn btn-primary" onclick="window.app.switchAdminTab('add-developer')" style="margin-top: var(--space-md);">
+                            <button class="btn btn-primary" onclick="window.switchAdminTab('add-developer')" style="margin-top: var(--space-md);">
                                 <i class="fas fa-user-astronaut"></i> Assign First Crew
                             </button>
                         </div>
@@ -1665,7 +1684,7 @@ class SpaceTeamApp {
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save"></i> ${this.state.editingId ? 'Update Crew Member' : 'Assign to Mission'}
                             </button>
-                            <button type="button" class="btn btn-outline" onclick="window.app.resetDeveloperForm()">
+                            <button type="button" class="btn btn-outline" onclick="window.resetDeveloperForm()">
                                 <i class="fas fa-times"></i> Cancel
                             </button>
                         </div>
@@ -1688,10 +1707,10 @@ class SpaceTeamApp {
                     <small style="color: var(--gray);">${Array.isArray(project.tech) ? project.tech.slice(0, 3).join(', ') : project.tech || ''}</small>
                 </div>
                 <div class="admin-list-actions">
-                    <button class="btn btn-sm" onclick="window.app.editProject(${project.id})">
+                    <button class="btn btn-sm" onclick="window.editProject(${project.id})">
                         <i class="fas fa-edit"></i> Edit
                     </button>
-                    <button class="btn btn-sm btn-danger" onclick="window.app.deleteProject(${project.id})">
+                    <button class="btn btn-sm btn-danger" onclick="window.deleteProject(${project.id})">
                         <i class="fas fa-trash"></i> Delete
                     </button>
                 </div>
@@ -1719,7 +1738,7 @@ class SpaceTeamApp {
                             <i class="fas fa-rocket fa-3x" style="color: var(--gray); margin-bottom: var(--space-md);"></i>
                             <h3 style="color: var(--dark);">No Missions Logged</h3>
                             <p style="color: var(--gray);">Log your first mission to showcase operations!</p>
-                            <button class="btn btn-primary" onclick="window.app.switchAdminTab('add-project')" style="margin-top: var(--space-md);">
+                            <button class="btn btn-primary" onclick="window.switchAdminTab('add-project')" style="margin-top: var(--space-md);">
                                 <i class="fas fa-rocket"></i> Log First Mission
                             </button>
                         </div>
@@ -1767,7 +1786,7 @@ class SpaceTeamApp {
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save"></i> ${this.state.editingId ? 'Update Mission' : 'Log Mission'}
                             </button>
-                            <button type="button" class="btn btn-outline" onclick="window.app.resetProjectForm()">
+                            <button type="button" class="btn btn-outline" onclick="window.resetProjectForm()">
                                 <i class="fas fa-times"></i> Cancel
                             </button>
                         </div>
@@ -1788,10 +1807,10 @@ class SpaceTeamApp {
                     <small style="color: var(--gray);">${new Date(post.created_at).toLocaleDateString()}</small>
                 </div>
                 <div class="admin-list-actions">
-                    <button class="btn btn-sm" onclick="window.app.editBlogPost(${post.id})">
+                    <button class="btn btn-sm" onclick="window.editBlogPost(${post.id})">
                         <i class="fas fa-edit"></i> Edit
                     </button>
-                    <button class="btn btn-sm btn-danger" onclick="window.app.deleteBlogPost(${post.id})">
+                    <button class="btn btn-sm btn-danger" onclick="window.deleteBlogPost(${post.id})">
                         <i class="fas fa-trash"></i> Delete
                     </button>
                 </div>
@@ -1819,7 +1838,7 @@ class SpaceTeamApp {
                             <i class="fas fa-newspaper fa-3x" style="color: var(--gray); margin-bottom: var(--space-md);"></i>
                             <h3 style="color: var(--dark);">No Briefings Available</h3>
                             <p style="color: var(--gray);">Create your first mission briefing!</p>
-                            <button class="btn btn-primary" onclick="window.app.switchAdminTab('add-blog')" style="margin-top: var(--space-md);">
+                            <button class="btn btn-primary" onclick="window.switchAdminTab('add-blog')" style="margin-top: var(--space-md);">
                                 <i class="fas fa-edit"></i> Create First Briefing
                             </button>
                         </div>
@@ -1864,7 +1883,7 @@ class SpaceTeamApp {
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save"></i> ${this.state.editingId ? 'Update Briefing' : 'Publish Briefing'}
                             </button>
-                            <button type="button" class="btn btn-outline" onclick="window.app.resetBlogForm()">
+                            <button type="button" class="btn btn-outline" onclick="window.resetBlogForm()">
                                 <i class="fas fa-times"></i> Cancel
                             </button>
                         </div>
@@ -1884,10 +1903,10 @@ class SpaceTeamApp {
                     <small style="color: var(--gray);">${new Date(msg.created_at).toLocaleString()}</small>
                 </div>
                 <div class="admin-list-actions">
-                    <button class="btn btn-sm" onclick="window.app.viewMessage(${msg.id})">
+                    <button class="btn btn-sm" onclick="window.viewMessage(${msg.id})">
                         <i class="fas fa-eye"></i> View
                     </button>
-                    <button class="btn btn-sm btn-danger" onclick="window.app.deleteMessage(${msg.id})">
+                    <button class="btn btn-sm btn-danger" onclick="window.deleteMessage(${msg.id})">
                         <i class="fas fa-trash"></i> Delete
                     </button>
                 </div>
@@ -1988,10 +2007,10 @@ class SpaceTeamApp {
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-save"></i> Save Systems
                         </button>
-                        <button type="button" class="btn btn-outline" onclick="window.app.exportData()">
+                        <button type="button" class="btn btn-outline" onclick="window.exportData()">
                             <i class="fas fa-download"></i> Backup Data
                         </button>
-                        <button type="button" class="btn btn-danger" onclick="window.app.resetData()">
+                        <button type="button" class="btn btn-danger" onclick="window.resetData()">
                             <i class="fas fa-trash"></i> System Reset
                         </button>
                     </div>
@@ -2488,6 +2507,26 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
         app = new SpaceTeamApp();
         window.app = app;
+        
+        // Expose methods for inline onclick handlers
+        window.showAdminSection = (section) => app.showAdminSection(section);
+        window.viewProjectDetails = (id) => app.viewProjectDetails(id);
+        window.viewBlogPost = (id) => app.viewBlogPost(id);
+        window.switchAdminTab = (tabId) => app.switchAdminTab(tabId);
+        window.resetDeveloperForm = () => app.resetDeveloperForm();
+        window.resetProjectForm = () => app.resetProjectForm();
+        window.resetBlogForm = () => app.resetBlogForm();
+        window.editDeveloper = (id) => app.editDeveloper(id);
+        window.editProject = (id) => app.editProject(id);
+        window.editBlogPost = (id) => app.editBlogPost(id);
+        window.deleteDeveloper = (id) => app.deleteDeveloper(id);
+        window.deleteProject = (id) => app.deleteProject(id);
+        window.deleteBlogPost = (id) => app.deleteBlogPost(id);
+        window.deleteMessage = (id) => app.deleteMessage(id);
+        window.viewMessage = (id) => app.viewMessage(id);
+        window.exportData = () => app.exportData();
+        window.resetData = () => app.resetData();
+        
     } catch (error) {
         console.error('Failed to initialize application:', error);
         // Show error message to user
@@ -2497,4 +2536,3 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(errorDiv);
     }
 });
-[file content end]
