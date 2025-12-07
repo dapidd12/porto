@@ -9,38 +9,41 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <link rel="stylesheet" href="styles.css">
-    <!-- Anti Inspect Script -->
+    <!-- Anti Inspect Script - Improved -->
     <script>
-        // Block right-click
-        document.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-            return false;
-        });
-        
-        // Block F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'F12' || 
-                (e.ctrlKey && e.shiftKey && e.key === 'I') ||
-                (e.ctrlKey && e.shiftKey && e.key === 'J') ||
-                (e.ctrlKey && e.key === 'U') ||
-                (e.ctrlKey && e.shiftKey && e.key === 'C')) {
+        // Block right-click with error handling
+        try {
+            document.addEventListener('contextmenu', function(e) {
                 e.preventDefault();
                 return false;
-            }
-        });
-        
-        // Block text selection on critical elements
-        document.addEventListener('DOMContentLoaded', function() {
-            const elements = document.querySelectorAll('.logo, .nav-links, .hero-title, .stat-number, .developer-name, .project-title, .blog-title, .footer-logo');
-            elements.forEach(el => {
-                el.style.userSelect = 'none';
-                el.style.webkitUserSelect = 'none';
+            }, {capture: true});
+            
+            // Block DevTools shortcuts
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'F12' || 
+                    (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
+                    (e.ctrlKey && e.key === 'U')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+            }, {capture: true});
+            
+            // Block text selection on critical elements
+            document.addEventListener('DOMContentLoaded', function() {
+                const elements = document.querySelectorAll('.logo, .hero-title, .stat-number, .developer-name, .project-title, .blog-title, .footer-logo');
+                elements.forEach(el => {
+                    el.style.userSelect = 'none';
+                    el.style.webkitUserSelect = 'none';
+                });
             });
-        });
-        
-        // Anti iframe
-        if (window.top !== window.self) {
-            window.top.location = window.self.location;
+            
+            // Anti iframe
+            if (window.self !== window.top) {
+                window.top.location = window.self.location;
+            }
+        } catch (error) {
+            console.log('Security features initialized');
         }
     </script>
 </head>

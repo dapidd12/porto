@@ -1,10 +1,14 @@
 [file name]: app.js
 [file content begin]
-// Main Application
+// Main Application - SpaceTeam | Dev
 class SpaceTeamApp {
     constructor() {
+        // Fix: Proper dark mode initialization
+        const savedDarkMode = localStorage.getItem('darkMode');
+        const defaultDarkMode = true; // Default to dark mode
+        
         this.state = {
-            darkMode: localStorage.getItem('darkMode') === 'true' || true,
+            darkMode: savedDarkMode !== null ? savedDarkMode === 'true' : defaultDarkMode,
             chatOpen: false,
             isAdmin: false,
             currentAdminSection: 'dashboard',
@@ -22,34 +26,57 @@ class SpaceTeamApp {
             messageIdCounter: 1
         };
 
+        // Bind methods to maintain context
+        this.init = this.init.bind(this);
+        this.toggleDarkMode = this.toggleDarkMode.bind(this);
+        this.toggleMobileMenu = this.toggleMobileMenu.bind(this);
+        this.handleContactSubmit = this.handleContactSubmit.bind(this);
+        this.handleAdminLogin = this.handleAdminLogin.bind(this);
+        this.toggleChat = this.toggleChat.bind(this);
+        this.sendChatMessage = this.sendChatMessage.bind(this);
+        this.showAdminSection = this.showAdminSection.bind(this);
+        this.switchAdminTab = this.switchAdminTab.bind(this);
+        
         this.init();
     }
 
     async init() {
-        // Set current year
-        document.getElementById('current-year').textContent = new Date().getFullYear();
-        
-        // Apply dark mode if enabled
-        if (this.state.darkMode) {
-            document.body.classList.add('dark-theme');
-            document.querySelector('#theme-toggle i').className = 'fas fa-sun';
+        try {
+            // Set current year
+            const yearElement = document.getElementById('current-year');
+            if (yearElement) {
+                yearElement.textContent = new Date().getFullYear();
+            }
+            
+            // Apply dark mode if enabled
+            if (this.state.darkMode) {
+                document.body.classList.add('dark-theme');
+                const themeIcon = document.querySelector('#theme-toggle i');
+                if (themeIcon) {
+                    themeIcon.className = 'fas fa-sun';
+                }
+            }
+            
+            // Setup event listeners
+            this.setupEventListeners();
+            
+            // Load data
+            await this.loadData();
+            
+            // Initialize UI
+            this.initUI();
+            
+            // Check admin session
+            this.checkAdminSession();
+            
+            // Setup animations
+            this.setupScrollAnimations();
+            this.setupScrollProgress();
+            
+        } catch (error) {
+            console.error('Initialization error:', error);
+            this.showNotification('Error initializing application', 'error');
         }
-        
-        // Setup event listeners
-        this.setupEventListeners();
-        
-        // Load data
-        await this.loadData();
-        
-        // Initialize UI
-        this.initUI();
-        
-        // Check admin session
-        this.checkAdminSession();
-        
-        // Setup animations
-        this.setupScrollAnimations();
-        this.setupScrollProgress();
     }
 
     async loadData() {
@@ -92,7 +119,9 @@ class SpaceTeamApp {
             
             if (devError) throw devError;
             this.state.developers = developers || [];
-            this.state.developerIdCounter = Math.max(...this.state.developers.map(d => d.id || 0), 0) + 1;
+            this.state.developerIdCounter = this.state.developers.length > 0 
+                ? Math.max(...this.state.developers.map(d => d.id || 0), 0) + 1 
+                : 1;
             
             // Load projects
             const { data: projects, error: projError } = await supabaseClient
@@ -102,7 +131,9 @@ class SpaceTeamApp {
             
             if (projError) throw projError;
             this.state.projects = projects || [];
-            this.state.projectIdCounter = Math.max(...this.state.projects.map(p => p.id || 0), 0) + 1;
+            this.state.projectIdCounter = this.state.projects.length > 0
+                ? Math.max(...this.state.projects.map(p => p.id || 0), 0) + 1
+                : 1;
             
             // Load blog posts
             const { data: blogPosts, error: blogError } = await supabaseClient
@@ -112,7 +143,9 @@ class SpaceTeamApp {
             
             if (blogError) throw blogError;
             this.state.blogPosts = blogPosts || [];
-            this.state.blogIdCounter = Math.max(...this.state.blogPosts.map(b => b.id || 0), 0) + 1;
+            this.state.blogIdCounter = this.state.blogPosts.length > 0
+                ? Math.max(...this.state.blogPosts.map(b => b.id || 0), 0) + 1
+                : 1;
             
             // Load settings
             let settingsData = null;
@@ -140,7 +173,9 @@ class SpaceTeamApp {
             
             if (msgError) throw msgError;
             this.state.messages = messages || [];
-            this.state.messageIdCounter = Math.max(...this.state.messages.map(m => m.id || 0), 0) + 1;
+            this.state.messageIdCounter = this.state.messages.length > 0
+                ? Math.max(...this.state.messages.map(m => m.id || 0), 0) + 1
+                : 1;
             
         } catch (error) {
             console.error('Supabase loading error:', error);
@@ -155,11 +190,19 @@ class SpaceTeamApp {
         this.state.settings = JSON.parse(localStorage.getItem('spaceteam_settings')) || { ...CONFIG.defaults };
         this.state.messages = JSON.parse(localStorage.getItem('spaceteam_messages')) || [];
         
-        // Update ID counters
-        this.state.developerIdCounter = Math.max(...this.state.developers.map(d => d.id || 0), 0) + 1;
-        this.state.projectIdCounter = Math.max(...this.state.projects.map(p => p.id || 0), 0) + 1;
-        this.state.blogIdCounter = Math.max(...this.state.blogPosts.map(b => b.id || 0), 0) + 1;
-        this.state.messageIdCounter = Math.max(...this.state.messages.map(m => m.id || 0), 0) + 1;
+        // Update ID counters safely
+        this.state.developerIdCounter = this.state.developers.length > 0
+            ? Math.max(...this.state.developers.map(d => d.id || 0), 0) + 1
+            : 1;
+        this.state.projectIdCounter = this.state.projects.length > 0
+            ? Math.max(...this.state.projects.map(p => p.id || 0), 0) + 1
+            : 1;
+        this.state.blogIdCounter = this.state.blogPosts.length > 0
+            ? Math.max(...this.state.blogPosts.map(b => b.id || 0), 0) + 1
+            : 1;
+        this.state.messageIdCounter = this.state.messages.length > 0
+            ? Math.max(...this.state.messages.map(m => m.id || 0), 0) + 1
+            : 1;
     }
 
     async saveToSupabase(table, data) {
@@ -295,7 +338,10 @@ class SpaceTeamApp {
     applySettings() {
         // Apply running text
         const runningText = this.state.settings.runningText || CONFIG.defaults.runningText;
-        document.getElementById('running-text').textContent = runningText;
+        const runningTextElement = document.getElementById('running-text');
+        if (runningTextElement) {
+            runningTextElement.textContent = runningText;
+        }
         
         // Apply site title
         const siteTitle = this.state.settings.siteTitle || CONFIG.defaults.siteTitle;
@@ -305,19 +351,27 @@ class SpaceTeamApp {
         const contactEmail = this.state.settings.contactEmail || CONFIG.defaults.contactEmail;
         const contactPhone = this.state.settings.contactPhone || CONFIG.defaults.contactPhone;
         
-        document.getElementById('contact-email-display').textContent = contactEmail;
-        document.getElementById('contact-phone-display').textContent = contactPhone;
-        document.getElementById('footer-email').textContent = contactEmail;
-        document.getElementById('footer-phone').textContent = contactPhone;
+        const emailDisplay = document.getElementById('contact-email-display');
+        const phoneDisplay = document.getElementById('contact-phone-display');
+        const footerEmail = document.getElementById('footer-email');
+        const footerPhone = document.getElementById('footer-phone');
         
-        // Apply dark mode if enabled in settings
-        if (this.state.settings.darkMode && !this.state.darkMode) {
+        if (emailDisplay) emailDisplay.textContent = contactEmail;
+        if (phoneDisplay) phoneDisplay.textContent = contactPhone;
+        if (footerEmail) footerEmail.textContent = contactEmail;
+        if (footerPhone) footerPhone.textContent = contactPhone;
+        
+        // Apply dark mode from settings
+        if (this.state.settings.darkMode !== undefined && this.state.settings.darkMode !== this.state.darkMode) {
             this.toggleDarkMode();
         }
         
         // Show/hide chat based on settings
         const chatEnabled = this.state.settings.chatEnabled !== false;
-        document.getElementById('chat-toggle').classList.toggle('hidden', !chatEnabled);
+        const chatToggle = document.getElementById('chat-toggle');
+        if (chatToggle) {
+            chatToggle.classList.toggle('hidden', !chatEnabled);
+        }
     }
 
     renderDevelopers() {
@@ -332,10 +386,10 @@ class SpaceTeamApp {
                     <div style="width: 80px; height: 80px; background: rgba(100, 255, 218, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-md);">
                         <i class="fas fa-user-astronaut fa-2x" style="color: var(--secondary);"></i>
                     </div>
-                    <h3 style="color: var(--secondary);">Mission Crew Assigned</h3>
+                    <h3 style="color: var(--secondary);">Mission Crew Assembling</h3>
                     <p style="color: var(--gray); max-width: 400px; margin: 0 auto;">Our elite space engineers are preparing for mission. Stand by for crew manifest!</p>
                     ${this.state.isAdmin ? `
-                        <button class="btn btn-primary" onclick="app.showAdminSection('developers')" style="margin-top: var(--space-md);">
+                        <button class="btn btn-primary" onclick="window.app.showAdminSection('developers')" style="margin-top: var(--space-md);">
                             <i class="fas fa-user-astronaut"></i> Assign First Crew Member
                         </button>
                     ` : ''}
@@ -352,13 +406,16 @@ class SpaceTeamApp {
                 `<span class="skill-tag">${skill}</span>`
             ).join('');
             
+            // Space-themed default image
+            const defaultImage = 'https://images.unsplash.com/photo-1534796636910-9c1825470300?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80';
+            
             const developerHTML = `
                 <div class="developer-card animate__animated animate__fadeInUp" style="animation-delay: ${index * 100}ms">
                     <div class="developer-header">
-                        <img src="${dev.image || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" 
+                        <img src="${dev.image || defaultImage}" 
                              alt="${dev.name}" 
                              class="developer-image"
-                             onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'">
+                             onerror="this.onerror=null; this.src='${defaultImage}'">
                         <div class="developer-overlay">
                             <h3 class="developer-name">${dev.name}</h3>
                             <p class="developer-role">${dev.role}</p>
@@ -406,7 +463,7 @@ class SpaceTeamApp {
                         ${filter === 'all' ? 'No missions completed yet. Preparing for launch!' : `No ${filter} missions found. Adjust mission parameters!`}
                     </p>
                     ${this.state.isAdmin ? `
-                        <button class="btn btn-primary" onclick="app.showAdminSection('projects')" style="margin-top: var(--space-md);">
+                        <button class="btn btn-primary" onclick="window.app.showAdminSection('projects')" style="margin-top: var(--space-md);">
                             <i class="fas fa-rocket"></i> Log First Mission
                         </button>
                     ` : ''}
@@ -429,12 +486,15 @@ class SpaceTeamApp {
                 'design': 'UI/UX Design'
             };
             
+            // Space-themed default image
+            const defaultImage = 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80';
+            
             const projectHTML = `
                 <div class="project-card animate__animated animate__fadeInUp" style="animation-delay: ${index * 100}ms">
-                    <img src="${project.image || 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" 
+                    <img src="${project.image || defaultImage}" 
                          alt="${project.title}" 
                          class="project-image"
-                         onerror="this.src='https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'">
+                         onerror="this.onerror=null; this.src='${defaultImage}'">
                     <div class="project-content">
                         <h3 class="project-title">${project.title}</h3>
                         <p class="project-description">${project.description}</p>
@@ -448,7 +508,7 @@ class SpaceTeamApp {
                                     <i class="fas fa-external-link-alt"></i> Launch
                                 </a>
                             ` : `
-                                <button class="btn btn-sm btn-primary" onclick="app.viewProjectDetails(${project.id})">
+                                <button class="btn btn-sm btn-primary" onclick="window.app.viewProjectDetails(${project.id})">
                                     <i class="fas fa-eye"></i> Mission Details
                                 </button>
                             `}
@@ -476,7 +536,7 @@ class SpaceTeamApp {
                     <h3 style="color: var(--secondary);">Mission Briefings Pending</h3>
                     <p style="color: var(--gray); max-width: 400px; margin: 0 auto;">Stand by for mission briefings and tech discoveries!</p>
                     ${this.state.isAdmin ? `
-                        <button class="btn btn-primary" onclick="app.showAdminSection('blog')" style="margin-top: var(--space-md);">
+                        <button class="btn btn-primary" onclick="window.app.showAdminSection('blog')" style="margin-top: var(--space-md);">
                             <i class="fas fa-edit"></i> Create First Briefing
                         </button>
                     ` : ''}
@@ -486,19 +546,24 @@ class SpaceTeamApp {
         }
         
         this.state.blogPosts.forEach((post, index) => {
+            // Space-themed default image
+            const defaultImage = 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80';
+            
+            const excerpt = post.excerpt || (post.content ? post.content.substring(0, 150) + '...' : 'Briefing details classified.');
+            
             const blogHTML = `
                 <div class="blog-card animate__animated animate__fadeInUp" style="animation-delay: ${index * 100}ms">
-                    <img src="${post.image || 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" 
+                    <img src="${post.image || defaultImage}" 
                          alt="${post.title}" 
                          class="blog-image"
-                         onerror="this.src='https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'">
+                         onerror="this.onerror=null; this.src='${defaultImage}'">
                     <div class="blog-content">
                         <span class="blog-category">${post.category || 'Mission Briefing'}</span>
                         <h3 class="blog-title">${post.title}</h3>
-                        <p class="blog-excerpt">${post.excerpt || post.content?.substring(0, 150) + '...' || 'Briefing details classified.'}</p>
+                        <p class="blog-excerpt">${excerpt}</p>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
                             <span><i class="fas fa-user-astronaut"></i> ${post.author || 'Mission Control'}</span>
-                            <button class="btn btn-sm btn-outline" onclick="app.viewBlogPost(${post.id})">
+                            <button class="btn btn-sm btn-outline" onclick="window.app.viewBlogPost(${post.id})">
                                 Read Briefing
                             </button>
                         </div>
@@ -511,10 +576,15 @@ class SpaceTeamApp {
     }
 
     updateStats() {
-        document.getElementById('projects-count').textContent = this.state.projects.length;
-        document.getElementById('stats-projects').textContent = this.state.projects.length;
-        document.getElementById('stats-clients').textContent = Math.floor(this.state.projects.length * 2.5);
-        document.getElementById('stats-articles').textContent = this.state.blogPosts.length;
+        const projectsCount = document.getElementById('projects-count');
+        const statsProjects = document.getElementById('stats-projects');
+        const statsClients = document.getElementById('stats-clients');
+        const statsArticles = document.getElementById('stats-articles');
+        
+        if (projectsCount) projectsCount.textContent = this.state.projects.length;
+        if (statsProjects) statsProjects.textContent = this.state.projects.length;
+        if (statsClients) statsClients.textContent = Math.floor(this.state.projects.length * 2.5);
+        if (statsArticles) statsArticles.textContent = this.state.blogPosts.length;
     }
 
     initSkillsChart() {
@@ -555,7 +625,7 @@ class SpaceTeamApp {
                     <h3 style="color: var(--secondary);">Tech Galaxy Map Unavailable</h3>
                     <p style="color: var(--gray);">Assign crew members with skills to map the tech galaxy</p>
                     ${this.state.isAdmin ? `
-                        <button class="btn btn-primary" onclick="app.showAdminSection('developers')" style="margin-top: var(--space-md);">
+                        <button class="btn btn-primary" onclick="window.app.showAdminSection('developers')" style="margin-top: var(--space-md);">
                             <i class="fas fa-user-astronaut"></i> Assign Crew Members
                         </button>
                     ` : ''}
@@ -565,71 +635,110 @@ class SpaceTeamApp {
         }
         
         const isDark = document.body.classList.contains('dark-theme');
-        const gridColor = isDark ? 'rgba(100, 255, 218, 0.1)' : 'rgba(0, 0, 0, 0.1)';
-        const textColor = isDark ? '#e6f1ff' : '#1a202c';
+        // Fix: Better color contrast for both modes
+        const gridColor = isDark ? 'rgba(100, 255, 218, 0.15)' : 'rgba(0, 0, 0, 0.1)';
+        const textColor = isDark ? '#e6f1ff' : '#333333';
+        const tickColor = isDark ? '#8892b0' : '#666666';
         
-        this.state.skillsChart = new Chart(ctx.getContext('2d'), {
-            type: 'radar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Skill Proficiency',
-                    data: data,
-                    backgroundColor: 'rgba(100, 255, 218, 0.2)',
-                    borderColor: 'rgba(100, 255, 218, 0.8)',
-                    borderWidth: 2,
-                    pointBackgroundColor: 'rgba(100, 255, 218, 1)',
-                    pointBorderColor: '#0a192f',
-                    pointHoverBackgroundColor: '#0a192f',
-                    pointHoverBorderColor: 'rgba(100, 255, 218, 1)'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                aspectRatio: window.innerWidth < 768 ? 1 : 2,
-                scales: {
-                    r: {
-                        angleLines: {
-                            color: gridColor
-                        },
-                        grid: {
-                            color: gridColor
-                        },
-                        pointLabels: {
-                            font: {
-                                size: window.innerWidth < 768 ? 10 : 12
-                            },
-                            color: textColor
-                        },
-                        ticks: {
-                            backdropColor: 'transparent',
-                            color: isDark ? '#8892b0' : '#4a5568',
-                            stepSize: 20
-                        },
-                        suggestedMin: 0,
-                        suggestedMax: 100
-                    }
+        try {
+            this.state.skillsChart = new Chart(ctx.getContext('2d'), {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Skill Proficiency',
+                        data: data,
+                        backgroundColor: 'rgba(100, 255, 218, 0.2)',
+                        borderColor: 'rgba(100, 255, 218, 0.8)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(100, 255, 218, 1)',
+                        pointBorderColor: isDark ? '#0a192f' : '#ffffff',
+                        pointHoverBackgroundColor: isDark ? '#0a192f' : '#ffffff',
+                        pointHoverBorderColor: 'rgba(100, 255, 218, 1)',
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
                 },
-                plugins: {
-                    legend: {
-                        labels: {
-                            color: textColor,
-                            font: {
-                                family: "'SF Mono', 'Fira Code', monospace"
-                            }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    aspectRatio: window.innerWidth < 768 ? 1 : 2,
+                    scales: {
+                        r: {
+                            angleLines: {
+                                color: gridColor,
+                                lineWidth: 1
+                            },
+                            grid: {
+                                color: gridColor,
+                                circular: true
+                            },
+                            pointLabels: {
+                                font: {
+                                    size: window.innerWidth < 768 ? 10 : 12,
+                                    family: "'SF Mono', 'Fira Code', monospace"
+                                },
+                                color: textColor,
+                                padding: 15
+                            },
+                            ticks: {
+                                backdropColor: 'transparent',
+                                color: tickColor,
+                                stepSize: 20,
+                                font: {
+                                    size: 10
+                                }
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 100,
+                            beginAtZero: true
                         }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: textColor,
+                                font: {
+                                    family: "'SF Mono', 'Fira Code', monospace",
+                                    size: 12
+                                },
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: isDark ? 'rgba(10, 25, 47, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+                            titleColor: textColor,
+                            bodyColor: textColor,
+                            borderColor: 'rgba(100, 255, 218, 0.5)',
+                            borderWidth: 1
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutQuart'
                     }
                 }
-            }
-        });
-        
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            if (this.state.skillsChart) {
-                this.state.skillsChart.resize();
-            }
-        });
+            });
+            
+            // Handle window resize
+            const resizeHandler = () => {
+                if (this.state.skillsChart) {
+                    this.state.skillsChart.resize();
+                }
+            };
+            
+            // Remove existing listener and add new one
+            window.removeEventListener('resize', resizeHandler);
+            window.addEventListener('resize', resizeHandler);
+            
+        } catch (error) {
+            console.error('Error creating skills chart:', error);
+            ctx.parentElement.innerHTML = `
+                <div class="text-center" style="padding: var(--space-xl);">
+                    <p style="color: var(--danger);">Unable to load skills visualization</p>
+                </div>
+            `;
+        }
     }
 
     initUI() {
@@ -639,7 +748,7 @@ class SpaceTeamApp {
         // Initialize project filtering
         this.setupProjectFiltering();
         
-        // Mark sections as visible
+        // Mark sections as visible with delay
         setTimeout(() => {
             document.querySelectorAll('.section').forEach(section => {
                 section.classList.add('visible');
@@ -648,64 +757,108 @@ class SpaceTeamApp {
     }
 
     setupEventListeners() {
-        // Theme toggle
-        document.getElementById('theme-toggle').addEventListener('click', () => this.toggleDarkMode());
-        
-        // Mobile menu
-        document.getElementById('mobile-menu-btn').addEventListener('click', () => this.toggleMobileMenu());
-        
-        // Navigation scroll
-        document.querySelectorAll('.nav-links a[href^="#"]').forEach(link => {
-            link.addEventListener('click', (e) => this.handleNavClick(e, link));
-        });
-        
-        // Contact form
-        document.getElementById('contact-form').addEventListener('submit', (e) => this.handleContactSubmit(e));
-        
-        // Admin login
-        document.getElementById('admin-login-btn').addEventListener('click', (e) => {
-            e.preventDefault();
-            this.showLoginModal();
-        });
-        
-        document.getElementById('close-login').addEventListener('click', () => this.hideLoginModal());
-        document.getElementById('login-form').addEventListener('submit', (e) => this.handleAdminLogin(e));
-        
-        // Chat widget
-        document.getElementById('chat-toggle').addEventListener('click', () => this.toggleChat());
-        document.getElementById('close-chat').addEventListener('click', () => this.toggleChat());
-        document.getElementById('send-chat').addEventListener('click', () => this.sendChatMessage());
-        document.getElementById('chat-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') this.sendChatMessage();
-        });
-        
-        // Scroll effect for navbar
-        window.addEventListener('scroll', () => this.handleScroll());
-        
-        // Close modals on outside click
-        document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('modal')) {
-                this.hideLoginModal();
+        try {
+            // Theme toggle
+            const themeToggle = document.getElementById('theme-toggle');
+            if (themeToggle) {
+                themeToggle.addEventListener('click', this.toggleDarkMode);
             }
-        });
-        
-        // Escape key to close modal
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                this.hideLoginModal();
+            
+            // Mobile menu
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            if (mobileMenuBtn) {
+                mobileMenuBtn.addEventListener('click', this.toggleMobileMenu);
             }
-        });
+            
+            // Navigation scroll
+            document.querySelectorAll('.nav-links a[href^="#"]').forEach(link => {
+                link.addEventListener('click', (e) => this.handleNavClick(e, link));
+            });
+            
+            // Contact form
+            const contactForm = document.getElementById('contact-form');
+            if (contactForm) {
+                contactForm.addEventListener('submit', this.handleContactSubmit);
+            }
+            
+            // Admin login
+            const adminLoginBtn = document.getElementById('admin-login-btn');
+            if (adminLoginBtn) {
+                adminLoginBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.showLoginModal();
+                });
+            }
+            
+            const closeLogin = document.getElementById('close-login');
+            if (closeLogin) {
+                closeLogin.addEventListener('click', () => this.hideLoginModal());
+            }
+            
+            const loginForm = document.getElementById('login-form');
+            if (loginForm) {
+                loginForm.addEventListener('submit', this.handleAdminLogin);
+            }
+            
+            // Chat widget
+            const chatToggle = document.getElementById('chat-toggle');
+            if (chatToggle) {
+                chatToggle.addEventListener('click', this.toggleChat);
+            }
+            
+            const closeChat = document.getElementById('close-chat');
+            if (closeChat) {
+                closeChat.addEventListener('click', this.toggleChat);
+            }
+            
+            const sendChat = document.getElementById('send-chat');
+            if (sendChat) {
+                sendChat.addEventListener('click', this.sendChatMessage);
+            }
+            
+            const chatInput = document.getElementById('chat-input');
+            if (chatInput) {
+                chatInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.sendChatMessage();
+                });
+            }
+            
+            // Scroll effect for navbar
+            window.addEventListener('scroll', () => this.handleScroll());
+            
+            // Close modals on outside click
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('modal')) {
+                    this.hideLoginModal();
+                }
+            });
+            
+            // Escape key to close modal
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    this.hideLoginModal();
+                }
+            });
+            
+        } catch (error) {
+            console.error('Error setting up event listeners:', error);
+        }
     }
 
     setupScrollAnimations() {
         const sections = document.querySelectorAll('.section');
+        if (sections.length === 0) return;
+        
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.classList.add('visible');
                 }
             });
-        }, { threshold: 0.1 });
+        }, { 
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        });
         
         sections.forEach(section => observer.observe(section));
     }
@@ -714,11 +867,15 @@ class SpaceTeamApp {
         const progressBar = document.getElementById('scroll-progress');
         if (!progressBar) return;
         
-        window.addEventListener('scroll', () => {
+        const scrollHandler = () => {
             const windowHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-            const scrolled = (window.scrollY / windowHeight) * 100;
-            progressBar.style.width = scrolled + '%';
-        });
+            const scrolled = windowHeight > 0 ? (window.scrollY / windowHeight) * 100 : 0;
+            progressBar.style.width = Math.min(scrolled, 100) + '%';
+        };
+        
+        window.addEventListener('scroll', scrollHandler);
+        // Initial call
+        scrollHandler();
     }
 
     toggleDarkMode() {
@@ -727,31 +884,34 @@ class SpaceTeamApp {
         localStorage.setItem('darkMode', this.state.darkMode);
         
         const icon = document.querySelector('#theme-toggle i');
-        icon.className = this.state.darkMode ? 'fas fa-sun' : 'fas fa-moon';
-        
-        // Update chart colors if it exists
-        if (this.state.skillsChart) {
-            const isDark = this.state.darkMode;
-            const gridColor = isDark ? 'rgba(100, 255, 218, 0.1)' : 'rgba(0, 0, 0, 0.1)';
-            const textColor = isDark ? '#e6f1ff' : '#1a202c';
-            
-            this.state.skillsChart.options.scales.r.angleLines.color = gridColor;
-            this.state.skillsChart.options.scales.r.grid.color = gridColor;
-            this.state.skillsChart.options.scales.r.pointLabels.color = textColor;
-            this.state.skillsChart.options.scales.r.ticks.color = isDark ? '#8892b0' : '#4a5568';
-            this.state.skillsChart.options.plugins.legend.labels.color = textColor;
-            
-            this.state.skillsChart.update();
+        if (icon) {
+            icon.className = this.state.darkMode ? 'fas fa-sun' : 'fas fa-moon';
         }
+        
+        // Update chart colors with delay to ensure DOM is ready
+        setTimeout(() => {
+            if (this.state.skillsChart) {
+                this.initSkillsChart(); // Re-initialize for proper color update
+            }
+        }, 50);
     }
 
     toggleMobileMenu() {
         const navLinks = document.querySelector('.nav-links');
-        navLinks.classList.toggle('active');
+        const menuBtn = document.getElementById('mobile-menu-btn');
         
-        // Toggle icon
-        const icon = document.querySelector('#mobile-menu-btn i');
-        icon.className = navLinks.classList.contains('active') ? 'fas fa-times' : 'fas fa-bars';
+        if (!navLinks || !menuBtn) return;
+        
+        const isExpanded = navLinks.classList.toggle('active');
+        
+        // Update icon
+        const icon = menuBtn.querySelector('i');
+        if (icon) {
+            icon.className = isExpanded ? 'fas fa-times' : 'fas fa-bars';
+        }
+        
+        // Update accessibility
+        menuBtn.setAttribute('aria-expanded', isExpanded);
     }
 
     handleNavClick(e, link) {
@@ -763,12 +923,21 @@ class SpaceTeamApp {
         
         if (target) {
             // Close mobile menu
-            document.querySelector('.nav-links').classList.remove('active');
-            document.querySelector('#mobile-menu-btn i').className = 'fas fa-bars';
+            const navLinks = document.querySelector('.nav-links');
+            const menuBtn = document.getElementById('mobile-menu-btn');
+            if (navLinks && menuBtn) {
+                navLinks.classList.remove('active');
+                const icon = menuBtn.querySelector('i');
+                if (icon) icon.className = 'fas fa-bars';
+                menuBtn.setAttribute('aria-expanded', 'false');
+            }
             
             // Scroll to target
+            const offset = 80; // Navbar height
+            const targetPosition = target.offsetTop - offset;
+            
             window.scrollTo({
-                top: target.offsetTop - 80,
+                top: targetPosition,
                 behavior: 'smooth'
             });
             
@@ -794,10 +963,10 @@ class SpaceTeamApp {
         // Reset errors
         this.clearFormErrors();
         
-        const name = document.getElementById('contact-name').value.trim();
-        const email = document.getElementById('contact-email').value.trim();
-        const subject = document.getElementById('contact-subject').value.trim();
-        const message = document.getElementById('contact-message').value.trim();
+        const name = document.getElementById('contact-name')?.value.trim() || '';
+        const email = document.getElementById('contact-email')?.value.trim() || '';
+        const subject = document.getElementById('contact-subject')?.value.trim() || '';
+        const message = document.getElementById('contact-message')?.value.trim() || '';
         
         // Validation
         let isValid = true;
@@ -840,8 +1009,11 @@ class SpaceTeamApp {
         
         // Show loading state
         const submitBtn = document.getElementById('contact-submit-btn');
+        if (!submitBtn) return;
+        
         const originalText = submitBtn.innerHTML;
         submitBtn.classList.add('loading');
+        submitBtn.disabled = true;
         
         try {
             // Save message
@@ -859,6 +1031,7 @@ class SpaceTeamApp {
             this.showNotification('Error sending transmission. Please try again.', 'error');
         } finally {
             submitBtn.classList.remove('loading');
+            submitBtn.disabled = false;
             submitBtn.innerHTML = originalText;
         }
     }
@@ -895,6 +1068,8 @@ class SpaceTeamApp {
 
     handleScroll() {
         const navbar = document.getElementById('navbar');
+        if (!navbar) return;
+        
         if (window.scrollY > 50) {
             navbar.classList.add('scrolled');
         } else {
@@ -908,11 +1083,15 @@ class SpaceTeamApp {
         const sections = document.querySelectorAll('section[id]');
         const navLinks = document.querySelectorAll('.nav-links a[href^="#"]');
         
+        if (sections.length === 0 || navLinks.length === 0) return;
+        
         let current = '';
+        const scrollPosition = window.scrollY + 100;
+        
         sections.forEach(section => {
             const sectionTop = section.offsetTop;
             const sectionHeight = section.clientHeight;
-            if (scrollY >= sectionTop - 100) {
+            if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
                 current = section.getAttribute('id');
             }
         });
@@ -927,21 +1106,30 @@ class SpaceTeamApp {
 
     toggleChat() {
         this.state.chatOpen = !this.state.chatOpen;
-        document.getElementById('chat-widget').classList.toggle('hidden', !this.state.chatOpen);
+        const chatWidget = document.getElementById('chat-widget');
+        if (chatWidget) {
+            chatWidget.classList.toggle('hidden', !this.state.chatOpen);
+        }
         
         if (this.state.chatOpen) {
-            document.getElementById('chat-input').focus();
+            const chatInput = document.getElementById('chat-input');
+            if (chatInput) {
+                setTimeout(() => chatInput.focus(), 100);
+            }
         }
     }
 
     async sendChatMessage() {
         const input = document.getElementById('chat-input');
-        const message = input.value.trim();
+        if (!input) return;
         
+        const message = input.value.trim();
         if (!message) return;
         
         // Add user message
         const chatBody = document.getElementById('chat-body');
+        if (!chatBody) return;
+        
         const userMsg = document.createElement('div');
         userMsg.className = 'chat-message user';
         userMsg.textContent = message;
@@ -985,7 +1173,7 @@ class SpaceTeamApp {
 
     async getAIResponse(message) {
         // Check if Gemini API key is available
-        if (CONFIG.geminiApiKey && CONFIG.geminiApiKey !== '') {
+        if (CONFIG.geminiApiKey && CONFIG.geminiApiKey !== '' && CONFIG.geminiApiKey !== 'AIzaSyBNFp4JFNfx2bd37V0SgFueK4vEEKIZHsk') {
             try {
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${CONFIG.geminiApiKey}`, {
                     method: 'POST',
@@ -1006,7 +1194,9 @@ class SpaceTeamApp {
                 }
 
                 const data = await response.json();
-                return data.candidates[0].content.parts[0].text;
+                if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+                    return data.candidates[0].content.parts[0].text;
+                }
             } catch (error) {
                 console.error('Gemini API error:', error);
                 // Fall through to default response
@@ -1026,13 +1216,27 @@ class SpaceTeamApp {
     }
 
     showLoginModal() {
-        document.getElementById('login-modal').classList.remove('hidden');
-        document.getElementById('username').focus();
+        const loginModal = document.getElementById('login-modal');
+        if (loginModal) {
+            loginModal.classList.remove('hidden');
+            const usernameInput = document.getElementById('username');
+            if (usernameInput) {
+                setTimeout(() => usernameInput.focus(), 100);
+            }
+        }
     }
 
     hideLoginModal() {
-        document.getElementById('login-modal').classList.add('hidden');
-        document.getElementById('login-form').reset();
+        const loginModal = document.getElementById('login-modal');
+        if (loginModal) {
+            loginModal.classList.add('hidden');
+        }
+        
+        const loginForm = document.getElementById('login-form');
+        if (loginForm) {
+            loginForm.reset();
+        }
+        
         this.clearFormErrors();
     }
 
@@ -1041,8 +1245,13 @@ class SpaceTeamApp {
         
         this.clearFormErrors();
         
-        const email = document.getElementById('username').value.trim();
-        const password = document.getElementById('password').value.trim();
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        
+        if (!usernameInput || !passwordInput) return;
+        
+        const email = usernameInput.value.trim();
+        const password = passwordInput.value.trim();
         
         // Validation
         if (!email) {
@@ -1057,8 +1266,11 @@ class SpaceTeamApp {
         
         // Show loading state
         const submitBtn = document.getElementById('login-submit-btn');
+        if (!submitBtn) return;
+        
         const originalText = submitBtn.innerHTML;
         submitBtn.classList.add('loading');
+        submitBtn.disabled = true;
         
         try {
             let authSuccess = false;
@@ -1100,6 +1312,7 @@ class SpaceTeamApp {
             this.showNotification('Access denied. Please try again.', 'error');
         } finally {
             submitBtn.classList.remove('loading');
+            submitBtn.disabled = false;
             submitBtn.innerHTML = originalText;
         }
     }
@@ -1115,27 +1328,37 @@ class SpaceTeamApp {
     }
 
     showAdminPanel() {
-        document.getElementById('main-content').classList.add('hidden');
-        document.getElementById('footer').classList.add('hidden');
-        document.querySelector('.running-text-container').classList.add('hidden');
-        document.getElementById('admin-panel').classList.remove('hidden');
+        const mainContent = document.getElementById('main-content');
+        const footer = document.getElementById('footer');
+        const runningText = document.querySelector('.running-text-container');
+        const adminPanel = document.getElementById('admin-panel');
+        
+        if (mainContent) mainContent.classList.add('hidden');
+        if (footer) footer.classList.add('hidden');
+        if (runningText) runningText.classList.add('hidden');
+        if (adminPanel) adminPanel.classList.remove('hidden');
         
         this.loadAdminDashboard();
         this.setupAdminEventListeners();
     }
 
     hideAdminPanel() {
-        document.getElementById('main-content').classList.remove('hidden');
-        document.getElementById('footer').classList.remove('hidden');
-        document.querySelector('.running-text-container').classList.remove('hidden');
-        document.getElementById('admin-panel').classList.add('hidden');
+        const mainContent = document.getElementById('main-content');
+        const footer = document.getElementById('footer');
+        const runningText = document.querySelector('.running-text-container');
+        const adminPanel = document.getElementById('admin-panel');
+        
+        if (mainContent) mainContent.classList.remove('hidden');
+        if (footer) footer.classList.remove('hidden');
+        if (runningText) runningText.classList.remove('hidden');
+        if (adminPanel) adminPanel.classList.add('hidden');
         
         this.state.isAdmin = false;
         localStorage.removeItem('spaceteam_admin');
         localStorage.removeItem('spaceteam_admin_token');
         
         if (window.supabaseClient) {
-            supabaseClient.auth.signOut();
+            supabaseClient.auth.signOut().catch(console.error);
         }
         
         this.showNotification('Logged out from mission control', 'success');
@@ -1152,14 +1375,18 @@ class SpaceTeamApp {
         });
         
         // Admin logout
-        document.getElementById('admin-logout').addEventListener('click', (e) => {
-            e.preventDefault();
-            this.hideAdminPanel();
-        });
+        const adminLogout = document.getElementById('admin-logout');
+        if (adminLogout) {
+            adminLogout.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.hideAdminPanel();
+            });
+        }
     }
 
     loadAdminDashboard() {
         const sectionsContainer = document.getElementById('admin-sections');
+        if (!sectionsContainer) return;
         
         const unreadMessages = this.state.messages.filter(msg => !msg.read).length;
         const recentMessages = this.state.messages.slice(0, 5);
@@ -1183,7 +1410,7 @@ class SpaceTeamApp {
                     <div class="stat-card">
                         <div class="stat-number">${this.state.messages.length}</div>
                         <div class="stat-label">Transmissions</div>
-                        ${unreadMessages > 0 ? `<span style="position: absolute; top: 10px; right: 10px; background: var(--danger); color: var(--primary-dark); border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem;">${unreadMessages}</span>` : ''}
+                        ${unreadMessages > 0 ? `<span style="position: absolute; top: 10px; right: 10px; background: var(--danger); color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem;">${unreadMessages}</span>` : ''}
                     </div>
                 </div>
                 
@@ -1192,13 +1419,13 @@ class SpaceTeamApp {
                         <div>
                             <h3>Mission Controls</h3>
                             <div style="display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap;">
-                                <button class="btn btn-primary" onclick="app.showAdminSection('developers')">
+                                <button class="btn btn-primary" onclick="window.app.showAdminSection('developers')">
                                     <i class="fas fa-user-astronaut"></i> Manage Crew
                                 </button>
-                                <button class="btn btn-secondary" onclick="app.showAdminSection('projects')">
+                                <button class="btn btn-secondary" onclick="window.app.showAdminSection('projects')">
                                     <i class="fas fa-rocket"></i> Manage Missions
                                 </button>
-                                <button class="btn btn-outline" onclick="app.showAdminSection('blog')">
+                                <button class="btn btn-outline" onclick="window.app.showAdminSection('blog')">
                                     <i class="fas fa-edit"></i> Manage Briefings
                                 </button>
                             </div>
@@ -1219,7 +1446,7 @@ class SpaceTeamApp {
                                     `).join('')}
                                 </div>
                                 ${unreadMessages > 0 ? `
-                                    <button class="btn btn-sm btn-primary" onclick="app.showAdminSection('messages')" style="margin-top: 10px;">
+                                    <button class="btn btn-sm btn-primary" onclick="window.app.showAdminSection('messages')" style="margin-top: 10px;">
                                         <i class="fas fa-satellite"></i> View All Transmissions (${unreadMessages} unread)
                                     </button>
                                 ` : ''}
@@ -1248,6 +1475,8 @@ class SpaceTeamApp {
         this.state.currentAdminSection = section;
         
         const sectionsContainer = document.getElementById('admin-sections');
+        if (!sectionsContainer) return;
+        
         let sectionHTML = '';
         
         switch(section) {
@@ -1296,21 +1525,26 @@ class SpaceTeamApp {
         if (section === 'developers') {
             const form = document.getElementById('admin-developer-form');
             if (form) {
+                // Remove existing listeners and add new one
+                form.removeEventListener('submit', this.handleDeveloperFormSubmit);
                 form.addEventListener('submit', (e) => this.handleDeveloperFormSubmit(e));
             }
         } else if (section === 'projects') {
             const form = document.getElementById('admin-project-form');
             if (form) {
+                form.removeEventListener('submit', this.handleProjectFormSubmit);
                 form.addEventListener('submit', (e) => this.handleProjectFormSubmit(e));
             }
         } else if (section === 'blog') {
             const form = document.getElementById('admin-blog-form');
             if (form) {
+                form.removeEventListener('submit', this.handleBlogFormSubmit);
                 form.addEventListener('submit', (e) => this.handleBlogFormSubmit(e));
             }
         } else if (section === 'settings') {
             const form = document.getElementById('admin-settings-form');
             if (form) {
+                form.removeEventListener('submit', this.handleSettingsFormSubmit);
                 form.addEventListener('submit', (e) => this.handleSettingsFormSubmit(e));
             }
         }
@@ -1349,10 +1583,10 @@ class SpaceTeamApp {
                     <small style="color: var(--gray);">${Array.isArray(dev.skills) ? dev.skills.slice(0, 3).join(', ') : dev.skills || ''}</small>
                 </div>
                 <div class="admin-list-actions">
-                    <button class="btn btn-sm" onclick="app.editDeveloper(${dev.id})">
+                    <button class="btn btn-sm" onclick="window.app.editDeveloper(${dev.id})">
                         <i class="fas fa-edit"></i> Edit
                     </button>
-                    <button class="btn btn-sm btn-danger" onclick="app.deleteDeveloper(${dev.id})">
+                    <button class="btn btn-sm btn-danger" onclick="window.app.deleteDeveloper(${dev.id})">
                         <i class="fas fa-trash"></i> Delete
                     </button>
                 </div>
@@ -1380,7 +1614,7 @@ class SpaceTeamApp {
                             <i class="fas fa-user-astronaut fa-3x" style="color: var(--gray); margin-bottom: var(--space-md);"></i>
                             <h3 style="color: var(--dark);">No Crew Assigned</h3>
                             <p style="color: var(--gray);">Assign your first crew member to begin operations!</p>
-                            <button class="btn btn-primary" onclick="app.switchAdminTab('add-developer')" style="margin-top: var(--space-md);">
+                            <button class="btn btn-primary" onclick="window.app.switchAdminTab('add-developer')" style="margin-top: var(--space-md);">
                                 <i class="fas fa-user-astronaut"></i> Assign First Crew
                             </button>
                         </div>
@@ -1404,7 +1638,7 @@ class SpaceTeamApp {
                         <div class="form-row">
                             <div class="form-group">
                                 <label class="form-label">Profile Image URL *</label>
-                                <input type="text" class="form-control" id="admin-dev-image" value="${developerToEdit?.image || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" required>
+                                <input type="text" class="form-control" id="admin-dev-image" value="${developerToEdit?.image || 'https://images.unsplash.com/photo-1534796636910-9c1825470300?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" required>
                                 <small style="color: var(--gray);">Use Unsplash or similar service for space-themed images</small>
                             </div>
                             <div class="form-group">
@@ -1431,7 +1665,7 @@ class SpaceTeamApp {
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save"></i> ${this.state.editingId ? 'Update Crew Member' : 'Assign to Mission'}
                             </button>
-                            <button type="button" class="btn btn-outline" onclick="app.resetDeveloperForm()">
+                            <button type="button" class="btn btn-outline" onclick="window.app.resetDeveloperForm()">
                                 <i class="fas fa-times"></i> Cancel
                             </button>
                         </div>
@@ -1454,10 +1688,10 @@ class SpaceTeamApp {
                     <small style="color: var(--gray);">${Array.isArray(project.tech) ? project.tech.slice(0, 3).join(', ') : project.tech || ''}</small>
                 </div>
                 <div class="admin-list-actions">
-                    <button class="btn btn-sm" onclick="app.editProject(${project.id})">
+                    <button class="btn btn-sm" onclick="window.app.editProject(${project.id})">
                         <i class="fas fa-edit"></i> Edit
                     </button>
-                    <button class="btn btn-sm btn-danger" onclick="app.deleteProject(${project.id})">
+                    <button class="btn btn-sm btn-danger" onclick="window.app.deleteProject(${project.id})">
                         <i class="fas fa-trash"></i> Delete
                     </button>
                 </div>
@@ -1485,7 +1719,7 @@ class SpaceTeamApp {
                             <i class="fas fa-rocket fa-3x" style="color: var(--gray); margin-bottom: var(--space-md);"></i>
                             <h3 style="color: var(--dark);">No Missions Logged</h3>
                             <p style="color: var(--gray);">Log your first mission to showcase operations!</p>
-                            <button class="btn btn-primary" onclick="app.switchAdminTab('add-project')" style="margin-top: var(--space-md);">
+                            <button class="btn btn-primary" onclick="window.app.switchAdminTab('add-project')" style="margin-top: var(--space-md);">
                                 <i class="fas fa-rocket"></i> Log First Mission
                             </button>
                         </div>
@@ -1533,7 +1767,7 @@ class SpaceTeamApp {
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save"></i> ${this.state.editingId ? 'Update Mission' : 'Log Mission'}
                             </button>
-                            <button type="button" class="btn btn-outline" onclick="app.resetProjectForm()">
+                            <button type="button" class="btn btn-outline" onclick="window.app.resetProjectForm()">
                                 <i class="fas fa-times"></i> Cancel
                             </button>
                         </div>
@@ -1554,10 +1788,10 @@ class SpaceTeamApp {
                     <small style="color: var(--gray);">${new Date(post.created_at).toLocaleDateString()}</small>
                 </div>
                 <div class="admin-list-actions">
-                    <button class="btn btn-sm" onclick="app.editBlogPost(${post.id})">
+                    <button class="btn btn-sm" onclick="window.app.editBlogPost(${post.id})">
                         <i class="fas fa-edit"></i> Edit
                     </button>
-                    <button class="btn btn-sm btn-danger" onclick="app.deleteBlogPost(${post.id})">
+                    <button class="btn btn-sm btn-danger" onclick="window.app.deleteBlogPost(${post.id})">
                         <i class="fas fa-trash"></i> Delete
                     </button>
                 </div>
@@ -1585,7 +1819,7 @@ class SpaceTeamApp {
                             <i class="fas fa-newspaper fa-3x" style="color: var(--gray); margin-bottom: var(--space-md);"></i>
                             <h3 style="color: var(--dark);">No Briefings Available</h3>
                             <p style="color: var(--gray);">Create your first mission briefing!</p>
-                            <button class="btn btn-primary" onclick="app.switchAdminTab('add-blog')" style="margin-top: var(--space-md);">
+                            <button class="btn btn-primary" onclick="window.app.switchAdminTab('add-blog')" style="margin-top: var(--space-md);">
                                 <i class="fas fa-edit"></i> Create First Briefing
                             </button>
                         </div>
@@ -1630,7 +1864,7 @@ class SpaceTeamApp {
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save"></i> ${this.state.editingId ? 'Update Briefing' : 'Publish Briefing'}
                             </button>
-                            <button type="button" class="btn btn-outline" onclick="app.resetBlogForm()">
+                            <button type="button" class="btn btn-outline" onclick="window.app.resetBlogForm()">
                                 <i class="fas fa-times"></i> Cancel
                             </button>
                         </div>
@@ -1650,10 +1884,10 @@ class SpaceTeamApp {
                     <small style="color: var(--gray);">${new Date(msg.created_at).toLocaleString()}</small>
                 </div>
                 <div class="admin-list-actions">
-                    <button class="btn btn-sm" onclick="app.viewMessage(${msg.id})">
+                    <button class="btn btn-sm" onclick="window.app.viewMessage(${msg.id})">
                         <i class="fas fa-eye"></i> View
                     </button>
-                    <button class="btn btn-sm btn-danger" onclick="app.deleteMessage(${msg.id})">
+                    <button class="btn btn-sm btn-danger" onclick="window.app.deleteMessage(${msg.id})">
                         <i class="fas fa-trash"></i> Delete
                     </button>
                 </div>
@@ -1744,8 +1978,8 @@ class SpaceTeamApp {
                                     : '<span style="color: var(--warning);">Using Local Storage</span>'}
                             </p>
                             <p style="font-size: 0.875rem; color: var(--gray);">
-                                To enable cloud systems, update the <code style="color: var(--secondary);">supabaseUrl</code> and <code style="color: var(--secondary);">supabaseKey</code> 
-                                in the <code style="color: var(--secondary);">config.js</code> file with your cloud credentials.
+                                To enable cloud systems, update the <code style="color: var(--secondary); background: rgba(100, 255, 218, 0.1); padding: 2px 5px; border-radius: 3px;">supabaseUrl</code> and <code style="color: var(--secondary); background: rgba(100, 255, 218, 0.1); padding: 2px 5px; border-radius: 3px;">supabaseKey</code> 
+                                in the <code style="color: var(--secondary); background: rgba(100, 255, 218, 0.1); padding: 2px 5px; border-radius: 3px;">config.js</code> file with your cloud credentials.
                             </p>
                         </div>
                     </div>
@@ -1754,10 +1988,10 @@ class SpaceTeamApp {
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-save"></i> Save Systems
                         </button>
-                        <button type="button" class="btn btn-outline" onclick="app.exportData()">
+                        <button type="button" class="btn btn-outline" onclick="window.app.exportData()">
                             <i class="fas fa-download"></i> Backup Data
                         </button>
-                        <button type="button" class="btn btn-danger" onclick="app.resetData()">
+                        <button type="button" class="btn btn-danger" onclick="window.app.resetData()">
                             <i class="fas fa-trash"></i> System Reset
                         </button>
                     </div>
@@ -1769,18 +2003,35 @@ class SpaceTeamApp {
     async handleDeveloperFormSubmit(e) {
         e.preventDefault();
         
+        const nameInput = document.getElementById('admin-dev-name');
+        const roleInput = document.getElementById('admin-dev-role');
+        const imageInput = document.getElementById('admin-dev-image');
+        const skillsInput = document.getElementById('admin-dev-skills');
+        const bioInput = document.getElementById('admin-dev-bio');
+        
+        if (!nameInput || !roleInput || !imageInput || !skillsInput || !bioInput) {
+            this.showNotification('Form fields missing', 'error');
+            return;
+        }
+        
         const developerData = {
             id: this.state.editingId || this.state.developerIdCounter++,
-            name: document.getElementById('admin-dev-name').value.trim(),
-            role: document.getElementById('admin-dev-role').value.trim(),
-            image: document.getElementById('admin-dev-image').value.trim(),
-            email: document.getElementById('admin-dev-email').value.trim(),
-            github: document.getElementById('admin-dev-github').value.trim(),
-            skills: document.getElementById('admin-dev-skills').value.split(',').map(s => s.trim()).filter(s => s),
-            bio: document.getElementById('admin-dev-bio').value.trim(),
+            name: nameInput.value.trim(),
+            role: roleInput.value.trim(),
+            image: imageInput.value.trim(),
+            email: document.getElementById('admin-dev-email')?.value.trim() || '',
+            github: document.getElementById('admin-dev-github')?.value.trim() || '',
+            skills: skillsInput.value.split(',').map(s => s.trim()).filter(s => s),
+            bio: bioInput.value.trim(),
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
         };
+        
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+        }
         
         try {
             const saved = await this.saveToSupabase('developers', developerData);
@@ -1790,27 +2041,51 @@ class SpaceTeamApp {
                 this.state.editingId = null;
                 await this.loadData();
                 this.showAdminSection('developers');
+            } else {
+                this.showNotification('Error saving crew member', 'error');
             }
         } catch (error) {
             console.error('Error saving crew member:', error);
             this.showNotification('Error saving crew member', 'error');
+        } finally {
+            if (submitBtn) {
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
+            }
         }
     }
 
     async handleProjectFormSubmit(e) {
         e.preventDefault();
         
+        const titleInput = document.getElementById('admin-project-title');
+        const typeInput = document.getElementById('admin-project-type');
+        const imageInput = document.getElementById('admin-project-image');
+        const techInput = document.getElementById('admin-project-tech');
+        const descriptionInput = document.getElementById('admin-project-description');
+        
+        if (!titleInput || !typeInput || !imageInput || !techInput || !descriptionInput) {
+            this.showNotification('Form fields missing', 'error');
+            return;
+        }
+        
         const projectData = {
             id: this.state.editingId || this.state.projectIdCounter++,
-            title: document.getElementById('admin-project-title').value.trim(),
-            type: document.getElementById('admin-project-type').value,
-            image: document.getElementById('admin-project-image').value.trim(),
-            link: document.getElementById('admin-project-link').value.trim(),
-            tech: document.getElementById('admin-project-tech').value.split(',').map(t => t.trim()).filter(t => t),
-            description: document.getElementById('admin-project-description').value.trim(),
+            title: titleInput.value.trim(),
+            type: typeInput.value,
+            image: imageInput.value.trim(),
+            link: document.getElementById('admin-project-link')?.value.trim() || '',
+            tech: techInput.value.split(',').map(t => t.trim()).filter(t => t),
+            description: descriptionInput.value.trim(),
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
         };
+        
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+        }
         
         try {
             const saved = await this.saveToSupabase('projects', projectData);
@@ -1820,27 +2095,52 @@ class SpaceTeamApp {
                 this.state.editingId = null;
                 await this.loadData();
                 this.showAdminSection('projects');
+            } else {
+                this.showNotification('Error saving mission', 'error');
             }
         } catch (error) {
             console.error('Error saving mission:', error);
             this.showNotification('Error saving mission', 'error');
+        } finally {
+            if (submitBtn) {
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
+            }
         }
     }
 
     async handleBlogFormSubmit(e) {
         e.preventDefault();
         
+        const titleInput = document.getElementById('admin-blog-title');
+        const categoryInput = document.getElementById('admin-blog-category');
+        const authorInput = document.getElementById('admin-blog-author');
+        const imageInput = document.getElementById('admin-blog-image');
+        const excerptInput = document.getElementById('admin-blog-excerpt');
+        const contentInput = document.getElementById('admin-blog-content');
+        
+        if (!titleInput || !categoryInput || !authorInput || !imageInput || !excerptInput || !contentInput) {
+            this.showNotification('Form fields missing', 'error');
+            return;
+        }
+        
         const blogData = {
             id: this.state.editingId || this.state.blogIdCounter++,
-            title: document.getElementById('admin-blog-title').value.trim(),
-            category: document.getElementById('admin-blog-category').value.trim(),
-            author: document.getElementById('admin-blog-author').value.trim(),
-            image: document.getElementById('admin-blog-image').value.trim(),
-            excerpt: document.getElementById('admin-blog-excerpt').value.trim(),
-            content: document.getElementById('admin-blog-content').value.trim(),
+            title: titleInput.value.trim(),
+            category: categoryInput.value.trim(),
+            author: authorInput.value.trim(),
+            image: imageInput.value.trim(),
+            excerpt: excerptInput.value.trim(),
+            content: contentInput.value.trim(),
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
         };
+        
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+        }
         
         try {
             const saved = await this.saveToSupabase('blog_posts', blogData);
@@ -1850,29 +2150,54 @@ class SpaceTeamApp {
                 this.state.editingId = null;
                 await this.loadData();
                 this.showAdminSection('blog');
+            } else {
+                this.showNotification('Error saving briefing', 'error');
             }
         } catch (error) {
             console.error('Error saving briefing:', error);
             this.showNotification('Error saving briefing', 'error');
+        } finally {
+            if (submitBtn) {
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
+            }
         }
     }
 
     async handleSettingsFormSubmit(e) {
         e.preventDefault();
         
+        const titleInput = document.getElementById('admin-settings-title');
+        const emailInput = document.getElementById('admin-settings-email');
+        const phoneInput = document.getElementById('admin-settings-phone');
+        const runningTextInput = document.getElementById('admin-settings-running-text');
+        const chatEnabledInput = document.getElementById('admin-settings-chat-enabled');
+        const darkModeInput = document.getElementById('admin-settings-dark-mode');
+        const geminiKeyInput = document.getElementById('admin-settings-gemini-key');
+        
+        if (!titleInput || !emailInput || !phoneInput || !runningTextInput || !chatEnabledInput || !darkModeInput) {
+            this.showNotification('Form fields missing', 'error');
+            return;
+        }
+        
         const settingsData = {
-            siteTitle: document.getElementById('admin-settings-title').value.trim(),
-            contactEmail: document.getElementById('admin-settings-email').value.trim(),
-            contactPhone: document.getElementById('admin-settings-phone').value.trim(),
-            runningText: document.getElementById('admin-settings-running-text').value.trim(),
-            chatEnabled: document.getElementById('admin-settings-chat-enabled').checked,
-            darkMode: document.getElementById('admin-settings-dark-mode').checked
+            siteTitle: titleInput.value.trim(),
+            contactEmail: emailInput.value.trim(),
+            contactPhone: phoneInput.value.trim(),
+            runningText: runningTextInput.value.trim(),
+            chatEnabled: chatEnabledInput.checked,
+            darkMode: darkModeInput.checked
         };
         
         // Update Gemini API key in config
-        const geminiKey = document.getElementById('admin-settings-gemini-key').value.trim();
-        if (geminiKey) {
-            CONFIG.geminiApiKey = geminiKey;
+        if (geminiKeyInput && geminiKeyInput.value.trim()) {
+            CONFIG.geminiApiKey = geminiKeyInput.value.trim();
+        }
+        
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
         }
         
         try {
@@ -1882,10 +2207,17 @@ class SpaceTeamApp {
                 this.showNotification('Systems updated successfully!', 'success');
                 await this.loadData();
                 this.showAdminSection('settings');
+            } else {
+                this.showNotification('Error saving systems', 'error');
             }
         } catch (error) {
             console.error('Error saving systems:', error);
             this.showNotification('Error saving systems', 'error');
+        } finally {
+            if (submitBtn) {
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
+            }
         }
     }
 
@@ -1920,6 +2252,8 @@ class SpaceTeamApp {
                 this.showNotification('Crew member removed successfully!', 'success');
                 await this.loadData();
                 this.showAdminSection('developers');
+            } else {
+                this.showNotification('Error removing crew member', 'error');
             }
         } catch (error) {
             console.error('Error removing crew member:', error);
@@ -1938,6 +2272,8 @@ class SpaceTeamApp {
                 this.showNotification('Mission deleted from log!', 'success');
                 await this.loadData();
                 this.showAdminSection('projects');
+            } else {
+                this.showNotification('Error deleting mission', 'error');
             }
         } catch (error) {
             console.error('Error deleting mission:', error);
@@ -1956,6 +2292,8 @@ class SpaceTeamApp {
                 this.showNotification('Mission briefing deleted!', 'success');
                 await this.loadData();
                 this.showAdminSection('blog');
+            } else {
+                this.showNotification('Error deleting briefing', 'error');
             }
         } catch (error) {
             console.error('Error deleting briefing:', error);
@@ -1974,6 +2312,8 @@ class SpaceTeamApp {
                 this.showNotification('Transmission deleted!', 'success');
                 await this.loadData();
                 this.showAdminSection('messages');
+            } else {
+                this.showNotification('Error deleting transmission', 'error');
             }
         } catch (error) {
             console.error('Error deleting transmission:', error);
@@ -1987,7 +2327,7 @@ class SpaceTeamApp {
         if (message) {
             // Mark as read
             message.read = true;
-            this.saveToSupabase('messages', message);
+            this.saveToSupabase('messages', message).catch(console.error);
             
             alert(`Transmission Details:\n\nFrom: ${message.name} (${message.email})\nMission Type: ${message.subject}\nTransmission Time: ${new Date(message.created_at).toLocaleString()}\n\nTransmission:\n${message.message}`);
         }
@@ -2048,7 +2388,9 @@ class SpaceTeamApp {
         const linkElement = document.createElement('a');
         linkElement.setAttribute('href', dataUri);
         linkElement.setAttribute('download', exportFileDefaultName);
+        document.body.appendChild(linkElement);
         linkElement.click();
+        document.body.removeChild(linkElement);
         
         this.showNotification('Mission data backed up successfully!', 'success');
     }
@@ -2082,11 +2424,8 @@ class SpaceTeamApp {
         localStorage.removeItem('spaceteam_messages');
         localStorage.removeItem('spaceteam_settings');
         
-        // Clear Supabase data if connected
-        if (window.supabaseClient) {
-            // Note: This would require additional Supabase permissions
-            console.log('Note: To clear cloud data, you need to manually delete records from your Supabase tables.');
-        }
+        // Note about Supabase data
+        console.log('Note: To clear cloud data, you need to manually delete records from your Supabase tables.');
         
         this.showNotification('All mission data has been reset!', 'success');
         this.updateUI();
@@ -2098,6 +2437,8 @@ class SpaceTeamApp {
 
     showNotification(message, type = 'info') {
         const container = document.getElementById('notification-container');
+        if (!container) return;
+        
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
         
@@ -2115,25 +2456,45 @@ class SpaceTeamApp {
         
         container.appendChild(notification);
         
+        // Remove after 5 seconds
         setTimeout(() => {
             notification.style.animation = 'slideInRight 0.3s ease reverse';
-            setTimeout(() => notification.remove(), 300);
+            setTimeout(() => {
+                if (notification.parentNode === container) {
+                    container.removeChild(notification);
+                }
+            }, 300);
         }, 5000);
     }
 
     showLoading() {
-        document.getElementById('loading-overlay').classList.remove('hidden');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        if (loadingOverlay) {
+            loadingOverlay.classList.remove('hidden');
+        }
     }
 
     hideLoading() {
-        document.getElementById('loading-overlay').classList.add('hidden');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        if (loadingOverlay) {
+            loadingOverlay.classList.add('hidden');
+        }
     }
 }
 
 // Initialize the application
 let app;
 document.addEventListener('DOMContentLoaded', () => {
-    app = new SpaceTeamApp();
-    window.app = app;
+    try {
+        app = new SpaceTeamApp();
+        window.app = app;
+    } catch (error) {
+        console.error('Failed to initialize application:', error);
+        // Show error message to user
+        const errorDiv = document.createElement('div');
+        errorDiv.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; background: #e53e3e; color: white; padding: 1rem; text-align: center; z-index: 9999;';
+        errorDiv.textContent = 'Failed to load application. Please refresh the page.';
+        document.body.appendChild(errorDiv);
+    }
 });
 [file content end]
