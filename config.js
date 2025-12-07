@@ -1,3 +1,5 @@
+[file name]: config.js
+[file content begin]
 // Configuration for SpaceTeam | Dev - FIXED VERSION
 const CONFIG = {
     // Supabase Configuration - UPDATE WITH YOUR CREDENTIALS
@@ -9,7 +11,7 @@ const CONFIG = {
     adminPassword: 'SpaceTeam2024!',
     
     // Gemini AI Configuration - SET YOUR API KEY IN PRODUCTION
-    geminiApiKey: '', // Leave empty or set your actual API key
+    geminiApiKey: '', // Kosongkan atau isi dengan API key Anda
     
     // AI System Prompt
     aiSystemPrompt: "You are the SpaceTeam AI assistant. Provide helpful responses about web development, projects, and services. Keep responses professional and space-themed.",
@@ -165,7 +167,22 @@ const CONFIG = {
             notificationSuccess: 'Success',
             notificationError: 'Error',
             notificationWarning: 'Warning',
-            notificationInfo: 'Info'
+            notificationInfo: 'Info',
+            
+            // Error Messages
+            errorInvalidUrl: 'Please enter a valid URL',
+            errorAtLeastOneTech: 'Please enter at least one technology',
+            errorNameRequired: 'Astronaut name is required',
+            errorRoleRequired: 'Mission role is required',
+            errorBioRequired: 'Mission bio is required',
+            errorSkillsRequired: 'Please enter at least one skill',
+            errorTitleRequired: 'Mission name is required',
+            errorDescriptionRequired: 'Mission report is required',
+            errorExcerptTooLong: 'Briefing summary should be 200 characters or less',
+            errorEmailRequired: 'Email is required',
+            errorInvalidEmail: 'Please enter a valid email address',
+            errorSubjectRequired: 'Subject is required',
+            errorMessageRequired: 'Message is required'
         },
         
         id: {
@@ -298,7 +315,22 @@ const CONFIG = {
             notificationSuccess: 'Sukses',
             notificationError: 'Error',
             notificationWarning: 'Peringatan',
-            notificationInfo: 'Info'
+            notificationInfo: 'Info',
+            
+            // Error Messages
+            errorInvalidUrl: 'Harap masukkan URL yang valid',
+            errorAtLeastOneTech: 'Harap masukkan setidaknya satu teknologi',
+            errorNameRequired: 'Nama astronot diperlukan',
+            errorRoleRequired: 'Peran misi diperlukan',
+            errorBioRequired: 'Bio misi diperlukan',
+            errorSkillsRequired: 'Harap masukkan setidaknya satu keahlian',
+            errorTitleRequired: 'Nama misi diperlukan',
+            errorDescriptionRequired: 'Laporan misi diperlukan',
+            errorExcerptTooLong: 'Ringkasan pengarahan harus 200 karakter atau kurang',
+            errorEmailRequired: 'Email diperlukan',
+            errorInvalidEmail: 'Harap masukkan alamat email yang valid',
+            errorSubjectRequired: 'Subjek diperlukan',
+            errorMessageRequired: 'Pesan diperlukan'
         }
     }
 };
@@ -338,3 +370,4 @@ window.addEventListener('unhandledrejection', function(e) {
     console.error('Unhandled promise rejection:', e.reason);
     // You can add error reporting here
 });
+[file content end]

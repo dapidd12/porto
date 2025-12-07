@@ -1,3 +1,5 @@
+[file name]: app.js
+[file content begin]
 // Main Application - SpaceTeam | Dev - FIXED VERSION
 class SpaceTeamApp {
     constructor() {
@@ -1324,27 +1326,28 @@ class SpaceTeamApp {
         
         // Validation
         let isValid = true;
+        const translations = CONFIG.translations[this.state.language] || CONFIG.translations.en;
         
         if (!name) {
-            this.showFormError('name-error', 'Astronaut name is required');
+            this.showFormError('name-error', translations.errorNameRequired || 'Astronaut name is required');
             isValid = false;
         }
         
         if (!email) {
-            this.showFormError('email-error', 'Transmission address is required');
+            this.showFormError('email-error', translations.errorEmailRequired || 'Email is required');
             isValid = false;
         } else if (!this.validateEmail(email)) {
-            this.showFormError('email-error', 'Please enter a valid transmission address');
+            this.showFormError('email-error', translations.errorInvalidEmail || 'Please enter a valid email address');
             isValid = false;
         }
         
         if (!subject) {
-            this.showFormError('subject-error', 'Mission type is required');
+            this.showFormError('subject-error', translations.errorSubjectRequired || 'Subject is required');
             isValid = false;
         }
         
         if (!message) {
-            this.showFormError('message-error', 'Mission briefing is required');
+            this.showFormError('message-error', translations.errorMessageRequired || 'Message is required');
             isValid = false;
         }
         
@@ -2529,14 +2532,39 @@ class SpaceTeamApp {
             return;
         }
         
+        // Get translations for error messages
+        const translations = CONFIG.translations[this.state.language] || CONFIG.translations.en;
+        
+        // Validation
+        if (!nameInput.value.trim()) {
+            this.showNotification(translations.errorNameRequired || 'Astronaut name is required', 'error');
+            return;
+        }
+        
+        if (!roleInput.value.trim()) {
+            this.showNotification(translations.errorRoleRequired || 'Mission role is required', 'error');
+            return;
+        }
+        
+        if (!bioInput.value.trim()) {
+            this.showNotification(translations.errorBioRequired || 'Mission bio is required', 'error');
+            return;
+        }
+        
+        const skills = skillsInput.value.split(',').map(s => s.trim()).filter(s => s);
+        if (skills.length === 0) {
+            this.showNotification(translations.errorSkillsRequired || 'Please enter at least one skill', 'error');
+            return;
+        }
+        
         const developerData = {
             id: this.state.editingId || this.state.developerIdCounter++,
             name: nameInput.value.trim(),
             role: roleInput.value.trim(),
             image: imageInput.value.trim(),
-            email: document.getElementById('admin-dev-email')?.value.trim() || '',
-            github: document.getElementById('admin-dev-github')?.value.trim() || '',
-            skills: skillsInput.value.split(',').map(s => s.trim()).filter(s => s),
+            email: document.getElementById('admin-dev-email')?.value.trim() || null,
+            github: document.getElementById('admin-dev-github')?.value.trim() || null,
+            skills: skills,
             bio: bioInput.value.trim(),
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
@@ -2561,7 +2589,7 @@ class SpaceTeamApp {
             }
         } catch (error) {
             console.error('Error saving crew member:', error);
-            this.showNotification('Error saving crew member', 'error');
+            this.showNotification('Error saving crew member: ' + error.message, 'error');
         } finally {
             if (submitBtn) {
                 submitBtn.classList.remove('loading');
@@ -2584,13 +2612,33 @@ class SpaceTeamApp {
             return;
         }
         
+        // Get translations for error messages
+        const translations = CONFIG.translations[this.state.language] || CONFIG.translations.en;
+        
+        // Validation
+        if (!titleInput.value.trim()) {
+            this.showNotification(translations.errorTitleRequired || 'Mission name is required', 'error');
+            return;
+        }
+        
+        if (!descriptionInput.value.trim()) {
+            this.showNotification(translations.errorDescriptionRequired || 'Mission report is required', 'error');
+            return;
+        }
+        
+        const tech = techInput.value.split(',').map(t => t.trim()).filter(t => t);
+        if (tech.length === 0) {
+            this.showNotification(translations.errorAtLeastOneTech || 'Please enter at least one technology', 'error');
+            return;
+        }
+        
         const projectData = {
             id: this.state.editingId || this.state.projectIdCounter++,
             title: titleInput.value.trim(),
             type: typeInput.value,
             image: imageInput.value.trim(),
-            link: document.getElementById('admin-project-link')?.value.trim() || '',
-            tech: techInput.value.split(',').map(t => t.trim()).filter(t => t),
+            link: document.getElementById('admin-project-link')?.value.trim() || null,
+            tech: tech,
             description: descriptionInput.value.trim(),
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
@@ -2615,7 +2663,7 @@ class SpaceTeamApp {
             }
         } catch (error) {
             console.error('Error saving mission:', error);
-            this.showNotification('Error saving mission', 'error');
+            this.showNotification('Error saving mission: ' + error.message, 'error');
         } finally {
             if (submitBtn) {
                 submitBtn.classList.remove('loading');
@@ -2638,6 +2686,35 @@ class SpaceTeamApp {
             return;
         }
         
+        // Get translations for error messages
+        const translations = CONFIG.translations[this.state.language] || CONFIG.translations.en;
+        
+        // Validasi URL
+        try {
+            new URL(urlInput.value.trim());
+        } catch (error) {
+            this.showNotification(translations.errorInvalidUrl || 'Please enter a valid URL', 'error');
+            return;
+        }
+        
+        // Validasi technologies
+        const technologies = technologiesInput.value.split(',').map(t => t.trim()).filter(t => t);
+        if (technologies.length === 0) {
+            this.showNotification(translations.errorAtLeastOneTech || 'Please enter at least one technology', 'error');
+            return;
+        }
+        
+        // Validasi required fields
+        if (!titleInput.value.trim()) {
+            this.showNotification(translations.errorTitleRequired || 'Website title is required', 'error');
+            return;
+        }
+        
+        if (!descriptionInput.value.trim()) {
+            this.showNotification(translations.errorDescriptionRequired || 'Description is required', 'error');
+            return;
+        }
+        
         const websiteData = {
             id: this.state.editingId || this.state.websiteIdCounter++,
             title: titleInput.value.trim(),
@@ -2645,7 +2722,7 @@ class SpaceTeamApp {
             screenshot: screenshotInput.value.trim(),
             status: document.getElementById('admin-website-status')?.value || 'live',
             description: descriptionInput.value.trim(),
-            technologies: technologiesInput.value.split(',').map(t => t.trim()).filter(t => t),
+            technologies: technologies,
             github: document.getElementById('admin-website-github')?.value.trim() || '',
             icon: document.getElementById('admin-website-icon')?.value.trim() || 'fas fa-globe',
             features: document.getElementById('admin-website-features')?.value.split(',').map(f => f.trim()).filter(f => f) || [],
@@ -2673,7 +2750,7 @@ class SpaceTeamApp {
             }
         } catch (error) {
             console.error('Error saving website:', error);
-            this.showNotification('Error saving website', 'error');
+            this.showNotification('Error saving website: ' + error.message, 'error');
         } finally {
             if (submitBtn) {
                 submitBtn.classList.remove('loading');
@@ -2694,6 +2771,30 @@ class SpaceTeamApp {
         
         if (!titleInput || !categoryInput || !authorInput || !imageInput || !excerptInput || !contentInput) {
             this.showNotification('Form fields missing', 'error');
+            return;
+        }
+        
+        // Get translations for error messages
+        const translations = CONFIG.translations[this.state.language] || CONFIG.translations.en;
+        
+        // Validation
+        if (!titleInput.value.trim()) {
+            this.showNotification(translations.errorTitleRequired || 'Briefing title is required', 'error');
+            return;
+        }
+        
+        if (!excerptInput.value.trim()) {
+            this.showNotification(translations.errorDescriptionRequired || 'Briefing summary is required', 'error');
+            return;
+        }
+        
+        if (!contentInput.value.trim()) {
+            this.showNotification(translations.errorMessageRequired || 'Full briefing is required', 'error');
+            return;
+        }
+        
+        if (excerptInput.value.length > 200) {
+            this.showNotification(translations.errorExcerptTooLong || 'Briefing summary should be 200 characters or less', 'error');
             return;
         }
         
@@ -2728,7 +2829,7 @@ class SpaceTeamApp {
             }
         } catch (error) {
             console.error('Error saving briefing:', error);
-            this.showNotification('Error saving briefing', 'error');
+            this.showNotification('Error saving briefing: ' + error.message, 'error');
         } finally {
             if (submitBtn) {
                 submitBtn.classList.remove('loading');
@@ -2843,7 +2944,7 @@ class SpaceTeamApp {
             }
         } catch (error) {
             console.error('Error removing crew member:', error);
-            this.showNotification('Error removing crew member', 'error');
+            this.showNotification('Error removing crew member: ' + error.message, 'error');
         }
     }
 
@@ -2862,7 +2963,7 @@ class SpaceTeamApp {
             }
         } catch (error) {
             console.error('Error deleting mission:', error);
-            this.showNotification('Error deleting mission', 'error');
+            this.showNotification('Error deleting mission: ' + error.message, 'error');
         }
     }
 
@@ -2881,7 +2982,7 @@ class SpaceTeamApp {
             }
         } catch (error) {
             console.error('Error deleting website:', error);
-            this.showNotification('Error deleting website', 'error');
+            this.showNotification('Error deleting website: ' + error.message, 'error');
         }
     }
 
@@ -2900,7 +3001,7 @@ class SpaceTeamApp {
             }
         } catch (error) {
             console.error('Error deleting briefing:', error);
-            this.showNotification('Error deleting briefing', 'error');
+            this.showNotification('Error deleting briefing: ' + error.message, 'error');
         }
     }
 
@@ -2919,7 +3020,7 @@ class SpaceTeamApp {
             }
         } catch (error) {
             console.error('Error deleting transmission:', error);
-            this.showNotification('Error deleting transmission', 'error');
+            this.showNotification('Error deleting transmission: ' + error.message, 'error');
         }
     }
 
@@ -3154,3 +3255,4 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(errorDiv);
     }
 });
+[file content end]
