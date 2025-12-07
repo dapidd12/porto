@@ -1,12 +1,48 @@
+[file name]: index.html
+[file content begin]
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NexusDev | Professional Developer Portfolio</title>
+    <title>SpaceTeam | Dev</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <link rel="stylesheet" href="styles.css">
+    <!-- Anti Inspect Script -->
+    <script>
+        // Block right-click
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // Block F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+                (e.ctrlKey && e.shiftKey && e.key === 'J') ||
+                (e.ctrlKey && e.key === 'U') ||
+                (e.ctrlKey && e.shiftKey && e.key === 'C')) {
+                e.preventDefault();
+                return false;
+            }
+        });
+        
+        // Block text selection on critical elements
+        document.addEventListener('DOMContentLoaded', function() {
+            const elements = document.querySelectorAll('.logo, .nav-links, .hero-title, .stat-number, .developer-name, .project-title, .blog-title, .footer-logo');
+            elements.forEach(el => {
+                el.style.userSelect = 'none';
+                el.style.webkitUserSelect = 'none';
+            });
+        });
+        
+        // Anti iframe
+        if (window.top !== window.self) {
+            window.top.location = window.self.location;
+        }
+    </script>
 </head>
 <body>
     <!-- Skip to Main Content (Accessibility) -->
@@ -20,7 +56,7 @@
     <!-- Running Text -->
     <div class="running-text-container">
         <div class="running-text" id="running-text">
-            🚀 Professional Developer Team • 💻 Full-Stack Development • 🎨 UI/UX Design • 📱 Mobile Applications • 🔧 Cutting-edge Technology
+            🚀 SpaceTeam | Dev • 💻 Full-Stack Development • 🎨 UI/UX Design • 📱 Mobile Applications • 🌌 Cutting-edge Technology
         </div>
     </div>
 
@@ -28,17 +64,18 @@
     <nav class="navbar" id="navbar">
         <div class="container nav-container">
             <a href="#home" class="logo">
-                <span class="logo-primary">Nexus</span>
-                <span class="logo-secondary">Dev</span>
+                <span class="logo-primary">Space</span>
+                <span class="logo-secondary">Team</span>
+                <span style="color: var(--gray); margin-left: 5px; font-size: 0.9rem;">| Dev</span>
             </a>
             
             <ul class="nav-links">
                 <li><a href="#home" class="active">Home</a></li>
-                <li><a href="#developers">Developers</a></li>
+                <li><a href="#developers">Team</a></li>
                 <li><a href="#projects">Projects</a></li>
                 <li><a href="#blog">Blog</a></li>
                 <li><a href="#contact">Contact</a></li>
-                <li><a href="#" id="admin-login-btn" class="btn btn-sm btn-outline">Admin Login</a></li>
+                <li><a href="#" id="admin-login-btn" class="btn btn-sm btn-outline">Admin</a></li>
             </ul>
             
             <div class="nav-actions">
@@ -59,41 +96,40 @@
             <div class="container">
                 <div class="hero-content animate__animated animate__fadeInUp">
                     <h1 class="hero-title">
-                        Building Digital Excellence with 
-                        <span class="text-gradient">Precision & Passion</span>
+                        Launching Digital 
+                        <span class="text-gradient">Innovations Beyond Limits</span>
                     </h1>
                     <p class="hero-subtitle">
-                        We are a team of passionate developers crafting exceptional digital experiences. 
-                        With expertise in modern web technologies, we transform ideas into powerful, 
-                        scalable solutions that drive business success.
+                        We are SpaceTeam | Dev, a crew of elite developers exploring the frontiers of technology. 
+                        We build scalable, futuristic solutions that propel businesses into the digital cosmos.
                     </p>
                     <div class="hero-actions">
                         <a href="#projects" class="btn btn-primary">
                             <i class="fas fa-rocket"></i>
-                            View Our Work
+                            Explore Projects
                         </a>
                         <a href="#contact" class="btn btn-outline">
-                            <i class="fas fa-calendar-alt"></i>
-                            Schedule Consultation
+                            <i class="fas fa-satellite"></i>
+                            Mission Control
                         </a>
                     </div>
                     
                     <div class="hero-stats">
                         <div class="stat-item">
                             <div class="stat-number" id="projects-count">0</div>
-                            <div class="stat-label">Projects Delivered</div>
+                            <div class="stat-label">Successful Missions</div>
                         </div>
                         <div class="stat-item">
-                            <div class="stat-number">98%</div>
+                            <div class="stat-number">99%</div>
                             <div class="stat-label">Client Satisfaction</div>
                         </div>
                         <div class="stat-item">
-                            <div class="stat-number">5+</div>
-                            <div class="stat-label">Years Experience</div>
+                            <div class="stat-number">7+</div>
+                            <div class="stat-label">Light Years Experience</div>
                         </div>
                         <div class="stat-item">
                             <div class="stat-number">24/7</div>
-                            <div class="stat-label">Support Available</div>
+                            <div class="stat-label">Mission Control</div>
                         </div>
                     </div>
                 </div>
@@ -104,10 +140,9 @@
         <section class="section section-alt" id="developers">
             <div class="container">
                 <div class="section-header">
-                    <h2>Meet Our Experts</h2>
+                    <h2>Mission Crew</h2>
                     <p class="section-subtitle">
-                        Our team combines technical expertise with creative vision to deliver 
-                        exceptional results for every project.
+                        Meet our elite team of space engineers, each specialized in different tech galaxies.
                     </p>
                 </div>
                 
@@ -118,9 +153,9 @@
                 <!-- Skills Visualization -->
                 <div class="skills-section">
                     <div class="section-header">
-                        <h3>Technology Stack</h3>
+                        <h3>Tech Galaxy Map</h3>
                         <p class="section-subtitle">
-                            Our expertise spans across the latest technologies and frameworks
+                            Our expertise spans across multiple technology constellations
                         </p>
                     </div>
                     <div class="skills-chart-container">
@@ -134,15 +169,15 @@
         <section class="section" id="projects">
             <div class="container">
                 <div class="section-header">
-                    <h2>Featured Projects</h2>
+                    <h2>Mission Log</h2>
                     <p class="section-subtitle">
-                        Explore our portfolio of successful projects across various industries
+                        Explore our portfolio of successful missions across the digital universe
                     </p>
                 </div>
                 
                 <div class="projects-filter">
-                    <button class="filter-btn active" data-filter="all" aria-label="Show all projects">All Projects</button>
-                    <button class="filter-btn" data-filter="web" aria-label="Filter web projects">Web Development</button>
+                    <button class="filter-btn active" data-filter="all" aria-label="Show all projects">All Missions</button>
+                    <button class="filter-btn" data-filter="web" aria-label="Filter web projects">Web Systems</button>
                     <button class="filter-btn" data-filter="mobile" aria-label="Filter mobile projects">Mobile Apps</button>
                     <button class="filter-btn" data-filter="design" aria-label="Filter design projects">UI/UX Design</button>
                 </div>
@@ -157,9 +192,9 @@
         <section class="section section-alt" id="blog">
             <div class="container">
                 <div class="section-header">
-                    <h2>Latest Insights</h2>
+                    <h2>Mission Briefings</h2>
                     <p class="section-subtitle">
-                        Stay updated with the latest trends and insights from our team
+                        Latest updates and discoveries from our tech expeditions
                     </p>
                 </div>
                 
@@ -173,9 +208,9 @@
         <section class="section" id="contact">
             <div class="container">
                 <div class="section-header">
-                    <h2>Get In Touch</h2>
+                    <h2>Mission Control</h2>
                     <p class="section-subtitle">
-                        Ready to start your next project? Let's discuss how we can help.
+                        Ready to launch your next project? Connect with mission control.
                     </p>
                 </div>
                 
@@ -183,61 +218,61 @@
                     <div class="contact-info">
                         <div class="info-card">
                             <div class="info-icon">
-                                <i class="fas fa-envelope"></i>
+                                <i class="fas fa-satellite-dish"></i>
                             </div>
-                            <h3>Email Us</h3>
-                            <p id="contact-email-display">hello@nexusdev.com</p>
-                            <p>Response within 24 hours</p>
+                            <h3>Transmit Signal</h3>
+                            <p id="contact-email-display">mission@spaceteam.dev</p>
+                            <p>Response within 24 light-minutes</p>
                         </div>
                         
                         <div class="info-card">
                             <div class="info-icon">
-                                <i class="fas fa-phone"></i>
+                                <i class="fas fa-broadcast-tower"></i>
                             </div>
-                            <h3>Call Us</h3>
-                            <p id="contact-phone-display">+62 812 3456 7890</p>
-                            <p>Mon-Fri, 9AM-6PM</p>
+                            <h3>Transmission Frequency</h3>
+                            <p id="contact-phone-display">+62 821 3830 5820</p>
+                            <p>Available for transmissions</p>
                         </div>
                         
                         <div class="info-card">
                             <div class="info-icon">
-                                <i class="fas fa-map-marker-alt"></i>
+                                <i class="fas fa-globe-americas"></i>
                             </div>
-                            <h3>Visit Us</h3>
+                            <h3>Ground Station</h3>
                             <p>Jakarta, Indonesia</p>
-                            <p>Available for meetings by appointment</p>
+                            <p>Orbital meetings available</p>
                         </div>
                     </div>
                     
                     <div class="contact-form">
                         <form id="contact-form">
                             <div class="form-group">
-                                <label class="form-label" for="contact-name">Full Name *</label>
+                                <label class="form-label" for="contact-name">Astronaut Name *</label>
                                 <input type="text" class="form-control" id="contact-name" required aria-required="true">
                                 <div class="form-error" id="name-error"></div>
                             </div>
                             
                             <div class="form-group">
-                                <label class="form-label" for="contact-email">Email Address *</label>
+                                <label class="form-label" for="contact-email">Transmission Address *</label>
                                 <input type="email" class="form-control" id="contact-email" required aria-required="true">
                                 <div class="form-error" id="email-error"></div>
                             </div>
                             
                             <div class="form-group">
-                                <label class="form-label" for="contact-subject">Subject *</label>
+                                <label class="form-label" for="contact-subject">Mission Type *</label>
                                 <input type="text" class="form-control" id="contact-subject" required aria-required="true">
                                 <div class="form-error" id="subject-error"></div>
                             </div>
                             
                             <div class="form-group">
-                                <label class="form-label" for="contact-message">Project Details *</label>
+                                <label class="form-label" for="contact-message">Mission Briefing *</label>
                                 <textarea class="form-control" id="contact-message" rows="5" required aria-required="true"></textarea>
                                 <div class="form-error" id="message-error"></div>
                             </div>
                             
                             <button type="submit" class="btn btn-primary btn-lg" id="contact-submit-btn">
                                 <i class="fas fa-paper-plane"></i>
-                                Send Message
+                                Launch Transmission
                             </button>
                         </form>
                     </div>
@@ -251,34 +286,34 @@
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-icon">
-                            <i class="fas fa-code"></i>
+                            <i class="fas fa-satellite"></i>
                         </div>
                         <div class="stat-number" id="stats-projects">0</div>
-                        <div class="stat-label">Projects Completed</div>
+                        <div class="stat-label">Missions Completed</div>
                     </div>
                     
                     <div class="stat-card">
                         <div class="stat-icon">
-                            <i class="fas fa-users"></i>
+                            <i class="fas fa-user-astronaut"></i>
                         </div>
                         <div class="stat-number" id="stats-clients">0</div>
-                        <div class="stat-label">Happy Clients</div>
+                        <div class="stat-label">Satisfied Cosmonauts</div>
                     </div>
                     
                     <div class="stat-card">
                         <div class="stat-icon">
                             <i class="fas fa-clock"></i>
                         </div>
-                        <div class="stat-number" id="stats-experience">5+</div>
-                        <div class="stat-label">Years Experience</div>
+                        <div class="stat-number" id="stats-experience">7+</div>
+                        <div class="stat-label">Light Years Experience</div>
                     </div>
                     
                     <div class="stat-card">
                         <div class="stat-icon">
-                            <i class="fas fa-file-alt"></i>
+                            <i class="fas fa-newspaper"></i>
                         </div>
                         <div class="stat-number" id="stats-articles">0</div>
-                        <div class="stat-label">Articles Published</div>
+                        <div class="stat-label">Mission Logs</div>
                     </div>
                 </div>
             </div>
@@ -291,13 +326,13 @@
             <div class="footer-content">
                 <div class="footer-col">
                     <div class="footer-logo">
-                        <span class="logo-primary">Nexus</span>
-                        <span class="logo-secondary">Dev</span>
+                        <span class="logo-primary">Space</span>
+                        <span class="logo-secondary">Team</span>
+                        <span style="color: var(--gray);"> | Dev</span>
                     </div>
                     <p class="footer-description">
-                        We create digital experiences that combine innovation, 
-                        functionality, and exceptional design to help businesses 
-                        thrive in the digital age.
+                        We explore the digital universe, building solutions that reach beyond the stars. 
+                        Our mission is to propel businesses into the future with cutting-edge technology.
                     </p>
                     <div class="social-links">
                         <a href="#" class="social-link" aria-label="GitHub">
@@ -309,20 +344,20 @@
                         <a href="#" class="social-link" aria-label="Twitter">
                             <i class="fab fa-twitter"></i>
                         </a>
-                        <a href="#" class="social-link" aria-label="Instagram">
-                            <i class="fab fa-instagram"></i>
+                        <a href="#" class="social-link" aria-label="Discord">
+                            <i class="fab fa-discord"></i>
                         </a>
                     </div>
                 </div>
                 
                 <div class="footer-col">
-                    <h3 class="footer-heading">Quick Links</h3>
+                    <h3 class="footer-heading">Flight Path</h3>
                     <ul class="footer-links">
-                        <li><a href="#home">Home</a></li>
-                        <li><a href="#developers">Our Team</a></li>
-                        <li><a href="#projects">Portfolio</a></li>
-                        <li><a href="#blog">Blog</a></li>
-                        <li><a href="#contact">Contact</a></li>
+                        <li><a href="#home">Command Center</a></li>
+                        <li><a href="#developers">Mission Crew</a></li>
+                        <li><a href="#projects">Mission Log</a></li>
+                        <li><a href="#blog">Briefings</a></li>
+                        <li><a href="#contact">Control Room</a></li>
                     </ul>
                 </div>
                 
@@ -332,48 +367,48 @@
                         <li><a href="#">Web Development</a></li>
                         <li><a href="#">Mobile Apps</a></li>
                         <li><a href="#">UI/UX Design</a></li>
-                        <li><a href="#">Consulting</a></li>
-                        <li><a href="#">Maintenance</a></li>
+                        <li><a href="#">Cloud Systems</a></li>
+                        <li><a href="#">AI Integration</a></li>
                     </ul>
                 </div>
                 
                 <div class="footer-col">
-                    <h3 class="footer-heading">Contact Info</h3>
+                    <h3 class="footer-heading">Ground Control</h3>
                     <ul class="footer-links">
                         <li><i class="fas fa-map-marker-alt"></i> Jakarta, Indonesia</li>
-                        <li><i class="fas fa-phone"></i> <span id="footer-phone">+62 821 3830 5820</span></li>
-                        <li><i class="fas fa-envelope"></i> <span id="footer-email">hdapidaeixa@gmail.com</span></li>
+                        <li><i class="fas fa-satellite"></i> <span id="footer-phone">+62 821 3830 5820</span></li>
+                        <li><i class="fas fa-envelope"></i> <span id="footer-email">mission@spaceteam.dev</span></li>
                     </ul>
                 </div>
             </div>
             
             <div class="footer-bottom">
-                <p>&copy; <span id="current-year"></span> NexusDev. All rights reserved.</p>
+                <p>&copy; <span id="current-year"></span> SpaceTeam | Dev. All systems operational.</p>
             </div>
         </div>
     </footer>
 
     <!-- Chat Widget -->
     <button class="chat-toggle" id="chat-toggle" aria-label="Open chat">
-        <i class="fas fa-comment-dots"></i>
+        <i class="fas fa-robot"></i>
     </button>
     
     <div class="chat-widget hidden" id="chat-widget">
         <div class="chat-header">
-            <h3>NexusDev AI Assistant</h3>
+            <h3>SpaceTeam AI Assistant</h3>
             <button class="btn btn-icon btn-sm" id="close-chat" aria-label="Close chat">
                 <i class="fas fa-times"></i>
             </button>
         </div>
         <div class="chat-body" id="chat-body">
             <div class="chat-message bot">
-                Hello! I'm your NexusDev AI assistant. How can I help you today? You can ask me about our services, projects, or request a consultation.
+                Greetings, astronaut! I'm your SpaceTeam AI assistant. How can I assist with your mission today? You can ask about our services, mission logs, or request a briefing.
             </div>
         </div>
         <div class="chat-input">
-            <input type="text" id="chat-input" placeholder="Type your message..." aria-label="Chat message">
+            <input type="text" id="chat-input" placeholder="Type your transmission..." aria-label="Chat message">
             <button class="btn btn-sm btn-primary" id="send-chat" style="margin-top: 10px;">
-                <i class="fas fa-paper-plane"></i> Send
+                <i class="fas fa-paper-plane"></i> Transmit
             </button>
         </div>
     </div>
@@ -382,25 +417,25 @@
     <div class="modal hidden" id="login-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Admin Login</h2>
+                <h2>Mission Control Access</h2>
                 <button class="modal-close" id="close-login" aria-label="Close login">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <form id="login-form">
                 <div class="form-group">
-                    <label class="form-label" for="username">Email *</label>
+                    <label class="form-label" for="username">Access Code *</label>
                     <input type="email" class="form-control" id="username" required aria-required="true">
                     <div class="form-error" id="login-email-error"></div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="password">Password *</label>
+                    <label class="form-label" for="password">Security Key *</label>
                     <input type="password" class="form-control" id="password" required aria-required="true">
                     <div class="form-error" id="login-password-error"></div>
                 </div>
                 <button type="submit" class="btn btn-primary btn-lg" id="login-submit-btn">
                     <i class="fas fa-sign-in-alt"></i>
-                    Sign In
+                    Access Control
                 </button>
             </form>
         </div>
@@ -412,17 +447,16 @@
             <div class="container">
                 <nav class="admin-nav">
                     <a href="#" class="logo">
-                        <span class="logo-primary">Nexus</span>
-                        <span class="logo-secondary">Dev</span>
-                        <span style="font-size: 0.875rem; margin-left: 10px; color: rgba(255, 255, 255, 0.9);">Admin Panel</span>
+                        <span class="logo-primary">Mission</span>
+                        <span class="logo-secondary">Control</span>
                     </a>
                     <ul class="admin-nav-links">
                         <li><a href="#dashboard" class="admin-nav-btn active" data-section="dashboard">Dashboard</a></li>
-                        <li><a href="#developers" class="admin-nav-btn" data-section="developers">Developers</a></li>
-                        <li><a href="#projects" class="admin-nav-btn" data-section="projects">Projects</a></li>
-                        <li><a href="#blog" class="admin-nav-btn" data-section="blog">Blog</a></li>
-                        <li><a href="#messages" class="admin-nav-btn" data-section="messages">Messages</a></li>
-                        <li><a href="#settings" class="admin-nav-btn" data-section="settings">Settings</a></li>
+                        <li><a href="#developers" class="admin-nav-btn" data-section="developers">Crew</a></li>
+                        <li><a href="#projects" class="admin-nav-btn" data-section="projects">Missions</a></li>
+                        <li><a href="#blog" class="admin-nav-btn" data-section="blog">Logs</a></li>
+                        <li><a href="#messages" class="admin-nav-btn" data-section="messages">Transmissions</a></li>
+                        <li><a href="#settings" class="admin-nav-btn" data-section="settings">Systems</a></li>
                         <li><a href="#" id="admin-logout" class="btn btn-sm btn-danger">Logout</a></li>
                     </ul>
                 </nav>
@@ -443,7 +477,7 @@
     <!-- Loading Overlay -->
     <div class="loading-overlay hidden" id="loading-overlay">
         <div class="loading-spinner"></div>
-        <p>Loading...</p>
+        <p>Initializing systems...</p>
     </div>
 
     <!-- External Scripts -->
@@ -453,3 +487,4 @@
     <script src="app.js"></script>
 </body>
 </html>
+[file content end]

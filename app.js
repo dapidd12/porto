@@ -1,8 +1,10 @@
+[file name]: app.js
+[file content begin]
 // Main Application
-class NexusDevApp {
+class SpaceTeamApp {
     constructor() {
         this.state = {
-            darkMode: localStorage.getItem('darkMode') === 'true',
+            darkMode: localStorage.getItem('darkMode') === 'true' || true,
             chatOpen: false,
             isAdmin: false,
             currentAdminSection: 'dashboard',
@@ -128,7 +130,7 @@ class NexusDevApp {
                 console.log('Settings table not found, using defaults');
             }
             
-            this.state.settings = settingsData || { ...CONFIG.defaults, ...JSON.parse(localStorage.getItem('nexusdev_settings') || '{}') };
+            this.state.settings = settingsData || { ...CONFIG.defaults, ...JSON.parse(localStorage.getItem('spaceteam_settings') || '{}') };
             
             // Load messages
             const { data: messages, error: msgError } = await supabaseClient
@@ -147,11 +149,11 @@ class NexusDevApp {
     }
 
     loadFromLocalStorage() {
-        this.state.developers = JSON.parse(localStorage.getItem('nexusdev_developers')) || [];
-        this.state.projects = JSON.parse(localStorage.getItem('nexusdev_projects')) || [];
-        this.state.blogPosts = JSON.parse(localStorage.getItem('nexusdev_blog')) || [];
-        this.state.settings = JSON.parse(localStorage.getItem('nexusdev_settings')) || { ...CONFIG.defaults };
-        this.state.messages = JSON.parse(localStorage.getItem('nexusdev_messages')) || [];
+        this.state.developers = JSON.parse(localStorage.getItem('spaceteam_developers')) || [];
+        this.state.projects = JSON.parse(localStorage.getItem('spaceteam_projects')) || [];
+        this.state.blogPosts = JSON.parse(localStorage.getItem('spaceteam_blog')) || [];
+        this.state.settings = JSON.parse(localStorage.getItem('spaceteam_settings')) || { ...CONFIG.defaults };
+        this.state.messages = JSON.parse(localStorage.getItem('spaceteam_messages')) || [];
         
         // Update ID counters
         this.state.developerIdCounter = Math.max(...this.state.developers.map(d => d.id || 0), 0) + 1;
@@ -201,7 +203,7 @@ class NexusDevApp {
             switch(table) {
                 case 'developers':
                     if (Array.isArray(data)) {
-                        localStorage.setItem('nexusdev_developers', JSON.stringify(data));
+                        localStorage.setItem('spaceteam_developers', JSON.stringify(data));
                         this.state.developers = data;
                     } else {
                         let developers = [...this.state.developers];
@@ -211,14 +213,14 @@ class NexusDevApp {
                         } else {
                             developers.push(data);
                         }
-                        localStorage.setItem('nexusdev_developers', JSON.stringify(developers));
+                        localStorage.setItem('spaceteam_developers', JSON.stringify(developers));
                         this.state.developers = developers;
                     }
                     break;
                     
                 case 'projects':
                     if (Array.isArray(data)) {
-                        localStorage.setItem('nexusdev_projects', JSON.stringify(data));
+                        localStorage.setItem('spaceteam_projects', JSON.stringify(data));
                         this.state.projects = data;
                     } else {
                         let projects = [...this.state.projects];
@@ -228,14 +230,14 @@ class NexusDevApp {
                         } else {
                             projects.push(data);
                         }
-                        localStorage.setItem('nexusdev_projects', JSON.stringify(projects));
+                        localStorage.setItem('spaceteam_projects', JSON.stringify(projects));
                         this.state.projects = projects;
                     }
                     break;
                     
                 case 'blog_posts':
                     if (Array.isArray(data)) {
-                        localStorage.setItem('nexusdev_blog', JSON.stringify(data));
+                        localStorage.setItem('spaceteam_blog', JSON.stringify(data));
                         this.state.blogPosts = data;
                     } else {
                         let blogPosts = [...this.state.blogPosts];
@@ -245,26 +247,26 @@ class NexusDevApp {
                         } else {
                             blogPosts.push(data);
                         }
-                        localStorage.setItem('nexusdev_blog', JSON.stringify(blogPosts));
+                        localStorage.setItem('spaceteam_blog', JSON.stringify(blogPosts));
                         this.state.blogPosts = blogPosts;
                     }
                     break;
                     
                 case 'settings':
                     const mergedSettings = { ...this.state.settings, ...data };
-                    localStorage.setItem('nexusdev_settings', JSON.stringify(mergedSettings));
+                    localStorage.setItem('spaceteam_settings', JSON.stringify(mergedSettings));
                     this.state.settings = mergedSettings;
                     break;
                     
                 case 'messages':
                     if (Array.isArray(data)) {
-                        localStorage.setItem('nexusdev_messages', JSON.stringify(data));
+                        localStorage.setItem('spaceteam_messages', JSON.stringify(data));
                         this.state.messages = data;
                     } else {
                         let messages = [...this.state.messages];
                         messages.unshift(data);
                         if (messages.length > 100) messages = messages.slice(0, 100);
-                        localStorage.setItem('nexusdev_messages', JSON.stringify(messages));
+                        localStorage.setItem('spaceteam_messages', JSON.stringify(messages));
                         this.state.messages = messages;
                     }
                     break;
@@ -327,14 +329,14 @@ class NexusDevApp {
         if (this.state.developers.length === 0) {
             container.innerHTML = `
                 <div class="text-center" style="grid-column: 1/-1; padding: var(--space-2xl);">
-                    <div style="width: 80px; height: 80px; background: var(--light-gray); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-md);">
-                        <i class="fas fa-users fa-2x" style="color: var(--gray);"></i>
+                    <div style="width: 80px; height: 80px; background: rgba(100, 255, 218, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-md);">
+                        <i class="fas fa-user-astronaut fa-2x" style="color: var(--secondary);"></i>
                     </div>
-                    <h3 style="color: var(--primary);">No Developers Yet</h3>
-                    <p style="color: var(--gray); max-width: 400px; margin: 0 auto;">Our expert team profiles are being prepared. Check back soon!</p>
+                    <h3 style="color: var(--secondary);">Mission Crew Assigned</h3>
+                    <p style="color: var(--gray); max-width: 400px; margin: 0 auto;">Our elite space engineers are preparing for mission. Stand by for crew manifest!</p>
                     ${this.state.isAdmin ? `
                         <button class="btn btn-primary" onclick="app.showAdminSection('developers')" style="margin-top: var(--space-md);">
-                            <i class="fas fa-user-plus"></i> Add First Developer
+                            <i class="fas fa-user-astronaut"></i> Assign First Crew Member
                         </button>
                     ` : ''}
                 </div>
@@ -353,10 +355,10 @@ class NexusDevApp {
             const developerHTML = `
                 <div class="developer-card animate__animated animate__fadeInUp" style="animation-delay: ${index * 100}ms">
                     <div class="developer-header">
-                        <img src="${dev.image || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" 
+                        <img src="${dev.image || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" 
                              alt="${dev.name}" 
                              class="developer-image"
-                             onerror="this.src='https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'">
+                             onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'">
                         <div class="developer-overlay">
                             <h3 class="developer-name">${dev.name}</h3>
                             <p class="developer-role">${dev.role}</p>
@@ -369,7 +371,7 @@ class NexusDevApp {
                         <p class="developer-bio">${dev.bio}</p>
                         <div style="display: flex; gap: 10px; margin-top: 20px;">
                             ${dev.email ? `<a href="mailto:${dev.email}" class="btn btn-sm btn-outline">
-                                <i class="fas fa-envelope"></i> Contact
+                                <i class="fas fa-satellite"></i> Contact
                             </a>` : ''}
                             ${dev.github ? `<a href="https://github.com/${dev.github}" target="_blank" class="btn btn-sm btn-secondary">
                                 <i class="fab fa-github"></i> GitHub
@@ -396,16 +398,16 @@ class NexusDevApp {
         if (filteredProjects.length === 0) {
             container.innerHTML = `
                 <div class="text-center" style="grid-column: 1/-1; padding: var(--space-2xl);">
-                    <div style="width: 80px; height: 80px; background: var(--light-gray); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-md);">
-                        <i class="fas fa-project-diagram fa-2x" style="color: var(--gray);"></i>
+                    <div style="width: 80px; height: 80px; background: rgba(100, 255, 218, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-md);">
+                        <i class="fas fa-satellite fa-2x" style="color: var(--secondary);"></i>
                     </div>
-                    <h3 style="color: var(--primary);">No Projects Found</h3>
+                    <h3 style="color: var(--secondary);">Mission Log Empty</h3>
                     <p style="color: var(--gray); max-width: 400px; margin: 0 auto;">
-                        ${filter === 'all' ? 'No projects available yet. Check back soon!' : `No ${filter} projects found. Try a different category!`}
+                        ${filter === 'all' ? 'No missions completed yet. Preparing for launch!' : `No ${filter} missions found. Adjust mission parameters!`}
                     </p>
                     ${this.state.isAdmin ? `
                         <button class="btn btn-primary" onclick="app.showAdminSection('projects')" style="margin-top: var(--space-md);">
-                            <i class="fas fa-plus-circle"></i> Add First Project
+                            <i class="fas fa-rocket"></i> Log First Mission
                         </button>
                     ` : ''}
                 </div>
@@ -422,17 +424,17 @@ class NexusDevApp {
             ).join('');
             
             const typeMap = {
-                'web': 'Web Development',
+                'web': 'Web Systems',
                 'mobile': 'Mobile App',
                 'design': 'UI/UX Design'
             };
             
             const projectHTML = `
                 <div class="project-card animate__animated animate__fadeInUp" style="animation-delay: ${index * 100}ms">
-                    <img src="${project.image || 'https://images.unsplash.com/photo-1551650975-87deedd944c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" 
+                    <img src="${project.image || 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" 
                          alt="${project.title}" 
                          class="project-image"
-                         onerror="this.src='https://images.unsplash.com/photo-1551650975-87deedd944c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'">
+                         onerror="this.src='https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'">
                     <div class="project-content">
                         <h3 class="project-title">${project.title}</h3>
                         <p class="project-description">${project.description}</p>
@@ -443,11 +445,11 @@ class NexusDevApp {
                             <span class="project-category">${typeMap[project.type] || project.type}</span>
                             ${project.link ? `
                                 <a href="${project.link}" target="_blank" class="btn btn-sm btn-primary">
-                                    <i class="fas fa-external-link-alt"></i> View Live
+                                    <i class="fas fa-external-link-alt"></i> Launch
                                 </a>
                             ` : `
                                 <button class="btn btn-sm btn-primary" onclick="app.viewProjectDetails(${project.id})">
-                                    <i class="fas fa-eye"></i> View Details
+                                    <i class="fas fa-eye"></i> Mission Details
                                 </button>
                             `}
                         </div>
@@ -468,14 +470,14 @@ class NexusDevApp {
         if (this.state.blogPosts.length === 0) {
             container.innerHTML = `
                 <div class="text-center" style="grid-column: 1/-1; padding: var(--space-2xl);">
-                    <div style="width: 80px; height: 80px; background: var(--light-gray); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-md);">
-                        <i class="fas fa-newspaper fa-2x" style="color: var(--gray);"></i>
+                    <div style="width: 80px; height: 80px; background: rgba(100, 255, 218, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-md);">
+                        <i class="fas fa-newspaper fa-2x" style="color: var(--secondary);"></i>
                     </div>
-                    <h3 style="color: var(--primary);">No Blog Posts Yet</h3>
-                    <p style="color: var(--gray); max-width: 400px; margin: 0 auto;">Check back soon for our latest insights and industry updates!</p>
+                    <h3 style="color: var(--secondary);">Mission Briefings Pending</h3>
+                    <p style="color: var(--gray); max-width: 400px; margin: 0 auto;">Stand by for mission briefings and tech discoveries!</p>
                     ${this.state.isAdmin ? `
                         <button class="btn btn-primary" onclick="app.showAdminSection('blog')" style="margin-top: var(--space-md);">
-                            <i class="fas fa-edit"></i> Write First Post
+                            <i class="fas fa-edit"></i> Create First Briefing
                         </button>
                     ` : ''}
                 </div>
@@ -486,18 +488,18 @@ class NexusDevApp {
         this.state.blogPosts.forEach((post, index) => {
             const blogHTML = `
                 <div class="blog-card animate__animated animate__fadeInUp" style="animation-delay: ${index * 100}ms">
-                    <img src="${post.image || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" 
+                    <img src="${post.image || 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" 
                          alt="${post.title}" 
                          class="blog-image"
-                         onerror="this.src='https://images.unsplash.com/photo-1499750310107-5fef28a66643?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'">
+                         onerror="this.src='https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'">
                     <div class="blog-content">
-                        <span class="blog-category">${post.category || 'General'}</span>
+                        <span class="blog-category">${post.category || 'Mission Briefing'}</span>
                         <h3 class="blog-title">${post.title}</h3>
-                        <p class="blog-excerpt">${post.excerpt || post.content?.substring(0, 150) + '...' || 'No excerpt available.'}</p>
+                        <p class="blog-excerpt">${post.excerpt || post.content?.substring(0, 150) + '...' || 'Briefing details classified.'}</p>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
-                            <span><i class="far fa-user"></i> ${post.author || 'Admin'}</span>
+                            <span><i class="fas fa-user-astronaut"></i> ${post.author || 'Mission Control'}</span>
                             <button class="btn btn-sm btn-outline" onclick="app.viewBlogPost(${post.id})">
-                                Read Article
+                                Read Briefing
                             </button>
                         </div>
                     </div>
@@ -547,14 +549,14 @@ class NexusDevApp {
         if (labels.length === 0) {
             ctx.parentElement.innerHTML = `
                 <div class="text-center" style="padding: var(--space-2xl);">
-                    <div style="width: 80px; height: 80px; background: var(--light-gray); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-md);">
-                        <i class="fas fa-chart-bar fa-2x" style="color: var(--gray);"></i>
+                    <div style="width: 80px; height: 80px; background: rgba(100, 255, 218, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-md);">
+                        <i class="fas fa-chart-network fa-2x" style="color: var(--secondary);"></i>
                     </div>
-                    <h3 style="color: var(--primary);">Skills Data Unavailable</h3>
-                    <p style="color: var(--gray);">Add developers with skills to see the visualization</p>
+                    <h3 style="color: var(--secondary);">Tech Galaxy Map Unavailable</h3>
+                    <p style="color: var(--gray);">Assign crew members with skills to map the tech galaxy</p>
                     ${this.state.isAdmin ? `
                         <button class="btn btn-primary" onclick="app.showAdminSection('developers')" style="margin-top: var(--space-md);">
-                            <i class="fas fa-user-plus"></i> Add Developers
+                            <i class="fas fa-user-astronaut"></i> Assign Crew Members
                         </button>
                     ` : ''}
                 </div>
@@ -563,8 +565,8 @@ class NexusDevApp {
         }
         
         const isDark = document.body.classList.contains('dark-theme');
-        const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
-        const textColor = isDark ? '#f7fafc' : '#1a202c';
+        const gridColor = isDark ? 'rgba(100, 255, 218, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+        const textColor = isDark ? '#e6f1ff' : '#1a202c';
         
         this.state.skillsChart = new Chart(ctx.getContext('2d'), {
             type: 'radar',
@@ -573,13 +575,13 @@ class NexusDevApp {
                 datasets: [{
                     label: 'Skill Proficiency',
                     data: data,
-                    backgroundColor: 'rgba(26, 54, 93, 0.2)',
-                    borderColor: 'rgba(26, 54, 93, 1)',
+                    backgroundColor: 'rgba(100, 255, 218, 0.2)',
+                    borderColor: 'rgba(100, 255, 218, 0.8)',
                     borderWidth: 2,
-                    pointBackgroundColor: 'rgba(212, 175, 55, 1)',
-                    pointBorderColor: '#fff',
-                    pointHoverBackgroundColor: '#fff',
-                    pointHoverBorderColor: 'rgba(212, 175, 55, 1)'
+                    pointBackgroundColor: 'rgba(100, 255, 218, 1)',
+                    pointBorderColor: '#0a192f',
+                    pointHoverBackgroundColor: '#0a192f',
+                    pointHoverBorderColor: 'rgba(100, 255, 218, 1)'
                 }]
             },
             options: {
@@ -602,7 +604,7 @@ class NexusDevApp {
                         },
                         ticks: {
                             backdropColor: 'transparent',
-                            color: isDark ? '#a0aec0' : '#4a5568',
+                            color: isDark ? '#8892b0' : '#4a5568',
                             stepSize: 20
                         },
                         suggestedMin: 0,
@@ -612,7 +614,10 @@ class NexusDevApp {
                 plugins: {
                     legend: {
                         labels: {
-                            color: textColor
+                            color: textColor,
+                            font: {
+                                family: "'SF Mono', 'Fira Code', monospace"
+                            }
                         }
                     }
                 }
@@ -727,13 +732,13 @@ class NexusDevApp {
         // Update chart colors if it exists
         if (this.state.skillsChart) {
             const isDark = this.state.darkMode;
-            const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
-            const textColor = isDark ? '#f7fafc' : '#1a202c';
+            const gridColor = isDark ? 'rgba(100, 255, 218, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+            const textColor = isDark ? '#e6f1ff' : '#1a202c';
             
             this.state.skillsChart.options.scales.r.angleLines.color = gridColor;
             this.state.skillsChart.options.scales.r.grid.color = gridColor;
             this.state.skillsChart.options.scales.r.pointLabels.color = textColor;
-            this.state.skillsChart.options.scales.r.ticks.color = isDark ? '#a0aec0' : '#4a5568';
+            this.state.skillsChart.options.scales.r.ticks.color = isDark ? '#8892b0' : '#4a5568';
             this.state.skillsChart.options.plugins.legend.labels.color = textColor;
             
             this.state.skillsChart.update();
@@ -798,25 +803,25 @@ class NexusDevApp {
         let isValid = true;
         
         if (!name) {
-            this.showFormError('name-error', 'Name is required');
+            this.showFormError('name-error', 'Astronaut name is required');
             isValid = false;
         }
         
         if (!email) {
-            this.showFormError('email-error', 'Email is required');
+            this.showFormError('email-error', 'Transmission address is required');
             isValid = false;
         } else if (!this.validateEmail(email)) {
-            this.showFormError('email-error', 'Please enter a valid email address');
+            this.showFormError('email-error', 'Please enter a valid transmission address');
             isValid = false;
         }
         
         if (!subject) {
-            this.showFormError('subject-error', 'Subject is required');
+            this.showFormError('subject-error', 'Mission type is required');
             isValid = false;
         }
         
         if (!message) {
-            this.showFormError('message-error', 'Message is required');
+            this.showFormError('message-error', 'Mission briefing is required');
             isValid = false;
         }
         
@@ -844,14 +849,14 @@ class NexusDevApp {
             
             if (saved) {
                 this.state.messages.unshift(formData);
-                this.showNotification('Message sent successfully! We will contact you soon.', 'success');
+                this.showNotification('Transmission sent successfully! Mission control will respond soon.', 'success');
                 e.target.reset();
             } else {
-                this.showNotification('Failed to save message. Please try again.', 'error');
+                this.showNotification('Failed to save transmission. Please try again.', 'error');
             }
         } catch (error) {
             console.error('Error saving message:', error);
-            this.showNotification('Error sending message. Please try again.', 'error');
+            this.showNotification('Error sending transmission. Please try again.', 'error');
         } finally {
             submitBtn.classList.remove('loading');
             submitBtn.innerHTML = originalText;
@@ -948,7 +953,7 @@ class NexusDevApp {
         // Add loading indicator
         const loadingMsg = document.createElement('div');
         loadingMsg.className = 'chat-message bot';
-        loadingMsg.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Thinking...';
+        loadingMsg.innerHTML = '<i class="fas fa-satellite fa-spin"></i> Processing transmission...';
         chatBody.appendChild(loadingMsg);
         chatBody.scrollTop = chatBody.scrollHeight;
         
@@ -970,7 +975,7 @@ class NexusDevApp {
             
             const errorMsg = document.createElement('div');
             errorMsg.className = 'chat-message bot';
-            errorMsg.textContent = "I apologize, but I'm having trouble connecting right now. Please email us at " + (this.state.settings.contactEmail || CONFIG.defaults.contactEmail) + " for assistance.";
+            errorMsg.textContent = "Transmission disrupted. Please contact mission control at " + (this.state.settings.contactEmail || CONFIG.defaults.contactEmail) + " for assistance.";
             chatBody.appendChild(errorMsg);
         }
         
@@ -990,7 +995,7 @@ class NexusDevApp {
                     body: JSON.stringify({
                         contents: [{
                             parts: [{
-                                text: `${CONFIG.aiSystemPrompt}\n\nUser: ${message}\n\nAssistant:`
+                                text: `${CONFIG.aiSystemPrompt}\n\nAstronaut: ${message}\n\nSpaceTeam AI:`
                             }]
                         }]
                     })
@@ -1010,11 +1015,11 @@ class NexusDevApp {
         
         // Default responses if no API key or API fails
         const responses = [
-            "Thanks for your message! Our team specializes in custom web and mobile development. We'd be happy to discuss your project requirements.",
-            "Great question! We offer consultation services to help plan your project. Would you like to schedule a call?",
-            "Based on your query, I recommend checking our portfolio section for similar projects we've completed.",
-            "We create digital experiences that combine innovation, functionality, and exceptional design. How can we help bring your vision to life?",
-            "For detailed project estimates, we typically need to understand your specific requirements. Would you like to share more details about your project?"
+            "Transmission received! SpaceTeam specializes in cutting-edge web and mobile development. Ready to discuss your mission parameters.",
+            "Excellent inquiry! We offer mission briefings to plan your project. Would you like to schedule a transmission with mission control?",
+            "Based on your transmission, I recommend checking our mission log for similar operations we've completed.",
+            "We build digital solutions that push technological boundaries. How can we assist with your mission objectives?",
+            "For mission estimates, we typically require mission parameters. Would you like to share more details about your operation?"
         ];
         
         return responses[Math.floor(Math.random() * responses.length)];
@@ -1041,12 +1046,12 @@ class NexusDevApp {
         
         // Validation
         if (!email) {
-            this.showFormError('login-email-error', 'Email is required');
+            this.showFormError('login-email-error', 'Access code is required');
             return;
         }
         
         if (!password) {
-            this.showFormError('login-password-error', 'Password is required');
+            this.showFormError('login-password-error', 'Security key is required');
             return;
         }
         
@@ -1069,7 +1074,7 @@ class NexusDevApp {
                     if (!error && data.user) {
                         authSuccess = true;
                         this.state.isAdmin = true;
-                        localStorage.setItem('nexusdev_admin_token', data.session.access_token);
+                        localStorage.setItem('spaceteam_admin_token', data.session.access_token);
                     }
                 } catch (supabaseError) {
                     console.warn('Supabase auth failed:', supabaseError);
@@ -1080,19 +1085,19 @@ class NexusDevApp {
             if (!authSuccess && email === CONFIG.adminEmail && password === CONFIG.adminPassword) {
                 authSuccess = true;
                 this.state.isAdmin = true;
-                localStorage.setItem('nexusdev_admin', 'true');
+                localStorage.setItem('spaceteam_admin', 'true');
             }
             
             if (authSuccess) {
                 this.hideLoginModal();
                 this.showAdminPanel();
-                this.showNotification('Admin login successful!', 'success');
+                this.showNotification('Mission control access granted!', 'success');
             } else {
-                this.showNotification('Invalid email or password', 'error');
+                this.showNotification('Invalid access code or security key', 'error');
             }
         } catch (error) {
             console.error('Login error:', error);
-            this.showNotification('Login failed. Please try again.', 'error');
+            this.showNotification('Access denied. Please try again.', 'error');
         } finally {
             submitBtn.classList.remove('loading');
             submitBtn.innerHTML = originalText;
@@ -1100,8 +1105,8 @@ class NexusDevApp {
     }
 
     checkAdminSession() {
-        const isAdminLoggedIn = localStorage.getItem('nexusdev_admin') === 'true' || 
-                               localStorage.getItem('nexusdev_admin_token');
+        const isAdminLoggedIn = localStorage.getItem('spaceteam_admin') === 'true' || 
+                               localStorage.getItem('spaceteam_admin_token');
         
         if (isAdminLoggedIn) {
             this.state.isAdmin = true;
@@ -1126,14 +1131,14 @@ class NexusDevApp {
         document.getElementById('admin-panel').classList.add('hidden');
         
         this.state.isAdmin = false;
-        localStorage.removeItem('nexusdev_admin');
-        localStorage.removeItem('nexusdev_admin_token');
+        localStorage.removeItem('spaceteam_admin');
+        localStorage.removeItem('spaceteam_admin_token');
         
         if (window.supabaseClient) {
             supabaseClient.auth.signOut();
         }
         
-        this.showNotification('Logged out successfully', 'success');
+        this.showNotification('Logged out from mission control', 'success');
     }
 
     setupAdminEventListeners() {
@@ -1161,53 +1166,53 @@ class NexusDevApp {
         
         const dashboardHTML = `
             <div class="admin-section">
-                <h2>Dashboard Overview</h2>
+                <h2>Mission Control Dashboard</h2>
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-number">${this.state.developers.length}</div>
-                        <div class="stat-label">Active Developers</div>
+                        <div class="stat-label">Active Crew</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-number">${this.state.projects.length}</div>
-                        <div class="stat-label">Total Projects</div>
+                        <div class="stat-label">Active Missions</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-number">${this.state.blogPosts.length}</div>
-                        <div class="stat-label">Blog Posts</div>
+                        <div class="stat-label">Mission Briefings</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-number">${this.state.messages.length}</div>
-                        <div class="stat-label">Messages</div>
-                        ${unreadMessages > 0 ? `<span style="position: absolute; top: 10px; right: 10px; background: var(--danger); color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem;">${unreadMessages}</span>` : ''}
+                        <div class="stat-label">Transmissions</div>
+                        ${unreadMessages > 0 ? `<span style="position: absolute; top: 10px; right: 10px; background: var(--danger); color: var(--primary-dark); border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem;">${unreadMessages}</span>` : ''}
                     </div>
                 </div>
                 
                 <div style="margin-top: 30px;">
                     <div class="form-row">
                         <div>
-                            <h3>Quick Actions</h3>
+                            <h3>Mission Controls</h3>
                             <div style="display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap;">
                                 <button class="btn btn-primary" onclick="app.showAdminSection('developers')">
-                                    <i class="fas fa-user-plus"></i> Manage Developers
+                                    <i class="fas fa-user-astronaut"></i> Manage Crew
                                 </button>
                                 <button class="btn btn-secondary" onclick="app.showAdminSection('projects')">
-                                    <i class="fas fa-plus-circle"></i> Manage Projects
+                                    <i class="fas fa-rocket"></i> Manage Missions
                                 </button>
                                 <button class="btn btn-outline" onclick="app.showAdminSection('blog')">
-                                    <i class="fas fa-edit"></i> Manage Blog
+                                    <i class="fas fa-edit"></i> Manage Briefings
                                 </button>
                             </div>
                         </div>
                         
                         <div>
-                            <h3>Recent Messages</h3>
+                            <h3>Recent Transmissions</h3>
                             ${recentMessages.length > 0 ? `
                                 <div style="margin-top: 15px; max-height: 200px; overflow-y: auto;">
                                     ${recentMessages.map(msg => `
-                                        <div style="padding: 10px; background: var(--light-gray); border-radius: var(--radius); margin-bottom: 10px; ${!msg.read ? 'border-left: 3px solid var(--primary);' : ''}">
+                                        <div style="padding: 10px; background: rgba(100, 255, 218, 0.05); border-radius: var(--radius); margin-bottom: 10px; border: 1px solid rgba(100, 255, 218, 0.1); ${!msg.read ? 'border-left: 3px solid var(--secondary);' : ''}">
                                             <div style="display: flex; justify-content: space-between;">
-                                                <strong>${msg.name}</strong>
-                                                <small>${new Date(msg.created_at).toLocaleDateString()}</small>
+                                                <strong style="color: var(--dark);">${msg.name}</strong>
+                                                <small style="color: var(--gray);">${new Date(msg.created_at).toLocaleDateString()}</small>
                                             </div>
                                             <div style="font-size: 0.875rem; color: var(--gray);">${msg.subject}</div>
                                         </div>
@@ -1215,11 +1220,11 @@ class NexusDevApp {
                                 </div>
                                 ${unreadMessages > 0 ? `
                                     <button class="btn btn-sm btn-primary" onclick="app.showAdminSection('messages')" style="margin-top: 10px;">
-                                        <i class="fas fa-envelope"></i> View All Messages (${unreadMessages} unread)
+                                        <i class="fas fa-satellite"></i> View All Transmissions (${unreadMessages} unread)
                                     </button>
                                 ` : ''}
                             ` : `
-                                <p style="color: var(--gray); margin-top: 10px;">No messages yet</p>
+                                <p style="color: var(--gray); margin-top: 10px;">No transmissions yet</p>
                             `}
                         </div>
                     </div>
@@ -1339,9 +1344,9 @@ class NexusDevApp {
         const developersListHTML = this.state.developers.map(dev => `
             <div class="admin-list-item">
                 <div>
-                    <h4 style="margin: 0;">${dev.name}</h4>
+                    <h4 style="margin: 0; color: var(--dark);">${dev.name}</h4>
                     <p style="margin: 5px 0; color: var(--gray);">${dev.role}</p>
-                    <small>${Array.isArray(dev.skills) ? dev.skills.slice(0, 3).join(', ') : dev.skills || ''}</small>
+                    <small style="color: var(--gray);">${Array.isArray(dev.skills) ? dev.skills.slice(0, 3).join(', ') : dev.skills || ''}</small>
                 </div>
                 <div class="admin-list-actions">
                     <button class="btn btn-sm" onclick="app.editDeveloper(${dev.id})">
@@ -1360,71 +1365,71 @@ class NexusDevApp {
         return `
             <div class="admin-section">
                 <div class="tab-nav">
-                    <button class="tab-btn active" data-tab="developers-list">All Developers (${this.state.developers.length})</button>
-                    <button class="tab-btn" data-tab="add-developer">${this.state.editingId ? 'Edit Developer' : 'Add New Developer'}</button>
+                    <button class="tab-btn active" data-tab="developers-list">Mission Crew (${this.state.developers.length})</button>
+                    <button class="tab-btn" data-tab="add-developer">${this.state.editingId ? 'Edit Crew Member' : 'Assign New Crew'}</button>
                 </div>
                 
                 <div id="developers-list" class="tab-content active">
-                    <h3>Manage Developers</h3>
+                    <h3>Manage Mission Crew</h3>
                     ${this.state.developers.length > 0 ? `
                         <div class="admin-list">
                             ${developersListHTML}
                         </div>
                     ` : `
                         <div class="text-center" style="padding: var(--space-2xl);">
-                            <i class="fas fa-users fa-3x" style="color: var(--gray); margin-bottom: var(--space-md);"></i>
-                            <h3>No Developers Yet</h3>
-                            <p>Add your first developer to get started!</p>
+                            <i class="fas fa-user-astronaut fa-3x" style="color: var(--gray); margin-bottom: var(--space-md);"></i>
+                            <h3 style="color: var(--dark);">No Crew Assigned</h3>
+                            <p style="color: var(--gray);">Assign your first crew member to begin operations!</p>
                             <button class="btn btn-primary" onclick="app.switchAdminTab('add-developer')" style="margin-top: var(--space-md);">
-                                <i class="fas fa-user-plus"></i> Add First Developer
+                                <i class="fas fa-user-astronaut"></i> Assign First Crew
                             </button>
                         </div>
                     `}
                 </div>
                 
                 <div id="add-developer" class="tab-content">
-                    <h3>${this.state.editingId ? 'Edit Developer' : 'Add New Developer'}</h3>
+                    <h3>${this.state.editingId ? 'Edit Crew Member' : 'Assign New Crew Member'}</h3>
                     <form id="admin-developer-form">
                         <input type="hidden" id="admin-developer-id" value="${developerToEdit?.id || ''}">
                         <div class="form-row">
                             <div class="form-group">
-                                <label class="form-label">Full Name *</label>
+                                <label class="form-label">Astronaut Name *</label>
                                 <input type="text" class="form-control" id="admin-dev-name" value="${developerToEdit?.name || ''}" required>
                             </div>
                             <div class="form-group">
-                                <label class="form-label">Role/Position *</label>
+                                <label class="form-label">Mission Role *</label>
                                 <input type="text" class="form-control" id="admin-dev-role" value="${developerToEdit?.role || ''}" required>
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
                                 <label class="form-label">Profile Image URL *</label>
-                                <input type="text" class="form-control" id="admin-dev-image" value="${developerToEdit?.image || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" required>
-                                <small style="color: var(--gray);">Use Unsplash or similar service for free high-quality images</small>
+                                <input type="text" class="form-control" id="admin-dev-image" value="${developerToEdit?.image || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" required>
+                                <small style="color: var(--gray);">Use Unsplash or similar service for space-themed images</small>
                             </div>
                             <div class="form-group">
-                                <label class="form-label">Email Address</label>
+                                <label class="form-label">Transmission Address</label>
                                 <input type="email" class="form-control" id="admin-dev-email" value="${developerToEdit?.email || ''}">
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label class="form-label">GitHub Username</label>
+                                <label class="form-label">GitHub Callsign</label>
                                 <input type="text" class="form-control" id="admin-dev-github" value="${developerToEdit?.github || ''}">
                             </div>
                             <div class="form-group">
-                                <label class="form-label">Skills (comma separated) *</label>
+                                <label class="form-label">Specializations (comma separated) *</label>
                                 <input type="text" class="form-control" id="admin-dev-skills" value="${Array.isArray(developerToEdit?.skills) ? developerToEdit.skills.join(', ') : developerToEdit?.skills || ''}" required>
-                                <small style="color: var(--gray);">Example: React, Node.js, Python, AWS</small>
+                                <small style="color: var(--gray);">Example: React, Node.js, Python, AWS, Space-Tech</small>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Bio/Description *</label>
+                            <label class="form-label">Mission Bio *</label>
                             <textarea class="form-control" id="admin-dev-bio" rows="4" required>${developerToEdit?.bio || ''}</textarea>
                         </div>
                         <div style="display: flex; gap: 15px; margin-top: 20px;">
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> ${this.state.editingId ? 'Update Developer' : 'Save Developer'}
+                                <i class="fas fa-save"></i> ${this.state.editingId ? 'Update Crew Member' : 'Assign to Mission'}
                             </button>
                             <button type="button" class="btn btn-outline" onclick="app.resetDeveloperForm()">
                                 <i class="fas fa-times"></i> Cancel
@@ -1440,13 +1445,13 @@ class NexusDevApp {
         const projectsListHTML = this.state.projects.map(project => `
             <div class="admin-list-item">
                 <div>
-                    <h4 style="margin: 0;">${project.title}</h4>
+                    <h4 style="margin: 0; color: var(--dark);">${project.title}</h4>
                     <p style="margin: 5px 0; color: var(--gray);">
-                        ${project.type === 'web' ? 'Web Development' : 
+                        ${project.type === 'web' ? 'Web Systems' : 
                           project.type === 'mobile' ? 'Mobile App' : 
                           'UI/UX Design'}
                     </p>
-                    <small>${Array.isArray(project.tech) ? project.tech.slice(0, 3).join(', ') : project.tech || ''}</small>
+                    <small style="color: var(--gray);">${Array.isArray(project.tech) ? project.tech.slice(0, 3).join(', ') : project.tech || ''}</small>
                 </div>
                 <div class="admin-list-actions">
                     <button class="btn btn-sm" onclick="app.editProject(${project.id})">
@@ -1465,41 +1470,41 @@ class NexusDevApp {
         return `
             <div class="admin-section">
                 <div class="tab-nav">
-                    <button class="tab-btn active" data-tab="projects-list">All Projects (${this.state.projects.length})</button>
-                    <button class="tab-btn" data-tab="add-project">${this.state.editingId ? 'Edit Project' : 'Add New Project'}</button>
+                    <button class="tab-btn active" data-tab="projects-list">Mission Log (${this.state.projects.length})</button>
+                    <button class="tab-btn" data-tab="add-project">${this.state.editingId ? 'Edit Mission' : 'Log New Mission'}</button>
                 </div>
                 
                 <div id="projects-list" class="tab-content active">
-                    <h3>Manage Projects</h3>
+                    <h3>Manage Mission Log</h3>
                     ${this.state.projects.length > 0 ? `
                         <div class="admin-list">
                             ${projectsListHTML}
                         </div>
                     ` : `
                         <div class="text-center" style="padding: var(--space-2xl);">
-                            <i class="fas fa-project-diagram fa-3x" style="color: var(--gray); margin-bottom: var(--space-md);"></i>
-                            <h3>No Projects Yet</h3>
-                            <p>Add your first project to showcase your work!</p>
+                            <i class="fas fa-rocket fa-3x" style="color: var(--gray); margin-bottom: var(--space-md);"></i>
+                            <h3 style="color: var(--dark);">No Missions Logged</h3>
+                            <p style="color: var(--gray);">Log your first mission to showcase operations!</p>
                             <button class="btn btn-primary" onclick="app.switchAdminTab('add-project')" style="margin-top: var(--space-md);">
-                                <i class="fas fa-plus-circle"></i> Add First Project
+                                <i class="fas fa-rocket"></i> Log First Mission
                             </button>
                         </div>
                     `}
                 </div>
                 
                 <div id="add-project" class="tab-content">
-                    <h3>${this.state.editingId ? 'Edit Project' : 'Add New Project'}</h3>
+                    <h3>${this.state.editingId ? 'Edit Mission' : 'Log New Mission'}</h3>
                     <form id="admin-project-form">
                         <input type="hidden" id="admin-project-id" value="${projectToEdit?.id || ''}">
                         <div class="form-row">
                             <div class="form-group">
-                                <label class="form-label">Project Title *</label>
+                                <label class="form-label">Mission Name *</label>
                                 <input type="text" class="form-control" id="admin-project-title" value="${projectToEdit?.title || ''}" required>
                             </div>
                             <div class="form-group">
-                                <label class="form-label">Project Type *</label>
+                                <label class="form-label">Mission Type *</label>
                                 <select class="form-control" id="admin-project-type" required>
-                                    <option value="web" ${projectToEdit?.type === 'web' ? 'selected' : ''}>Web Development</option>
+                                    <option value="web" ${projectToEdit?.type === 'web' ? 'selected' : ''}>Web Systems</option>
                                     <option value="mobile" ${projectToEdit?.type === 'mobile' ? 'selected' : ''}>Mobile App</option>
                                     <option value="design" ${projectToEdit?.type === 'design' ? 'selected' : ''}>UI/UX Design</option>
                                 </select>
@@ -1507,26 +1512,26 @@ class NexusDevApp {
                         </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label class="form-label">Project Image URL *</label>
-                                <input type="text" class="form-control" id="admin-project-image" value="${projectToEdit?.image || 'https://images.unsplash.com/photo-1551650975-87deedd944c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" required>
+                                <label class="form-label">Mission Image URL *</label>
+                                <input type="text" class="form-control" id="admin-project-image" value="${projectToEdit?.image || 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" required>
                             </div>
                             <div class="form-group">
-                                <label class="form-label">Project Link (Optional)</label>
+                                <label class="form-label">Mission Link (Optional)</label>
                                 <input type="url" class="form-control" id="admin-project-link" value="${projectToEdit?.link || ''}">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Technologies (comma separated) *</label>
+                            <label class="form-label">Technologies Used *</label>
                             <input type="text" class="form-control" id="admin-project-tech" value="${Array.isArray(projectToEdit?.tech) ? projectToEdit.tech.join(', ') : projectToEdit?.tech || ''}" required>
-                            <small style="color: var(--gray);">Example: React, Node.js, MongoDB, AWS</small>
+                            <small style="color: var(--gray);">Example: React, Node.js, MongoDB, AWS, Space-Tech</small>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Project Description *</label>
+                            <label class="form-label">Mission Report *</label>
                             <textarea class="form-control" id="admin-project-description" rows="4" required>${projectToEdit?.description || ''}</textarea>
                         </div>
                         <div style="display: flex; gap: 15px; margin-top: 20px;">
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> ${this.state.editingId ? 'Update Project' : 'Save Project'}
+                                <i class="fas fa-save"></i> ${this.state.editingId ? 'Update Mission' : 'Log Mission'}
                             </button>
                             <button type="button" class="btn btn-outline" onclick="app.resetProjectForm()">
                                 <i class="fas fa-times"></i> Cancel
@@ -1542,11 +1547,11 @@ class NexusDevApp {
         const blogListHTML = this.state.blogPosts.map(post => `
             <div class="admin-list-item">
                 <div>
-                    <h4 style="margin: 0;">${post.title}</h4>
+                    <h4 style="margin: 0; color: var(--dark);">${post.title}</h4>
                     <p style="margin: 5px 0; color: var(--gray);">
-                        ${post.category || 'General'} • By ${post.author || 'Admin'}
+                        ${post.category || 'Mission Briefing'} • By ${post.author || 'Mission Control'}
                     </p>
-                    <small>${new Date(post.created_at).toLocaleDateString()}</small>
+                    <small style="color: var(--gray);">${new Date(post.created_at).toLocaleDateString()}</small>
                 </div>
                 <div class="admin-list-actions">
                     <button class="btn btn-sm" onclick="app.editBlogPost(${post.id})">
@@ -1565,12 +1570,12 @@ class NexusDevApp {
         return `
             <div class="admin-section">
                 <div class="tab-nav">
-                    <button class="tab-btn active" data-tab="blog-list">All Posts (${this.state.blogPosts.length})</button>
-                    <button class="tab-btn" data-tab="add-blog">${this.state.editingId ? 'Edit Post' : 'Write New Post'}</button>
+                    <button class="tab-btn active" data-tab="blog-list">Mission Briefings (${this.state.blogPosts.length})</button>
+                    <button class="tab-btn" data-tab="add-blog">${this.state.editingId ? 'Edit Briefing' : 'Create Briefing'}</button>
                 </div>
                 
                 <div id="blog-list" class="tab-content active">
-                    <h3>Manage Blog Posts</h3>
+                    <h3>Manage Mission Briefings</h3>
                     ${this.state.blogPosts.length > 0 ? `
                         <div class="admin-list">
                             ${blogListHTML}
@@ -1578,52 +1583,52 @@ class NexusDevApp {
                     ` : `
                         <div class="text-center" style="padding: var(--space-2xl);">
                             <i class="fas fa-newspaper fa-3x" style="color: var(--gray); margin-bottom: var(--space-md);"></i>
-                            <h3>No Blog Posts Yet</h3>
-                            <p>Write your first blog post to share insights!</p>
+                            <h3 style="color: var(--dark);">No Briefings Available</h3>
+                            <p style="color: var(--gray);">Create your first mission briefing!</p>
                             <button class="btn btn-primary" onclick="app.switchAdminTab('add-blog')" style="margin-top: var(--space-md);">
-                                <i class="fas fa-edit"></i> Write First Post
+                                <i class="fas fa-edit"></i> Create First Briefing
                             </button>
                         </div>
                     `}
                 </div>
                 
                 <div id="add-blog" class="tab-content">
-                    <h3>${this.state.editingId ? 'Edit Blog Post' : 'Write New Blog Post'}</h3>
+                    <h3>${this.state.editingId ? 'Edit Mission Briefing' : 'Create Mission Briefing'}</h3>
                     <form id="admin-blog-form">
                         <input type="hidden" id="admin-blog-id" value="${postToEdit?.id || ''}">
                         <div class="form-row">
                             <div class="form-group">
-                                <label class="form-label">Post Title *</label>
+                                <label class="form-label">Briefing Title *</label>
                                 <input type="text" class="form-control" id="admin-blog-title" value="${postToEdit?.title || ''}" required>
                             </div>
                             <div class="form-group">
-                                <label class="form-label">Category *</label>
-                                <input type="text" class="form-control" id="admin-blog-category" value="${postToEdit?.category || 'General'}" required>
+                                <label class="form-label">Briefing Type *</label>
+                                <input type="text" class="form-control" id="admin-blog-category" value="${postToEdit?.category || 'Mission Briefing'}" required>
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label class="form-label">Author Name *</label>
-                                <input type="text" class="form-control" id="admin-blog-author" value="${postToEdit?.author || 'Admin'}" required>
+                                <label class="form-label">Author Callsign *</label>
+                                <input type="text" class="form-control" id="admin-blog-author" value="${postToEdit?.author || 'Mission Control'}" required>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Featured Image URL *</label>
-                                <input type="text" class="form-control" id="admin-blog-image" value="${postToEdit?.image || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" required>
+                                <input type="text" class="form-control" id="admin-blog-image" value="${postToEdit?.image || 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" required>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Excerpt/Summary *</label>
+                            <label class="form-label">Briefing Summary *</label>
                             <textarea class="form-control" id="admin-blog-excerpt" rows="3" required>${postToEdit?.excerpt || ''}</textarea>
-                            <small style="color: var(--gray);">Brief summary of the post (150-200 characters)</small>
+                            <small style="color: var(--gray);">Brief summary of the briefing (150-200 characters)</small>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Post Content *</label>
+                            <label class="form-label">Full Briefing *</label>
                             <textarea class="form-control" id="admin-blog-content" rows="8" required>${postToEdit?.content || ''}</textarea>
-                            <small style="color: var(--gray);">Full blog post content</small>
+                            <small style="color: var(--gray);">Complete mission briefing content</small>
                         </div>
                         <div style="display: flex; gap: 15px; margin-top: 20px;">
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> ${this.state.editingId ? 'Update Post' : 'Publish Post'}
+                                <i class="fas fa-save"></i> ${this.state.editingId ? 'Update Briefing' : 'Publish Briefing'}
                             </button>
                             <button type="button" class="btn btn-outline" onclick="app.resetBlogForm()">
                                 <i class="fas fa-times"></i> Cancel
@@ -1637,11 +1642,11 @@ class NexusDevApp {
 
     getMessagesManagementHTML() {
         const messagesListHTML = this.state.messages.map(msg => `
-            <div class="admin-list-item" style="${!msg.read ? 'border-left: 3px solid var(--primary);' : ''}">
+            <div class="admin-list-item" style="${!msg.read ? 'border-left: 3px solid var(--secondary);' : ''}">
                 <div>
-                    <h4 style="margin: 0;">${msg.name} <small style="color: var(--gray);">(${msg.email})</small></h4>
-                    <p style="margin: 5px 0; color: var(--primary); font-weight: 600;">${msg.subject}</p>
-                    <p style="margin: 5px 0;">${msg.message.substring(0, 100)}${msg.message.length > 100 ? '...' : ''}</p>
+                    <h4 style="margin: 0; color: var(--dark);">${msg.name} <small style="color: var(--gray);">(${msg.email})</small></h4>
+                    <p style="margin: 5px 0; color: var(--secondary); font-weight: 600;">${msg.subject}</p>
+                    <p style="margin: 5px 0; color: var(--dark);">${msg.message.substring(0, 100)}${msg.message.length > 100 ? '...' : ''}</p>
                     <small style="color: var(--gray);">${new Date(msg.created_at).toLocaleString()}</small>
                 </div>
                 <div class="admin-list-actions">
@@ -1657,8 +1662,8 @@ class NexusDevApp {
         
         return `
             <div class="admin-section">
-                <h2>Messages (${this.state.messages.length})</h2>
-                <p>Manage all contact form submissions and inquiries.</p>
+                <h2>Transmissions (${this.state.messages.length})</h2>
+                <p style="color: var(--gray);">Manage all mission transmissions and inquiries.</p>
                 
                 ${this.state.messages.length > 0 ? `
                     <div class="admin-list">
@@ -1666,9 +1671,9 @@ class NexusDevApp {
                     </div>
                 ` : `
                     <div class="text-center" style="padding: var(--space-2xl);">
-                        <i class="fas fa-envelope fa-3x" style="color: var(--gray); margin-bottom: var(--space-md);"></i>
-                        <h3>No Messages Yet</h3>
-                        <p>All contact form submissions will appear here.</p>
+                        <i class="fas fa-satellite fa-3x" style="color: var(--gray); margin-bottom: var(--space-md);"></i>
+                        <h3 style="color: var(--dark);">No Transmissions Yet</h3>
+                        <p style="color: var(--gray);">All mission control transmissions will appear here.</p>
                     </div>
                 `}
             </div>
@@ -1678,30 +1683,30 @@ class NexusDevApp {
     getSettingsManagementHTML() {
         return `
             <div class="admin-section">
-                <h2>Website Settings</h2>
-                <p>Configure your website settings and preferences.</p>
+                <h2>Mission Control Systems</h2>
+                <p style="color: var(--gray);">Configure mission control systems and preferences.</p>
                 
                 <form id="admin-settings-form">
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label">Site Title *</label>
+                            <label class="form-label">Mission Name *</label>
                             <input type="text" class="form-control" id="admin-settings-title" value="${this.state.settings.siteTitle || CONFIG.defaults.siteTitle}" required>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Contact Email *</label>
+                            <label class="form-label">Transmission Address *</label>
                             <input type="email" class="form-control" id="admin-settings-email" value="${this.state.settings.contactEmail || CONFIG.defaults.contactEmail}" required>
                         </div>
                     </div>
                     
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label">Contact Phone *</label>
+                            <label class="form-label">Transmission Frequency *</label>
                             <input type="text" class="form-control" id="admin-settings-phone" value="${this.state.settings.contactPhone || CONFIG.defaults.contactPhone}" required>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Running Text *</label>
+                            <label class="form-label">Mission Status Text *</label>
                             <input type="text" class="form-control" id="admin-settings-running-text" value="${this.state.settings.runningText || CONFIG.defaults.runningText}" required>
-                            <small style="color: var(--gray);">Text that runs at the top of the page</small>
+                            <small style="color: var(--gray);">Text that runs at the top of mission control</small>
                         </div>
                     </div>
                     
@@ -1709,13 +1714,13 @@ class NexusDevApp {
                         <div class="form-group">
                             <div class="form-check" style="display: flex; align-items: center; gap: 10px;">
                                 <input type="checkbox" class="form-control" id="admin-settings-chat-enabled" ${this.state.settings.chatEnabled !== false ? 'checked' : ''} style="width: auto;">
-                                <label class="form-label" style="margin: 0;">Enable Chat Widget</label>
+                                <label class="form-label" style="margin: 0; color: var(--dark);">Enable AI Assistant</label>
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="form-check" style="display: flex; align-items: center; gap: 10px;">
                                 <input type="checkbox" class="form-control" id="admin-settings-dark-mode" ${this.state.settings.darkMode ? 'checked' : ''} style="width: auto;">
-                                <label class="form-label" style="margin: 0;">Enable Dark Mode by Default</label>
+                                <label class="form-label" style="margin: 0; color: var(--dark);">Enable Dark Mode by Default</label>
                             </div>
                         </div>
                     </div>
@@ -1724,36 +1729,36 @@ class NexusDevApp {
                         <label class="form-label">Gemini API Key (Optional)</label>
                         <input type="password" class="form-control" id="admin-settings-gemini-key" value="${CONFIG.geminiApiKey || ''}">
                         <small style="color: var(--gray);">
-                            Enter your Google Gemini API key to enable AI chat features. 
-                            <a href="https://makersuite.google.com/app/apikey" target="_blank">Get API key</a>
+                            Enter your Google Gemini API key to enable AI assistant. 
+                            <a href="https://makersuite.google.com/app/apikey" target="_blank" style="color: var(--secondary);">Get API key</a>
                         </small>
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label">Supabase Configuration</label>
-                        <div style="background: var(--light-gray); padding: var(--space-md); border-radius: var(--radius);">
-                            <p style="margin-bottom: var(--space-sm);">
-                                <strong>Status:</strong> 
+                        <label class="form-label">Cloud Systems Configuration</label>
+                        <div style="background: rgba(100, 255, 218, 0.05); padding: var(--space-md); border-radius: var(--radius); border: 1px solid rgba(100, 255, 218, 0.1);">
+                            <p style="margin-bottom: var(--space-sm); color: var(--dark);">
+                                <strong>System Status:</strong> 
                                 ${window.supabaseClient && CONFIG.supabaseUrl !== 'https://your-project.supabase.co' 
-                                    ? '<span style="color: var(--success);">Connected</span>' 
+                                    ? '<span style="color: var(--success);">Cloud Systems Active</span>' 
                                     : '<span style="color: var(--warning);">Using Local Storage</span>'}
                             </p>
                             <p style="font-size: 0.875rem; color: var(--gray);">
-                                To enable cloud storage, update the <code>supabaseUrl</code> and <code>supabaseKey</code> 
-                                in the <code>config.js</code> file with your Supabase project credentials.
+                                To enable cloud systems, update the <code style="color: var(--secondary);">supabaseUrl</code> and <code style="color: var(--secondary);">supabaseKey</code> 
+                                in the <code style="color: var(--secondary);">config.js</code> file with your cloud credentials.
                             </p>
                         </div>
                     </div>
                     
-                    <div style="display: flex; gap: 15px; margin-top: 30px;">
+                    <div style="display: flex; gap: 15px; margin-top: 30px; flex-wrap: wrap;">
                         <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i> Save Settings
+                            <i class="fas fa-save"></i> Save Systems
                         </button>
                         <button type="button" class="btn btn-outline" onclick="app.exportData()">
-                            <i class="fas fa-download"></i> Export Data
+                            <i class="fas fa-download"></i> Backup Data
                         </button>
                         <button type="button" class="btn btn-danger" onclick="app.resetData()">
-                            <i class="fas fa-trash"></i> Reset All Data
+                            <i class="fas fa-trash"></i> System Reset
                         </button>
                     </div>
                 </form>
@@ -1781,14 +1786,14 @@ class NexusDevApp {
             const saved = await this.saveToSupabase('developers', developerData);
             
             if (saved) {
-                this.showNotification(`Developer ${this.state.editingId ? 'updated' : 'added'} successfully!`, 'success');
+                this.showNotification(`Crew member ${this.state.editingId ? 'updated' : 'assigned'} successfully!`, 'success');
                 this.state.editingId = null;
                 await this.loadData();
                 this.showAdminSection('developers');
             }
         } catch (error) {
-            console.error('Error saving developer:', error);
-            this.showNotification('Error saving developer', 'error');
+            console.error('Error saving crew member:', error);
+            this.showNotification('Error saving crew member', 'error');
         }
     }
 
@@ -1811,14 +1816,14 @@ class NexusDevApp {
             const saved = await this.saveToSupabase('projects', projectData);
             
             if (saved) {
-                this.showNotification(`Project ${this.state.editingId ? 'updated' : 'added'} successfully!`, 'success');
+                this.showNotification(`Mission ${this.state.editingId ? 'updated' : 'logged'} successfully!`, 'success');
                 this.state.editingId = null;
                 await this.loadData();
                 this.showAdminSection('projects');
             }
         } catch (error) {
-            console.error('Error saving project:', error);
-            this.showNotification('Error saving project', 'error');
+            console.error('Error saving mission:', error);
+            this.showNotification('Error saving mission', 'error');
         }
     }
 
@@ -1841,14 +1846,14 @@ class NexusDevApp {
             const saved = await this.saveToSupabase('blog_posts', blogData);
             
             if (saved) {
-                this.showNotification(`Blog post ${this.state.editingId ? 'updated' : 'published'} successfully!`, 'success');
+                this.showNotification(`Mission briefing ${this.state.editingId ? 'updated' : 'published'} successfully!`, 'success');
                 this.state.editingId = null;
                 await this.loadData();
                 this.showAdminSection('blog');
             }
         } catch (error) {
-            console.error('Error saving blog post:', error);
-            this.showNotification('Error saving blog post', 'error');
+            console.error('Error saving briefing:', error);
+            this.showNotification('Error saving briefing', 'error');
         }
     }
 
@@ -1874,13 +1879,13 @@ class NexusDevApp {
             const saved = await this.saveToSupabase('settings', settingsData);
             
             if (saved) {
-                this.showNotification('Settings saved successfully!', 'success');
+                this.showNotification('Systems updated successfully!', 'success');
                 await this.loadData();
                 this.showAdminSection('settings');
             }
         } catch (error) {
-            console.error('Error saving settings:', error);
-            this.showNotification('Error saving settings', 'error');
+            console.error('Error saving systems:', error);
+            this.showNotification('Error saving systems', 'error');
         }
     }
 
@@ -1905,74 +1910,74 @@ class NexusDevApp {
 
     // Delete methods
     async deleteDeveloper(id) {
-        if (!confirm('Are you sure you want to delete this developer?')) return;
+        if (!confirm('Are you sure you want to remove this crew member from the mission?')) return;
         
         try {
             const updatedDevelopers = this.state.developers.filter(d => d.id !== id);
             const saved = await this.saveToSupabase('developers', updatedDevelopers);
             
             if (saved) {
-                this.showNotification('Developer deleted successfully!', 'success');
+                this.showNotification('Crew member removed successfully!', 'success');
                 await this.loadData();
                 this.showAdminSection('developers');
             }
         } catch (error) {
-            console.error('Error deleting developer:', error);
-            this.showNotification('Error deleting developer', 'error');
+            console.error('Error removing crew member:', error);
+            this.showNotification('Error removing crew member', 'error');
         }
     }
 
     async deleteProject(id) {
-        if (!confirm('Are you sure you want to delete this project?')) return;
+        if (!confirm('Are you sure you want to delete this mission from the log?')) return;
         
         try {
             const updatedProjects = this.state.projects.filter(p => p.id !== id);
             const saved = await this.saveToSupabase('projects', updatedProjects);
             
             if (saved) {
-                this.showNotification('Project deleted successfully!', 'success');
+                this.showNotification('Mission deleted from log!', 'success');
                 await this.loadData();
                 this.showAdminSection('projects');
             }
         } catch (error) {
-            console.error('Error deleting project:', error);
-            this.showNotification('Error deleting project', 'error');
+            console.error('Error deleting mission:', error);
+            this.showNotification('Error deleting mission', 'error');
         }
     }
 
     async deleteBlogPost(id) {
-        if (!confirm('Are you sure you want to delete this blog post?')) return;
+        if (!confirm('Are you sure you want to delete this mission briefing?')) return;
         
         try {
             const updatedBlogPosts = this.state.blogPosts.filter(p => p.id !== id);
             const saved = await this.saveToSupabase('blog_posts', updatedBlogPosts);
             
             if (saved) {
-                this.showNotification('Blog post deleted successfully!', 'success');
+                this.showNotification('Mission briefing deleted!', 'success');
                 await this.loadData();
                 this.showAdminSection('blog');
             }
         } catch (error) {
-            console.error('Error deleting blog post:', error);
-            this.showNotification('Error deleting blog post', 'error');
+            console.error('Error deleting briefing:', error);
+            this.showNotification('Error deleting briefing', 'error');
         }
     }
 
     async deleteMessage(id) {
-        if (!confirm('Are you sure you want to delete this message?')) return;
+        if (!confirm('Are you sure you want to delete this transmission?')) return;
         
         try {
             const updatedMessages = this.state.messages.filter(m => m.id !== id);
             const saved = await this.saveToSupabase('messages', updatedMessages);
             
             if (saved) {
-                this.showNotification('Message deleted successfully!', 'success');
+                this.showNotification('Transmission deleted!', 'success');
                 await this.loadData();
                 this.showAdminSection('messages');
             }
         } catch (error) {
-            console.error('Error deleting message:', error);
-            this.showNotification('Error deleting message', 'error');
+            console.error('Error deleting transmission:', error);
+            this.showNotification('Error deleting transmission', 'error');
         }
     }
 
@@ -1984,7 +1989,7 @@ class NexusDevApp {
             message.read = true;
             this.saveToSupabase('messages', message);
             
-            alert(`Message Details:\n\nFrom: ${message.name} (${message.email})\nSubject: ${message.subject}\nDate: ${new Date(message.created_at).toLocaleString()}\n\nMessage:\n${message.message}`);
+            alert(`Transmission Details:\n\nFrom: ${message.name} (${message.email})\nMission Type: ${message.subject}\nTransmission Time: ${new Date(message.created_at).toLocaleString()}\n\nTransmission:\n${message.message}`);
         }
     }
 
@@ -1992,19 +1997,19 @@ class NexusDevApp {
         const project = this.state.projects.find(p => p.id === id);
         if (project) {
             const typeMap = {
-                'web': 'Web Development',
+                'web': 'Web Systems',
                 'mobile': 'Mobile App',
                 'design': 'UI/UX Design'
             };
             
-            alert(`Project Details:\n\nTitle: ${project.title}\nType: ${typeMap[project.type] || project.type}\nDescription: ${project.description}\nTechnologies: ${Array.isArray(project.tech) ? project.tech.join(', ') : project.tech || 'Not specified'}\n${project.link ? `Live Link: ${project.link}` : ''}`);
+            alert(`Mission Details:\n\nMission Name: ${project.title}\nMission Type: ${typeMap[project.type] || project.type}\nMission Report: ${project.description}\nTechnologies: ${Array.isArray(project.tech) ? project.tech.join(', ') : project.tech || 'Not specified'}\n${project.link ? `Mission Link: ${project.link}` : ''}`);
         }
     }
 
     viewBlogPost(id) {
         const post = this.state.blogPosts.find(p => p.id === id);
         if (post) {
-            alert(`Blog Post:\n\nTitle: ${post.title}\nAuthor: ${post.author}\nCategory: ${post.category}\nDate: ${new Date(post.created_at).toLocaleDateString()}\n\n${post.content || post.excerpt}`);
+            alert(`Mission Briefing:\n\nTitle: ${post.title}\nAuthor: ${post.author}\nBriefing Type: ${post.category}\nTransmission Date: ${new Date(post.created_at).toLocaleDateString()}\n\n${post.content || post.excerpt}`);
         }
     }
 
@@ -2038,22 +2043,22 @@ class NexusDevApp {
         const dataStr = JSON.stringify(data, null, 2);
         const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
         
-        const exportFileDefaultName = `nexusdev-backup-${new Date().toISOString().split('T')[0]}.json`;
+        const exportFileDefaultName = `spaceteam-backup-${new Date().toISOString().split('T')[0]}.json`;
         
         const linkElement = document.createElement('a');
         linkElement.setAttribute('href', dataUri);
         linkElement.setAttribute('download', exportFileDefaultName);
         linkElement.click();
         
-        this.showNotification('Data exported successfully!', 'success');
+        this.showNotification('Mission data backed up successfully!', 'success');
     }
 
     resetData() {
-        if (!confirm('WARNING: This will delete ALL data including developers, projects, blog posts, and messages. This action cannot be undone. Are you sure?')) {
+        if (!confirm('WARNING: This will delete ALL mission data including crew, missions, briefings, and transmissions. This action cannot be undone. Are you sure?')) {
             return;
         }
         
-        if (!confirm('Are you absolutely sure? All data will be permanently deleted.')) {
+        if (!confirm('Are you absolutely sure? All mission data will be permanently deleted.')) {
             return;
         }
         
@@ -2071,19 +2076,19 @@ class NexusDevApp {
         this.state.messageIdCounter = 1;
         
         // Clear localStorage
-        localStorage.removeItem('nexusdev_developers');
-        localStorage.removeItem('nexusdev_projects');
-        localStorage.removeItem('nexusdev_blog');
-        localStorage.removeItem('nexusdev_messages');
-        localStorage.removeItem('nexusdev_settings');
+        localStorage.removeItem('spaceteam_developers');
+        localStorage.removeItem('spaceteam_projects');
+        localStorage.removeItem('spaceteam_blog');
+        localStorage.removeItem('spaceteam_messages');
+        localStorage.removeItem('spaceteam_settings');
         
         // Clear Supabase data if connected
         if (window.supabaseClient) {
             // Note: This would require additional Supabase permissions
-            console.log('Note: To clear Supabase data, you need to manually delete records from your Supabase tables.');
+            console.log('Note: To clear cloud data, you need to manually delete records from your Supabase tables.');
         }
         
-        this.showNotification('All data has been reset!', 'success');
+        this.showNotification('All mission data has been reset!', 'success');
         this.updateUI();
         
         if (this.state.isAdmin) {
@@ -2128,6 +2133,7 @@ class NexusDevApp {
 // Initialize the application
 let app;
 document.addEventListener('DOMContentLoaded', () => {
-    app = new NexusDevApp();
+    app = new SpaceTeamApp();
     window.app = app;
 });
+[file content end]
