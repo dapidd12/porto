@@ -1,99 +1,125 @@
-[file name]: index.html
-[file content begin]
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>SpaceTeam | Dev</title>
+    <meta name="description" content="SpaceTeam | Dev - Elite developers exploring the frontiers of technology. Building scalable, futuristic solutions for the digital cosmos.">
+    <meta name="keywords" content="web development, mobile apps, UI/UX design, space technology, developers, programming">
+    <meta name="author" content="SpaceTeam">
+    
+    <!-- Open Graph Tags -->
+    <meta property="og:title" content="SpaceTeam | Dev - Digital Space Explorers">
+    <meta property="og:description" content="Elite developers building futuristic solutions for the digital cosmos.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <link rel="stylesheet" href="styles.css">
-    <!-- Anti Inspect Script - Improved -->
+    
+    <!-- Preload critical resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Security Script - Improved -->
     <script>
         // Block right-click with error handling
-        try {
-            document.addEventListener('contextmenu', function(e) {
-                e.preventDefault();
-                return false;
-            }, {capture: true});
-            
-            // Block DevTools shortcuts
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'F12' || 
-                    (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
-                    (e.ctrlKey && e.key === 'U')) {
+        (function() {
+            try {
+                // Context menu prevention
+                document.addEventListener('contextmenu', function(e) {
                     e.preventDefault();
-                    e.stopPropagation();
                     return false;
+                }, true);
+                
+                // DevTools detection
+                const devtools = /./;
+                devtools.toString = function() {
+                    console.clear();
+                    return '';
+                };
+                
+                // Block common DevTools shortcuts
+                document.addEventListener('keydown', function(e) {
+                    // F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+                    if (e.key === 'F12' || 
+                        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
+                        (e.ctrlKey && e.key === 'U')) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return false;
+                    }
+                }, true);
+                
+                // Anti iframe
+                if (window.self !== window.top) {
+                    window.top.location = window.self.location;
                 }
-            }, {capture: true});
-            
-            // Block text selection on critical elements
-            document.addEventListener('DOMContentLoaded', function() {
-                const elements = document.querySelectorAll('.logo, .hero-title, .stat-number, .developer-name, .project-title, .blog-title, .footer-logo');
-                elements.forEach(el => {
-                    el.style.userSelect = 'none';
-                    el.style.webkitUserSelect = 'none';
+                
+                // Block text selection on critical elements only
+                document.addEventListener('DOMContentLoaded', function() {
+                    const elements = document.querySelectorAll('.logo, .hero-title, .stat-number, .developer-name, .project-title, .blog-title, .footer-logo');
+                    elements.forEach(el => {
+                        el.style.userSelect = 'none';
+                        el.style.webkitUserSelect = 'none';
+                        el.style.MozUserSelect = 'none';
+                    });
                 });
-            });
-            
-            // Anti iframe
-            if (window.self !== window.top) {
-                window.top.location = window.self.location;
+                
+            } catch (error) {
+                console.log('Security features initialized');
             }
-        } catch (error) {
-            console.log('Security features initialized');
-        }
+        })();
     </script>
 </head>
 <body>
     <!-- Skip to Main Content (Accessibility) -->
-    <a href="#main-content" class="skip-to-main">
+    <a href="#main-content" class="skip-to-main" aria-label="Skip to main content">
         Skip to main content
     </a>
 
     <!-- Scroll Progress Bar -->
-    <div class="scroll-progress" id="scroll-progress"></div>
+    <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
 
     <!-- Running Text -->
-    <div class="running-text-container">
+    <div class="running-text-container" aria-hidden="true">
         <div class="running-text" id="running-text">
             🚀 SpaceTeam | Dev • 💻 Full-Stack Development • 🎨 UI/UX Design • 📱 Mobile Applications • 🌌 Cutting-edge Technology
         </div>
     </div>
 
     <!-- Navigation -->
-    <nav class="navbar" id="navbar">
+    <nav class="navbar" id="navbar" role="navigation" aria-label="Main navigation">
         <div class="container nav-container">
-            <a href="#home" class="logo">
+            <a href="#home" class="logo" aria-label="SpaceTeam | Dev Home">
                 <span class="logo-primary">Space</span>
                 <span class="logo-secondary">Team</span>
-                <span style="color: var(--gray); margin-left: 5px; font-size: 0.9rem;">| Dev</span>
+                <span class="logo-tertiary">| Dev</span>
             </a>
             
-            <ul class="nav-links">
-                <li><a href="#home" class="active" data-i18n="navHome">Home</a></li>
-                <li><a href="#developers" data-i18n="navTeam">Team</a></li>
-                <li><a href="#projects" data-i18n="navProjects">Projects</a></li>
-                <li><a href="#blog" data-i18n="navBlog">Blog</a></li>
-                <li><a href="#contact" data-i18n="navContact">Contact</a></li>
-                <li><a href="#" id="admin-login-btn" class="btn btn-sm btn-outline" data-i18n="navAdmin">Admin</a></li>
+            <ul class="nav-links" role="menubar">
+                <li role="none"><a href="#home" class="active" data-i18n="navHome" role="menuitem">Home</a></li>
+                <li role="none"><a href="#developers" data-i18n="navTeam" role="menuitem">Team</a></li>
+                <li role="none"><a href="#projects" data-i18n="navProjects" role="menuitem">Projects</a></li>
+                <li role="none"><a href="#blog" data-i18n="navBlog" role="menuitem">Blog</a></li>
+                <li role="none"><a href="#contact" data-i18n="navContact" role="menuitem">Contact</a></li>
+                <li role="none"><a href="#" id="admin-login-btn" class="btn btn-sm btn-outline" data-i18n="navAdmin" role="menuitem">Admin</a></li>
             </ul>
             
             <div class="nav-actions">
                 <!-- Language Selector -->
                 <div class="language-selector">
                     <select id="language-selector" class="language-dropdown" aria-label="Select language">
-                        <option value="en" selected>🇺🇸 EN</option>
-                        <option value="id">🇮🇩 ID</option>
+                        <option value="en">🇺🇸 EN</option>
+                        <option value="id" selected>🇮🇩 ID</option>
                     </select>
                 </div>
                 
                 <button class="theme-toggle" id="theme-toggle" title="Toggle theme" aria-label="Toggle dark mode">
                     <i class="fas fa-moon"></i>
                 </button>
-                <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle menu">
+                <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle menu" aria-expanded="false" aria-controls="nav-links">
                     <i class="fas fa-bars"></i>
                 </button>
             </div>
@@ -103,10 +129,10 @@
     <!-- Main Content -->
     <main id="main-content">
         <!-- Hero Section -->
-        <section class="hero section" id="home">
+        <section class="hero section" id="home" aria-labelledby="hero-title">
             <div class="container">
                 <div class="hero-content animate__animated animate__fadeInUp">
-                    <h1 class="hero-title">
+                    <h1 class="hero-title" id="hero-title">
                         <span data-i18n="heroTitle">Launching Digital</span> 
                         <span class="text-gradient" data-i18n="heroTitleHighlight">Innovations Beyond Limits</span>
                     </h1>
@@ -115,17 +141,17 @@
                         We build scalable, futuristic solutions that propel businesses into the digital cosmos.
                     </p>
                     <div class="hero-actions">
-                        <a href="#projects" class="btn btn-primary">
+                        <a href="#projects" class="btn btn-primary" aria-label="Explore our projects">
                             <i class="fas fa-rocket"></i>
                             <span data-i18n="btnExploreProjects">Explore Projects</span>
                         </a>
-                        <a href="#contact" class="btn btn-outline">
+                        <a href="#contact" class="btn btn-outline" aria-label="Contact mission control">
                             <i class="fas fa-satellite"></i>
                             <span data-i18n="btnMissionControl">Mission Control</span>
                         </a>
                     </div>
                     
-                    <div class="hero-stats">
+                    <div class="hero-stats" aria-label="Company statistics">
                         <div class="stat-item">
                             <div class="stat-number" id="projects-count">0</div>
                             <div class="stat-label" data-i18n="statMissions">Successful Missions</div>
@@ -148,65 +174,65 @@
         </section>
 
         <!-- Developers Section -->
-        <section class="section section-alt" id="developers">
+        <section class="section section-alt" id="developers" aria-labelledby="developers-title">
             <div class="container">
                 <div class="section-header">
-                    <h2 data-i18n="sectionTeam">Mission Crew</h2>
+                    <h2 id="developers-title" data-i18n="sectionTeam">Mission Crew</h2>
                     <p class="section-subtitle" data-i18n="sectionTeamSubtitle">
                         Meet our elite team of space engineers, each specialized in different tech galaxies.
                     </p>
                 </div>
                 
-                <div class="developers-grid" id="developers-container">
+                <div class="developers-grid" id="developers-container" role="list" aria-label="Team members">
                     <!-- Developers will be loaded here -->
                 </div>
                 
                 <!-- Skills Visualization -->
-                <div class="skills-section">
+                <div class="skills-section" aria-labelledby="skills-title">
                     <div class="section-header">
-                        <h3 data-i18n="sectionSkills">Tech Galaxy Map</h3>
+                        <h3 id="skills-title" data-i18n="sectionSkills">Tech Galaxy Map</h3>
                         <p class="section-subtitle" data-i18n="sectionSkillsSubtitle">
                             Our expertise spans across multiple technology constellations
                         </p>
                     </div>
                     <div class="skills-chart-container">
-                        <canvas id="skillsChart"></canvas>
+                        <canvas id="skillsChart" aria-label="Skills chart showing team expertise" role="img"></canvas>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- Projects Section -->
-        <section class="section" id="projects">
+        <section class="section" id="projects" aria-labelledby="projects-title">
             <div class="container">
                 <div class="section-header">
-                    <h2 data-i18n="sectionProjects">Mission Log</h2>
+                    <h2 id="projects-title" data-i18n="sectionProjects">Mission Log</h2>
                     <p class="section-subtitle" data-i18n="sectionProjectsSubtitle">
                         Explore our portfolio of successful missions across the digital universe
                     </p>
                 </div>
                 
-                <div class="projects-filter">
-                    <button class="filter-btn active" data-filter="all" aria-label="Show all projects" data-i18n="filterAll">All Missions</button>
-                    <button class="filter-btn" data-filter="web" aria-label="Filter web projects" data-i18n="filterWeb">Web Systems</button>
-                    <button class="filter-btn" data-filter="mobile" aria-label="Filter mobile projects" data-i18n="filterMobile">Mobile Apps</button>
-                    <button class="filter-btn" data-filter="design" aria-label="Filter design projects" data-i18n="filterDesign">UI/UX Design</button>
+                <div class="projects-filter" role="tablist" aria-label="Project filters">
+                    <button class="filter-btn active" data-filter="all" aria-label="Show all projects" data-i18n="filterAll" role="tab" aria-selected="true">All Missions</button>
+                    <button class="filter-btn" data-filter="web" aria-label="Filter web projects" data-i18n="filterWeb" role="tab" aria-selected="false">Web Systems</button>
+                    <button class="filter-btn" data-filter="mobile" aria-label="Filter mobile projects" data-i18n="filterMobile" role="tab" aria-selected="false">Mobile Apps</button>
+                    <button class="filter-btn" data-filter="design" aria-label="Filter design projects" data-i18n="filterDesign" role="tab" aria-selected="false">UI/UX Design</button>
                 </div>
                 
-                <div class="projects-grid" id="projects-container">
+                <div class="projects-grid" id="projects-container" role="list" aria-label="Project list">
                     <!-- Projects will be loaded here -->
                 </div>
                 
                 <!-- Website Projects Section -->
-                <div class="website-projects-section">
+                <div class="website-projects-section" aria-labelledby="websites-title">
                     <div class="section-header">
-                        <h3 data-i18n="sectionWebsites">Website Projects</h3>
+                        <h3 id="websites-title" data-i18n="sectionWebsites">Website Projects</h3>
                         <p class="section-subtitle" data-i18n="sectionWebsitesSubtitle">
                             Our deployed websites and web applications
                         </p>
                     </div>
                     
-                    <div class="websites-grid" id="websites-container">
+                    <div class="websites-grid" id="websites-container" role="list" aria-label="Website projects">
                         <!-- Website projects will be loaded here -->
                     </div>
                 </div>
@@ -214,26 +240,26 @@
         </section>
 
         <!-- Blog Section -->
-        <section class="section section-alt" id="blog">
+        <section class="section section-alt" id="blog" aria-labelledby="blog-title">
             <div class="container">
                 <div class="section-header">
-                    <h2 data-i18n="sectionBlog">Mission Briefings</h2>
+                    <h2 id="blog-title" data-i18n="sectionBlog">Mission Briefings</h2>
                     <p class="section-subtitle" data-i18n="sectionBlogSubtitle">
                         Latest updates and discoveries from our tech expeditions
                     </p>
                 </div>
                 
-                <div class="blog-grid" id="blog-container">
+                <div class="blog-grid" id="blog-container" role="list" aria-label="Blog posts">
                     <!-- Blog posts will be loaded here -->
                 </div>
             </div>
         </section>
 
         <!-- Contact Section -->
-        <section class="section" id="contact">
+        <section class="section" id="contact" aria-labelledby="contact-title">
             <div class="container">
                 <div class="section-header">
-                    <h2 data-i18n="sectionContact">Mission Control</h2>
+                    <h2 id="contact-title" data-i18n="sectionContact">Mission Control</h2>
                     <p class="section-subtitle" data-i18n="sectionContactSubtitle">
                         Ready to launch your next project? Connect with mission control.
                     </p>
@@ -241,27 +267,27 @@
                 
                 <div class="contact-container">
                     <div class="contact-info">
-                        <div class="info-card">
+                        <div class="info-card" role="region" aria-label="Contact information">
                             <div class="info-icon">
-                                <i class="fas fa-satellite-dish"></i>
+                                <i class="fas fa-satellite-dish" aria-hidden="true"></i>
                             </div>
                             <h3 data-i18n="contactTransmit">Transmit Signal</h3>
                             <p id="contact-email-display">mission@spaceteam.dev</p>
                             <p data-i18n="responseTime">Response within 24 light-minutes</p>
                         </div>
                         
-                        <div class="info-card">
+                        <div class="info-card" role="region" aria-label="Phone information">
                             <div class="info-icon">
-                                <i class="fas fa-broadcast-tower"></i>
+                                <i class="fas fa-broadcast-tower" aria-hidden="true"></i>
                             </div>
                             <h3 data-i18n="contactFrequency">Transmission Frequency</h3>
                             <p id="contact-phone-display">+62 821 3830 5820</p>
                             <p data-i18n="available">Available for transmissions</p>
                         </div>
                         
-                        <div class="info-card">
+                        <div class="info-card" role="region" aria-label="Location information">
                             <div class="info-icon">
-                                <i class="fas fa-globe-americas"></i>
+                                <i class="fas fa-globe-americas" aria-hidden="true"></i>
                             </div>
                             <h3 data-i18n="contactStation">Ground Station</h3>
                             <p>Jakarta, Indonesia</p>
@@ -269,33 +295,33 @@
                         </div>
                     </div>
                     
-                    <div class="contact-form">
+                    <div class="contact-form" role="form" aria-label="Contact form">
                         <form id="contact-form">
                             <div class="form-group">
                                 <label class="form-label" for="contact-name" data-i18n="formName">Astronaut Name *</label>
-                                <input type="text" class="form-control" id="contact-name" required aria-required="true">
-                                <div class="form-error" id="name-error"></div>
+                                <input type="text" class="form-control" id="contact-name" required aria-required="true" aria-describedby="name-error">
+                                <div class="form-error" id="name-error" role="alert" aria-live="polite"></div>
                             </div>
                             
                             <div class="form-group">
                                 <label class="form-label" for="contact-email" data-i18n="formEmail">Transmission Address *</label>
-                                <input type="email" class="form-control" id="contact-email" required aria-required="true">
-                                <div class="form-error" id="email-error"></div>
+                                <input type="email" class="form-control" id="contact-email" required aria-required="true" aria-describedby="email-error">
+                                <div class="form-error" id="email-error" role="alert" aria-live="polite"></div>
                             </div>
                             
                             <div class="form-group">
                                 <label class="form-label" for="contact-subject" data-i18n="formSubject">Mission Type *</label>
-                                <input type="text" class="form-control" id="contact-subject" required aria-required="true">
-                                <div class="form-error" id="subject-error"></div>
+                                <input type="text" class="form-control" id="contact-subject" required aria-required="true" aria-describedby="subject-error">
+                                <div class="form-error" id="subject-error" role="alert" aria-live="polite"></div>
                             </div>
                             
                             <div class="form-group">
                                 <label class="form-label" for="contact-message" data-i18n="formMessage">Mission Briefing *</label>
-                                <textarea class="form-control" id="contact-message" rows="5" required aria-required="true"></textarea>
-                                <div class="form-error" id="message-error"></div>
+                                <textarea class="form-control" id="contact-message" rows="5" required aria-required="true" aria-describedby="message-error"></textarea>
+                                <div class="form-error" id="message-error" role="alert" aria-live="polite"></div>
                             </div>
                             
-                            <button type="submit" class="btn btn-primary btn-lg" id="contact-submit-btn">
+                            <button type="submit" class="btn btn-primary btn-lg" id="contact-submit-btn" aria-label="Send message">
                                 <i class="fas fa-paper-plane"></i>
                                 <span data-i18n="btnLaunchTransmission">Launch Transmission</span>
                             </button>
@@ -306,36 +332,36 @@
         </section>
 
         <!-- Stats Section -->
-        <section class="section section-alt">
+        <section class="section section-alt" aria-label="Company statistics">
             <div class="container">
                 <div class="stats-grid">
-                    <div class="stat-card">
+                    <div class="stat-card" role="region" aria-label="Completed projects">
                         <div class="stat-icon">
-                            <i class="fas fa-satellite"></i>
+                            <i class="fas fa-satellite" aria-hidden="true"></i>
                         </div>
                         <div class="stat-number" id="stats-projects">0</div>
                         <div class="stat-label" data-i18n="statCompleted">Missions Completed</div>
                     </div>
                     
-                    <div class="stat-card">
+                    <div class="stat-card" role="region" aria-label="Satisfied clients">
                         <div class="stat-icon">
-                            <i class="fas fa-user-astronaut"></i>
+                            <i class="fas fa-user-astronaut" aria-hidden="true"></i>
                         </div>
                         <div class="stat-number" id="stats-clients">0</div>
                         <div class="stat-label" data-i18n="statCosmonauts">Satisfied Cosmonauts</div>
                     </div>
                     
-                    <div class="stat-card">
+                    <div class="stat-card" role="region" aria-label="Years of experience">
                         <div class="stat-icon">
-                            <i class="fas fa-clock"></i>
+                            <i class="fas fa-clock" aria-hidden="true"></i>
                         </div>
                         <div class="stat-number" id="stats-experience">7+</div>
                         <div class="stat-label" data-i18n="statExperience">Light Years Experience</div>
                     </div>
                     
-                    <div class="stat-card">
+                    <div class="stat-card" role="region" aria-label="Blog articles">
                         <div class="stat-icon">
-                            <i class="fas fa-newspaper"></i>
+                            <i class="fas fa-newspaper" aria-hidden="true"></i>
                         </div>
                         <div class="stat-number" id="stats-articles">0</div>
                         <div class="stat-label" data-i18n="statLogs">Mission Logs</div>
@@ -346,63 +372,63 @@
     </main>
 
     <!-- Footer -->
-    <footer class="footer" id="footer">
+    <footer class="footer" id="footer" role="contentinfo">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-col">
-                    <div class="footer-logo">
+                    <div class="footer-logo" aria-label="SpaceTeam | Dev">
                         <span class="logo-primary">Space</span>
                         <span class="logo-secondary">Team</span>
-                        <span style="color: var(--gray);"> | Dev</span>
+                        <span class="logo-tertiary"> | Dev</span>
                     </div>
                     <p class="footer-description" data-i18n="footerDescription">
                         We explore the digital universe, building solutions that reach beyond the stars. 
                         Our mission is to propel businesses into the future with cutting-edge technology.
                     </p>
-                    <div class="social-links">
+                    <div class="social-links" aria-label="Social media links">
                         <a href="#" class="social-link" aria-label="GitHub">
-                            <i class="fab fa-github"></i>
+                            <i class="fab fa-github" aria-hidden="true"></i>
                         </a>
                         <a href="#" class="social-link" aria-label="LinkedIn">
-                            <i class="fab fa-linkedin-in"></i>
+                            <i class="fab fa-linkedin-in" aria-hidden="true"></i>
                         </a>
                         <a href="#" class="social-link" aria-label="Twitter">
-                            <i class="fab fa-twitter"></i>
+                            <i class="fab fa-twitter" aria-hidden="true"></i>
                         </a>
                         <a href="#" class="social-link" aria-label="Discord">
-                            <i class="fab fa-discord"></i>
+                            <i class="fab fa-discord" aria-hidden="true"></i>
                         </a>
                     </div>
                 </div>
                 
                 <div class="footer-col">
                     <h3 class="footer-heading" data-i18n="footerFlightPath">Flight Path</h3>
-                    <ul class="footer-links">
-                        <li><a href="#home" data-i18n="footerCommandCenter">Command Center</a></li>
-                        <li><a href="#developers" data-i18n="footerMissionCrew">Mission Crew</a></li>
-                        <li><a href="#projects" data-i18n="footerMissionLog">Mission Log</a></li>
-                        <li><a href="#blog" data-i18n="footerBriefings">Briefings</a></li>
-                        <li><a href="#contact" data-i18n="footerControlRoom">Control Room</a></li>
+                    <ul class="footer-links" role="list">
+                        <li role="listitem"><a href="#home" data-i18n="footerCommandCenter">Command Center</a></li>
+                        <li role="listitem"><a href="#developers" data-i18n="footerMissionCrew">Mission Crew</a></li>
+                        <li role="listitem"><a href="#projects" data-i18n="footerMissionLog">Mission Log</a></li>
+                        <li role="listitem"><a href="#blog" data-i18n="footerBriefings">Briefings</a></li>
+                        <li role="listitem"><a href="#contact" data-i18n="footerControlRoom">Control Room</a></li>
                     </ul>
                 </div>
                 
                 <div class="footer-col">
                     <h3 class="footer-heading" data-i18n="footerServices">Services</h3>
-                    <ul class="footer-links">
-                        <li><a href="#" data-i18n="footerWebDev">Web Development</a></li>
-                        <li><a href="#" data-i18n="footerMobileApps">Mobile Apps</a></li>
-                        <li><a href="#" data-i18n="footerUIDesign">UI/UX Design</a></li>
-                        <li><a href="#" data-i18n="footerCloud">Cloud Systems</a></li>
-                        <li><a href="#" data-i18n="footerAI">AI Integration</a></li>
+                    <ul class="footer-links" role="list">
+                        <li role="listitem"><a href="#" data-i18n="footerWebDev">Web Development</a></li>
+                        <li role="listitem"><a href="#" data-i18n="footerMobileApps">Mobile Apps</a></li>
+                        <li role="listitem"><a href="#" data-i18n="footerUIDesign">UI/UX Design</a></li>
+                        <li role="listitem"><a href="#" data-i18n="footerCloud">Cloud Systems</a></li>
+                        <li role="listitem"><a href="#" data-i18n="footerAI">AI Integration</a></li>
                     </ul>
                 </div>
                 
                 <div class="footer-col">
                     <h3 class="footer-heading" data-i18n="footerGroundControl">Ground Control</h3>
-                    <ul class="footer-links">
-                        <li><i class="fas fa-map-marker-alt"></i> Jakarta, Indonesia</li>
-                        <li><i class="fas fa-satellite"></i> <span id="footer-phone">+62 821 3830 5820</span></li>
-                        <li><i class="fas fa-envelope"></i> <span id="footer-email">mission@spaceteam.dev</span></li>
+                    <ul class="footer-links" role="list">
+                        <li><i class="fas fa-map-marker-alt" aria-hidden="true"></i> Jakarta, Indonesia</li>
+                        <li><i class="fas fa-satellite" aria-hidden="true"></i> <span id="footer-phone">+62 821 3830 5820</span></li>
+                        <li><i class="fas fa-envelope" aria-hidden="true"></i> <span id="footer-email">mission@spaceteam.dev</span></li>
                     </ul>
                 </div>
             </div>
@@ -415,34 +441,34 @@
 
     <!-- Chat Widget -->
     <button class="chat-toggle" id="chat-toggle" aria-label="Open chat">
-        <i class="fas fa-robot"></i>
+        <i class="fas fa-robot" aria-hidden="true"></i>
     </button>
     
-    <div class="chat-widget hidden" id="chat-widget">
+    <div class="chat-widget hidden" id="chat-widget" role="dialog" aria-label="AI Chat Assistant" aria-modal="true">
         <div class="chat-header">
             <h3>SpaceTeam AI Assistant</h3>
             <button class="btn btn-icon btn-sm" id="close-chat" aria-label="Close chat">
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        <div class="chat-body" id="chat-body">
+        <div class="chat-body" id="chat-body" role="log" aria-live="polite">
             <div class="chat-message bot" data-i18n="chatGreeting">
                 Greetings, astronaut! I'm your SpaceTeam AI assistant. How can I assist with your mission today? You can ask about our services, mission logs, or request a briefing.
             </div>
         </div>
         <div class="chat-input">
             <input type="text" id="chat-input" placeholder="Type your transmission..." aria-label="Chat message" data-i18n-ph="chatPlaceholder">
-            <button class="btn btn-sm btn-primary" id="send-chat" style="margin-top: 10px;">
+            <button class="btn btn-sm btn-primary" id="send-chat" aria-label="Send message">
                 <i class="fas fa-paper-plane"></i> <span data-i18n="chatSend">Transmit</span>
             </button>
         </div>
     </div>
 
     <!-- Login Modal -->
-    <div class="modal hidden" id="login-modal">
+    <div class="modal hidden" id="login-modal" role="dialog" aria-labelledby="login-title" aria-modal="true">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 data-i18n="loginTitle">Mission Control Access</h2>
+                <h2 id="login-title" data-i18n="loginTitle">Mission Control Access</h2>
                 <button class="modal-close" id="close-login" aria-label="Close login">
                     <i class="fas fa-times"></i>
                 </button>
@@ -450,15 +476,15 @@
             <form id="login-form">
                 <div class="form-group">
                     <label class="form-label" for="username" data-i18n="formAccessCode">Access Code *</label>
-                    <input type="email" class="form-control" id="username" required aria-required="true">
-                    <div class="form-error" id="login-email-error"></div>
+                    <input type="email" class="form-control" id="username" required aria-required="true" aria-describedby="login-email-error">
+                    <div class="form-error" id="login-email-error" role="alert" aria-live="polite"></div>
                 </div>
                 <div class="form-group">
                     <label class="form-label" for="password" data-i18n="formSecurityKey">Security Key *</label>
-                    <input type="password" class="form-control" id="password" required aria-required="true">
-                    <div class="form-error" id="login-password-error"></div>
+                    <input type="password" class="form-control" id="password" required aria-required="true" aria-describedby="login-password-error">
+                    <div class="form-error" id="login-password-error" role="alert" aria-live="polite"></div>
                 </div>
-                <button type="submit" class="btn btn-primary btn-lg" id="login-submit-btn">
+                <button type="submit" class="btn btn-primary btn-lg" id="login-submit-btn" aria-label="Login">
                     <i class="fas fa-sign-in-alt"></i>
                     <span data-i18n="btnAccessControl">Access Control</span>
                 </button>
@@ -467,23 +493,23 @@
     </div>
 
     <!-- Admin Panel -->
-    <div id="admin-panel" class="hidden">
+    <div id="admin-panel" class="hidden" role="application" aria-label="Admin panel">
         <div class="admin-header">
             <div class="container">
-                <nav class="admin-nav">
-                    <a href="#" class="logo">
+                <nav class="admin-nav" role="navigation" aria-label="Admin navigation">
+                    <a href="#" class="logo" aria-label="Mission Control">
                         <span class="logo-primary">Mission</span>
                         <span class="logo-secondary">Control</span>
                     </a>
-                    <ul class="admin-nav-links">
-                        <li><a href="#dashboard" class="admin-nav-btn active" data-section="dashboard">Dashboard</a></li>
-                        <li><a href="#developers" class="admin-nav-btn" data-section="developers">Crew</a></li>
-                        <li><a href="#projects" class="admin-nav-btn" data-section="projects">Missions</a></li>
-                        <li><a href="#websites" class="admin-nav-btn" data-section="websites">Websites</a></li>
-                        <li><a href="#blog" class="admin-nav-btn" data-section="blog">Logs</a></li>
-                        <li><a href="#messages" class="admin-nav-btn" data-section="messages">Transmissions</a></li>
-                        <li><a href="#settings" class="admin-nav-btn" data-section="settings">Systems</a></li>
-                        <li><a href="#" id="admin-logout" class="btn btn-sm btn-danger">Logout</a></li>
+                    <ul class="admin-nav-links" role="menubar">
+                        <li role="none"><a href="#dashboard" class="admin-nav-btn active" data-section="dashboard" role="menuitem">Dashboard</a></li>
+                        <li role="none"><a href="#developers" class="admin-nav-btn" data-section="developers" role="menuitem">Crew</a></li>
+                        <li role="none"><a href="#projects" class="admin-nav-btn" data-section="projects" role="menuitem">Missions</a></li>
+                        <li role="none"><a href="#websites" class="admin-nav-btn" data-section="websites" role="menuitem">Websites</a></li>
+                        <li role="none"><a href="#blog" class="admin-nav-btn" data-section="blog" role="menuitem">Logs</a></li>
+                        <li role="none"><a href="#messages" class="admin-nav-btn" data-section="messages" role="menuitem">Transmissions</a></li>
+                        <li role="none"><a href="#settings" class="admin-nav-btn" data-section="settings" role="menuitem">Systems</a></li>
+                        <li role="none"><a href="#" id="admin-logout" class="btn btn-sm btn-danger" role="menuitem">Logout</a></li>
                     </ul>
                 </nav>
             </div>
@@ -498,10 +524,10 @@
     </div>
 
     <!-- Notification Container -->
-    <div id="notification-container"></div>
+    <div id="notification-container" role="region" aria-live="polite" aria-label="Notifications"></div>
 
     <!-- Loading Overlay -->
-    <div class="loading-overlay hidden" id="loading-overlay">
+    <div class="loading-overlay hidden" id="loading-overlay" role="alert" aria-live="assertive" aria-label="Loading">
         <div class="loading-spinner"></div>
         <p>Initializing systems...</p>
     </div>
@@ -512,68 +538,86 @@
     <script src="config.js"></script>
     <script src="app.js"></script>
     
-    <!-- Lazy Loading Script -->
+    <!-- Lazy Loading Script - Enhanced -->
     <script>
-    // Lazy loading images with Intersection Observer
-    document.addEventListener('DOMContentLoaded', function() {
-        const lazyImages = document.querySelectorAll('img[loading="lazy"]');
+    // Enhanced lazy loading with better error handling
+    (function() {
+        'use strict';
         
-        if ('IntersectionObserver' in window) {
-            const imageObserver = new IntersectionObserver((entries, observer) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const img = entry.target;
-                        const src = img.getAttribute('data-src');
-                        if (src) {
-                            img.src = src;
-                            img.removeAttribute('data-src');
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Intersection Observer for lazy loading
+            if ('IntersectionObserver' in window) {
+                const lazyObserver = new IntersectionObserver(function(entries) {
+                    entries.forEach(function(entry) {
+                        if (entry.isIntersecting) {
+                            const element = entry.target;
+                            
+                            // Handle images
+                            if (element.tagName === 'IMG' && element.dataset.src) {
+                                element.src = element.dataset.src;
+                                element.classList.add('loaded');
+                                lazyObserver.unobserve(element);
+                            }
+                            
+                            // Handle sections
+                            if (element.classList.contains('section')) {
+                                element.classList.add('visible');
+                                lazyObserver.unobserve(element);
+                            }
                         }
-                        img.classList.add('loaded');
-                        imageObserver.unobserve(img);
-                    }
+                    });
+                }, {
+                    rootMargin: '50px',
+                    threshold: 0.1
                 });
-            }, {
-                rootMargin: '50px 0px',
-                threshold: 0.1
-            });
-            
-            lazyImages.forEach(img => {
-                if (!img.src) {
-                    const dataSrc = img.getAttribute('data-src');
-                    if (dataSrc) {
-                        img.setAttribute('src', 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"%3E%3C/svg%3E');
+                
+                // Observe lazy images
+                document.querySelectorAll('img[data-src]').forEach(function(img) {
+                    // Set placeholder
+                    if (!img.src || img.src.includes('data:')) {
+                        img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"%3E%3C/svg%3E';
                     }
-                }
-                imageObserver.observe(img);
-            });
-        } else {
-            // Fallback for browsers without Intersection Observer
-            lazyImages.forEach(img => {
-                const src = img.getAttribute('data-src');
-                if (src) {
-                    img.src = src;
-                    img.removeAttribute('data-src');
-                }
-            });
-        }
-        
-        // Lazy load sections
-        const sections = document.querySelectorAll('.section');
-        const sectionObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    sectionObserver.unobserve(entry.target);
-                }
-            });
-        }, {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
+                    lazyObserver.observe(img);
+                });
+                
+                // Observe sections
+                document.querySelectorAll('.section').forEach(function(section) {
+                    lazyObserver.observe(section);
+                });
+                
+                // Error handling for images
+                document.addEventListener('error', function(e) {
+                    if (e.target.tagName === 'IMG') {
+                        const defaultImages = {
+                            'developer': 'https://images.unsplash.com/photo-1534796636910-9c1825470300?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+                            'project': 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+                            'website': 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+                            'blog': 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'
+                        };
+                        
+                        let fallbackUrl = defaultImages.developer;
+                        if (e.target.classList.contains('project-image')) fallbackUrl = defaultImages.project;
+                        if (e.target.classList.contains('website-image')) fallbackUrl = defaultImages.website;
+                        if (e.target.classList.contains('blog-image')) fallbackUrl = defaultImages.blog;
+                        
+                        e.target.src = fallbackUrl;
+                        e.target.onerror = null; // Prevent infinite loop
+                    }
+                }, true);
+                
+            } else {
+                // Fallback for older browsers
+                document.querySelectorAll('img[data-src]').forEach(function(img) {
+                    img.src = img.dataset.src;
+                    img.classList.add('loaded');
+                });
+                
+                document.querySelectorAll('.section').forEach(function(section) {
+                    section.classList.add('visible');
+                });
+            }
         });
-        
-        sections.forEach(section => sectionObserver.observe(section));
-    });
+    })();
     </script>
 </body>
 </html>
-[file content end]

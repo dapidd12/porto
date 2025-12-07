@@ -1,6 +1,4 @@
-[file name]: config.js
-[file content begin]
-// Configuration for SpaceTeam | Dev
+// Configuration for SpaceTeam | Dev - FIXED VERSION
 const CONFIG = {
     // Supabase Configuration - UPDATE WITH YOUR CREDENTIALS
     supabaseUrl: 'https://your-project.supabase.co',
@@ -155,6 +153,9 @@ const CONFIG = {
             emptyCrewText: 'Our elite space engineers are preparing for mission. Stand by for crew manifest!',
             emptyProjects: 'Mission Log Empty',
             emptyProjectsText: 'No missions completed yet. Preparing for launch!',
+            emptyProjectsWeb: 'No web projects found',
+            emptyProjectsMobile: 'No mobile projects found',
+            emptyProjectsDesign: 'No design projects found',
             emptyBlog: 'Mission Briefings Pending',
             emptyBlogText: 'Stand by for mission briefings and tech discoveries!',
             emptyWebsites: 'No Websites Deployed',
@@ -285,6 +286,9 @@ const CONFIG = {
             emptyCrewText: 'Insinyur antariksa elit kami sedang bersiap untuk misi. Tunggu manifes kru!',
             emptyProjects: 'Log Misi Kosong',
             emptyProjectsText: 'Belum ada misi yang diselesaikan. Bersiap untuk peluncuran!',
+            emptyProjectsWeb: 'Tidak ada proyek web',
+            emptyProjectsMobile: 'Tidak ada proyek mobile',
+            emptyProjectsDesign: 'Tidak ada proyek desain',
             emptyBlog: 'Pengarahan Misi Tertunda',
             emptyBlogText: 'Tunggu pengarahan misi dan penemuan teknologi!',
             emptyWebsites: 'Belum Ada Website',
@@ -299,19 +303,38 @@ const CONFIG = {
     }
 };
 
-// Initialize Supabase client
+// Initialize Supabase client with better error handling
 let supabaseClient = null;
-if (CONFIG.supabaseUrl && CONFIG.supabaseKey && 
-    CONFIG.supabaseUrl !== 'https://your-project.supabase.co' && 
-    CONFIG.supabaseKey !== 'your-anon-key') {
-    try {
-        supabaseClient = supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
-    } catch (error) {
-        console.warn('Supabase client initialization failed:', error);
+try {
+    if (CONFIG.supabaseUrl && CONFIG.supabaseKey && 
+        CONFIG.supabaseUrl !== 'https://your-project.supabase.co' && 
+        CONFIG.supabaseKey !== 'your-anon-key') {
+        supabaseClient = supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey, {
+            auth: {
+                persistSession: true,
+                autoRefreshToken: true
+            }
+        });
+        console.log('Supabase client initialized successfully');
+    } else {
+        console.warn('Supabase credentials not configured. Using localStorage mode.');
     }
+} catch (error) {
+    console.error('Supabase client initialization failed:', error);
 }
 
 // Export configuration
 window.CONFIG = CONFIG;
 window.supabaseClient = supabaseClient;
-[file content end]
+
+// Add global error handler
+window.addEventListener('error', function(e) {
+    console.error('Global error caught:', e.error);
+    // You can add error reporting here
+});
+
+// Add unhandled promise rejection handler
+window.addEventListener('unhandledrejection', function(e) {
+    console.error('Unhandled promise rejection:', e.reason);
+    // You can add error reporting here
+});
