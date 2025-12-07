@@ -9,6 +9,14 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- Skip to Main Content (Accessibility) -->
+    <a href="#main-content" class="skip-to-main">
+        Skip to main content
+    </a>
+
+    <!-- Scroll Progress Bar -->
+    <div class="scroll-progress" id="scroll-progress"></div>
+
     <!-- Running Text -->
     <div class="running-text-container">
         <div class="running-text" id="running-text">
@@ -34,10 +42,10 @@
             </ul>
             
             <div class="nav-actions">
-                <button class="theme-toggle" id="theme-toggle" title="Toggle theme">
+                <button class="theme-toggle" id="theme-toggle" title="Toggle theme" aria-label="Toggle dark mode">
                     <i class="fas fa-moon"></i>
                 </button>
-                <button class="mobile-menu-btn" id="mobile-menu-btn">
+                <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle menu">
                     <i class="fas fa-bars"></i>
                 </button>
             </div>
@@ -133,10 +141,10 @@
                 </div>
                 
                 <div class="projects-filter">
-                    <button class="filter-btn active" data-filter="all">All Projects</button>
-                    <button class="filter-btn" data-filter="web">Web Development</button>
-                    <button class="filter-btn" data-filter="mobile">Mobile Apps</button>
-                    <button class="filter-btn" data-filter="design">UI/UX Design</button>
+                    <button class="filter-btn active" data-filter="all" aria-label="Show all projects">All Projects</button>
+                    <button class="filter-btn" data-filter="web" aria-label="Filter web projects">Web Development</button>
+                    <button class="filter-btn" data-filter="mobile" aria-label="Filter mobile projects">Mobile Apps</button>
+                    <button class="filter-btn" data-filter="design" aria-label="Filter design projects">UI/UX Design</button>
                 </div>
                 
                 <div class="projects-grid" id="projects-container">
@@ -178,7 +186,7 @@
                                 <i class="fas fa-envelope"></i>
                             </div>
                             <h3>Email Us</h3>
-                            <p id="contact-email-display">loading...</p>
+                            <p id="contact-email-display">hello@nexusdev.com</p>
                             <p>Response within 24 hours</p>
                         </div>
                         
@@ -187,7 +195,7 @@
                                 <i class="fas fa-phone"></i>
                             </div>
                             <h3>Call Us</h3>
-                            <p id="contact-phone-display">loading...</p>
+                            <p id="contact-phone-display">+62 812 3456 7890</p>
                             <p>Mon-Fri, 9AM-6PM</p>
                         </div>
                         
@@ -204,26 +212,30 @@
                     <div class="contact-form">
                         <form id="contact-form">
                             <div class="form-group">
-                                <label class="form-label" for="contact-name">Full Name</label>
-                                <input type="text" class="form-control" id="contact-name" required>
+                                <label class="form-label" for="contact-name">Full Name *</label>
+                                <input type="text" class="form-control" id="contact-name" required aria-required="true">
+                                <div class="form-error" id="name-error"></div>
                             </div>
                             
                             <div class="form-group">
-                                <label class="form-label" for="contact-email">Email Address</label>
-                                <input type="email" class="form-control" id="contact-email" required>
+                                <label class="form-label" for="contact-email">Email Address *</label>
+                                <input type="email" class="form-control" id="contact-email" required aria-required="true">
+                                <div class="form-error" id="email-error"></div>
                             </div>
                             
                             <div class="form-group">
-                                <label class="form-label" for="contact-subject">Subject</label>
-                                <input type="text" class="form-control" id="contact-subject" required>
+                                <label class="form-label" for="contact-subject">Subject *</label>
+                                <input type="text" class="form-control" id="contact-subject" required aria-required="true">
+                                <div class="form-error" id="subject-error"></div>
                             </div>
                             
                             <div class="form-group">
-                                <label class="form-label" for="contact-message">Project Details</label>
-                                <textarea class="form-control" id="contact-message" rows="5" required></textarea>
+                                <label class="form-label" for="contact-message">Project Details *</label>
+                                <textarea class="form-control" id="contact-message" rows="5" required aria-required="true"></textarea>
+                                <div class="form-error" id="message-error"></div>
                             </div>
                             
-                            <button type="submit" class="btn btn-primary btn-lg">
+                            <button type="submit" class="btn btn-primary btn-lg" id="contact-submit-btn">
                                 <i class="fas fa-paper-plane"></i>
                                 Send Message
                             </button>
@@ -288,16 +300,16 @@
                         thrive in the digital age.
                     </p>
                     <div class="social-links">
-                        <a href="#" class="social-link">
+                        <a href="#" class="social-link" aria-label="GitHub">
                             <i class="fab fa-github"></i>
                         </a>
-                        <a href="#" class="social-link">
+                        <a href="#" class="social-link" aria-label="LinkedIn">
                             <i class="fab fa-linkedin-in"></i>
                         </a>
-                        <a href="#" class="social-link">
+                        <a href="#" class="social-link" aria-label="Twitter">
                             <i class="fab fa-twitter"></i>
                         </a>
-                        <a href="#" class="social-link">
+                        <a href="#" class="social-link" aria-label="Instagram">
                             <i class="fab fa-instagram"></i>
                         </a>
                     </div>
@@ -329,8 +341,8 @@
                     <h3 class="footer-heading">Contact Info</h3>
                     <ul class="footer-links">
                         <li><i class="fas fa-map-marker-alt"></i> Jakarta, Indonesia</li>
-                        <li><i class="fas fa-phone"></i> <span id="footer-phone">loading...</span></li>
-                        <li><i class="fas fa-envelope"></i> <span id="footer-email">loading...</span></li>
+                        <li><i class="fas fa-phone"></i> <span id="footer-phone">+62 821 3830 5820</span></li>
+                        <li><i class="fas fa-envelope"></i> <span id="footer-email">hdapidaeixa@gmail.com</span></li>
                     </ul>
                 </div>
             </div>
@@ -342,14 +354,14 @@
     </footer>
 
     <!-- Chat Widget -->
-    <button class="chat-toggle" id="chat-toggle">
+    <button class="chat-toggle" id="chat-toggle" aria-label="Open chat">
         <i class="fas fa-comment-dots"></i>
     </button>
     
     <div class="chat-widget hidden" id="chat-widget">
         <div class="chat-header">
             <h3>NexusDev AI Assistant</h3>
-            <button class="btn btn-icon btn-sm" id="close-chat">
+            <button class="btn btn-icon btn-sm" id="close-chat" aria-label="Close chat">
                 <i class="fas fa-times"></i>
             </button>
         </div>
@@ -359,7 +371,7 @@
             </div>
         </div>
         <div class="chat-input">
-            <input type="text" id="chat-input" placeholder="Type your message...">
+            <input type="text" id="chat-input" placeholder="Type your message..." aria-label="Chat message">
             <button class="btn btn-sm btn-primary" id="send-chat" style="margin-top: 10px;">
                 <i class="fas fa-paper-plane"></i> Send
             </button>
@@ -371,20 +383,22 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Admin Login</h2>
-                <button class="modal-close" id="close-login">
+                <button class="modal-close" id="close-login" aria-label="Close login">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <form id="login-form">
                 <div class="form-group">
-                    <label class="form-label" for="username">Email</label>
-                    <input type="email" class="form-control" id="username" required>
+                    <label class="form-label" for="username">Email *</label>
+                    <input type="email" class="form-control" id="username" required aria-required="true">
+                    <div class="form-error" id="login-email-error"></div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="password">Password</label>
-                    <input type="password" class="form-control" id="password" required>
+                    <label class="form-label" for="password">Password *</label>
+                    <input type="password" class="form-control" id="password" required aria-required="true">
+                    <div class="form-error" id="login-password-error"></div>
                 </div>
-                <button type="submit" class="btn btn-primary btn-lg">
+                <button type="submit" class="btn btn-primary btn-lg" id="login-submit-btn">
                     <i class="fas fa-sign-in-alt"></i>
                     Sign In
                 </button>
@@ -400,13 +414,14 @@
                     <a href="#" class="logo">
                         <span class="logo-primary">Nexus</span>
                         <span class="logo-secondary">Dev</span>
-                        <span style="font-size: 0.875rem; margin-left: 10px;">Admin Panel</span>
+                        <span style="font-size: 0.875rem; margin-left: 10px; color: rgba(255, 255, 255, 0.9);">Admin Panel</span>
                     </a>
                     <ul class="admin-nav-links">
                         <li><a href="#dashboard" class="admin-nav-btn active" data-section="dashboard">Dashboard</a></li>
                         <li><a href="#developers" class="admin-nav-btn" data-section="developers">Developers</a></li>
                         <li><a href="#projects" class="admin-nav-btn" data-section="projects">Projects</a></li>
                         <li><a href="#blog" class="admin-nav-btn" data-section="blog">Blog</a></li>
+                        <li><a href="#messages" class="admin-nav-btn" data-section="messages">Messages</a></li>
                         <li><a href="#settings" class="admin-nav-btn" data-section="settings">Settings</a></li>
                         <li><a href="#" id="admin-logout" class="btn btn-sm btn-danger">Logout</a></li>
                     </ul>

@@ -1,22 +1,24 @@
 // Configuration for the application
 const CONFIG = {
-    // Supabase Configuration
-    supabaseUrl: 'https://your-project.supabase.co', // Replace with your Supabase URL
-    supabaseKey: 'your-anon-key', // Replace with your Supabase anon key
+    // Supabase Configuration (Update these with your actual credentials)
+    supabaseUrl: 'https://your-project.supabase.co',
+    supabaseKey: 'your-anon-key',
     
-    // Admin credentials (in production, use Supabase Auth)
+    // Admin credentials
     adminEmail: 'admin@nexusdev.com',
     adminPassword: 'Admin123!',
     
-    // Gemini AI Configuration
-    geminiApiKey: '', // Set your Gemini API key here
+    // Gemini AI Configuration (Optional)
+    geminiApiKey: 'AIzaSyBNFp4JFNfx2bd37V0SgFueK4vEEKIZHsk',
     
     // Application defaults
     defaults: {
         siteTitle: 'NexusDev | Professional Developer Portfolio',
         contactEmail: 'hello@nexusdev.com',
-        contactPhone: '+62 812 3456 7890',
-        runningText: '🚀 Professional Developer Team • 💻 Full-Stack Development • 🎨 UI/UX Design • 📱 Mobile Applications • 🔧 Cutting-edge Technology'
+        contactPhone: '+62 821-3830-5820',
+        runningText: '🚀 Professional Developer Team • 💻 Full-Stack Development • 🎨 UI/UX Design • 📱 Mobile Applications • 🔧 Cutting-edge Technology',
+        chatEnabled: true,
+        darkMode: false
     },
     
     // Chat AI System Prompt
@@ -45,7 +47,11 @@ let supabaseClient = null;
 if (CONFIG.supabaseUrl && CONFIG.supabaseKey && 
     CONFIG.supabaseUrl !== 'https://your-project.supabase.co' && 
     CONFIG.supabaseKey !== 'your-anon-key') {
-    supabaseClient = supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
+    try {
+        supabaseClient = supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
+    } catch (error) {
+        console.warn('Supabase client initialization failed:', error);
+    }
 }
 
 // Export configuration
