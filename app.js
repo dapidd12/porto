@@ -1640,10 +1640,12 @@ class SpaceTeamApp {
         const footer = document.getElementById('footer');
         const runningText = document.querySelector('.running-text-container');
         const adminPanel = document.getElementById('admin-panel');
+        const navbar = document.getElementById('navbar');
         
         if (mainContent) mainContent.classList.add('hidden');
         if (footer) footer.classList.add('hidden');
         if (runningText) runningText.classList.add('hidden');
+        if (navbar) navbar.classList.add('hidden');
         if (adminPanel) adminPanel.classList.remove('hidden');
         
         this.loadAdminDashboard();
@@ -1655,10 +1657,12 @@ class SpaceTeamApp {
         const footer = document.getElementById('footer');
         const runningText = document.querySelector('.running-text-container');
         const adminPanel = document.getElementById('admin-panel');
+        const navbar = document.getElementById('navbar');
         
         if (mainContent) mainContent.classList.remove('hidden');
         if (footer) footer.classList.remove('hidden');
         if (runningText) runningText.classList.remove('hidden');
+        if (navbar) navbar.classList.remove('hidden');
         if (adminPanel) adminPanel.classList.add('hidden');
         
         this.state.isAdmin = false;

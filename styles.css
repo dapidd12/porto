@@ -508,7 +508,7 @@ body:not(.dark-theme) .navbar {
 
 .logo {
     font-family: var(--font-heading);
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     font-weight: 700;
     display: flex;
     align-items: center;
@@ -522,6 +522,10 @@ body:not(.dark-theme) .navbar {
 
 .logo-secondary {
     color: var(--secondary);
+}
+
+.logo-tertiary {
+    color: var(--accent-blue);
 }
 
 .nav-links {
@@ -1164,15 +1168,6 @@ body:not(.dark-theme) .blog-card {
     flex-direction: column;
 }
 
-.blog-meta {
-    display: flex;
-    align-items: center;
-    gap: var(--space-md);
-    margin-bottom: var(--space-md);
-    font-size: 0.875rem;
-    color: var(--text-tertiary);
-}
-
 .blog-category {
     background: rgba(100, 255, 218, 0.1);
     color: var(--secondary);
@@ -1698,8 +1693,8 @@ body:not(.dark-theme) .chat-input input:focus {
     background: var(--bg-surface);
 }
 
-/* ========== ADMIN PANEL - IMPROVED ========== */
-.admin-panel {
+/* ========== ADMIN PANEL - FIXED (MENU TIDAK MEMENUHI LAYAR) ========== */
+#admin-panel {
     background: var(--bg-primary);
     min-height: 100vh;
 }
@@ -1730,6 +1725,8 @@ body:not(.dark-theme) .chat-input input:focus {
     margin: 0;
     padding: 0;
     flex-wrap: wrap;
+    justify-content: flex-end;
+    flex: 1;
 }
 
 .admin-nav-btn {
@@ -1743,6 +1740,7 @@ body:not(.dark-theme) .chat-input input:focus {
     text-decoration: none;
     white-space: nowrap;
     display: inline-block;
+    font-size: 0.875rem;
 }
 
 .admin-nav-btn:hover,
@@ -2109,7 +2107,7 @@ textarea:focus,
     }
 }
 
-/* ========== RESPONSIVE DESIGN - FIXED MOBILE ========== */
+/* ========== RESPONSIVE DESIGN - FIXED MOBILE & ADMIN ========== */
 @media (max-width: 1024px) {
     .hero-title {
         font-size: 2.75rem;
@@ -2120,7 +2118,12 @@ textarea:focus,
     }
     
     .admin-nav-links {
-        justify-content: center;
+        justify-content: flex-start;
+    }
+    
+    .admin-nav-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
     }
 }
 
@@ -2218,6 +2221,7 @@ textarea:focus,
         bottom: calc(var(--space-md) + 70px);
     }
     
+    /* FIXED ADMIN PANEL MOBILE */
     .admin-nav {
         flex-direction: column;
         gap: var(--space-md);
@@ -2225,14 +2229,19 @@ textarea:focus,
     }
     
     .admin-nav-links {
-        flex-direction: column;
-        gap: var(--space-sm);
-        width: 100%;
+        flex-direction: row;
+        gap: var(--space-xs);
+        justify-content: center;
+        overflow-x: auto;
+        padding-bottom: var(--space-sm);
+        -webkit-overflow-scrolling: touch;
     }
     
     .admin-nav-btn {
         text-align: center;
-        width: 100%;
+        white-space: nowrap;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.75rem;
     }
     
     .contact-form {
@@ -2323,5 +2332,16 @@ textarea:focus,
     
     .hero-stats {
         grid-template-columns: 1fr;
+    }
+    
+    /* FIXED ADMIN PANEL SMALL MOBILE */
+    .admin-nav-links {
+        justify-content: flex-start;
+        padding-bottom: var(--space-sm);
+    }
+    
+    .admin-nav-btn {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.7rem;
     }
 }
