@@ -276,14 +276,25 @@ class SpaceTeamApp {
                 // For bulk updates (used for initial sync)
                 if (data.length === 0) return true;
                 
-                const { error } = await supabaseClient
+                // Clear all and insert new data for reset operations
+                const { error: deleteError } = await supabaseClient
                     .from(table)
-                    .upsert(data, { onConflict: 'id' });
+                    .delete()
+                    .neq('id', 0); // Delete all records
                 
-                if (error) throw error;
+                if (deleteError) throw deleteError;
+                
+                if (data.length > 0) {
+                    const { error: insertError } = await supabaseClient
+                        .from(table)
+                        .insert(data);
+                    
+                    if (insertError) throw insertError;
+                }
+                
                 result = true;
             } else {
-                // Single record
+                // Single record - upsert
                 const { error } = await supabaseClient
                     .from(table)
                     .upsert([data], { onConflict: 'id' });
@@ -297,6 +308,26 @@ class SpaceTeamApp {
             console.error(`Error saving to ${table}:`, error);
             // Fallback to localStorage
             return this.saveToLocalStorage(table, data);
+        }
+    }
+
+    async deleteFromSupabase(table, id) {
+        if (!window.supabaseClient || CONFIG.supabaseUrl === 'https://your-project.supabase.co') {
+            return this.deleteFromLocalStorage(table, id);
+        }
+
+        try {
+            const { error } = await supabaseClient
+                .from(table)
+                .delete()
+                .eq('id', id);
+            
+            if (error) throw error;
+            return true;
+        } catch (error) {
+            console.error(`Error deleting from ${table}:`, error);
+            // Fallback to localStorage
+            return this.deleteFromLocalStorage(table, id);
         }
     }
 
@@ -393,6 +424,46 @@ class SpaceTeamApp {
             return true;
         } catch (error) {
             console.error(`Error saving to localStorage for ${table}:`, error);
+            return false;
+        }
+    }
+
+    deleteFromLocalStorage(table, id) {
+        try {
+            switch(table) {
+                case 'developers':
+                    const developers = this.state.developers.filter(d => d.id !== id);
+                    localStorage.setItem('spaceteam_developers', JSON.stringify(developers));
+                    this.state.developers = developers;
+                    break;
+                    
+                case 'projects':
+                    const projects = this.state.projects.filter(p => p.id !== id);
+                    localStorage.setItem('spaceteam_projects', JSON.stringify(projects));
+                    this.state.projects = projects;
+                    break;
+                    
+                case 'website_projects':
+                    const websites = this.state.websiteProjects.filter(w => w.id !== id);
+                    localStorage.setItem('spaceteam_websites', JSON.stringify(websites));
+                    this.state.websiteProjects = websites;
+                    break;
+                    
+                case 'blog_posts':
+                    const blogPosts = this.state.blogPosts.filter(b => b.id !== id);
+                    localStorage.setItem('spaceteam_blog', JSON.stringify(blogPosts));
+                    this.state.blogPosts = blogPosts;
+                    break;
+                    
+                case 'messages':
+                    const messages = this.state.messages.filter(m => m.id !== id);
+                    localStorage.setItem('spaceteam_messages', JSON.stringify(messages));
+                    this.state.messages = messages;
+                    break;
+            }
+            return true;
+        } catch (error) {
+            console.error(`Error deleting from localStorage for ${table}:`, error);
             return false;
         }
     }
@@ -540,14 +611,10 @@ class SpaceTeamApp {
                 `<span class="skill-tag">${skill}</span>`
             ).join('');
             
-            // Space-themed default image
-            const defaultImage = 'https://images.unsplash.com/photo-1534796636910-9c1825470300?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80';
-            
             const developerHTML = `
                 <div class="developer-card animate__animated animate__fadeInUp" style="animation-delay: ${index * 100}ms">
                     <div class="developer-header">
-                        <img src="${defaultImage}" 
-                             data-src="${dev.image || defaultImage}"
+                        <img src="${dev.image || 'https://images.unsplash.com/photo-1534796636910-9c1825470300?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" 
                              alt="${dev.name}" 
                              class="developer-image"
                              loading="lazy">
@@ -624,13 +691,9 @@ class SpaceTeamApp {
                 'design': translations.filterDesign || 'UI/UX Design'
             };
             
-            // Space-themed default image
-            const defaultImage = 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80';
-            
             const projectHTML = `
                 <div class="project-card animate__animated animate__fadeInUp" style="animation-delay: ${index * 100}ms">
-                    <img src="${defaultImage}" 
-                         data-src="${project.image || defaultImage}"
+                    <img src="${project.image || 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" 
                          alt="${project.title}" 
                          class="project-image"
                          loading="lazy">
@@ -693,13 +756,10 @@ class SpaceTeamApp {
                 'development': translations.websiteStatusDev || '👨‍💻 Development'
             };
             
-            const defaultImage = 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80';
-            
             const websiteHTML = `
                 <div class="website-card animate__animated animate__fadeInUp" style="animation-delay: ${index * 100}ms">
                     <div class="website-preview">
-                        <img src="${defaultImage}" 
-                             data-src="${website.screenshot || defaultImage}"
+                        <img src="${website.screenshot || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" 
                              alt="${website.title}" 
                              class="website-image"
                              loading="lazy">
@@ -765,15 +825,11 @@ class SpaceTeamApp {
         }
         
         this.state.blogPosts.forEach((post, index) => {
-            // Space-themed default image
-            const defaultImage = 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80';
-            
             const excerpt = post.excerpt || (post.content ? post.content.substring(0, 150) + '...' : 'Briefing details classified.');
             
             const blogHTML = `
                 <div class="blog-card animate__animated animate__fadeInUp" style="animation-delay: ${index * 100}ms">
-                    <img src="${defaultImage}" 
-                         data-src="${post.image || defaultImage}"
+                    <img src="${post.image || 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" 
                          alt="${post.title}" 
                          class="blog-image"
                          loading="lazy">
@@ -2101,8 +2157,7 @@ class SpaceTeamApp {
         const websitesListHTML = this.state.websiteProjects.map(website => `
             <div class="admin-list-item">
                 <div style="display: flex; align-items: center; gap: 15px;">
-                    <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" 
-                         data-src="${website.screenshot || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}"
+                    <img src="${website.screenshot || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80'}" 
                          alt="${website.title}" 
                          style="width: 60px; height: 40px; object-fit: cover; border-radius: var(--radius);">
                     <div>
@@ -2772,15 +2827,14 @@ class SpaceTeamApp {
         this.switchAdminTab('add-blog');
     }
 
-    // Delete methods
+    // Delete methods - FIXED
     async deleteDeveloper(id) {
         if (!confirm('Are you sure you want to remove this crew member from the mission?')) return;
         
         try {
-            const updatedDevelopers = this.state.developers.filter(d => d.id !== id);
-            const saved = await this.saveToSupabase('developers', updatedDevelopers);
+            const deleted = await this.deleteFromSupabase('developers', id);
             
-            if (saved) {
+            if (deleted) {
                 this.showNotification('Crew member removed successfully!', 'success');
                 await this.loadData();
                 this.showAdminSection('developers');
@@ -2797,10 +2851,9 @@ class SpaceTeamApp {
         if (!confirm('Are you sure you want to delete this mission from the log?')) return;
         
         try {
-            const updatedProjects = this.state.projects.filter(p => p.id !== id);
-            const saved = await this.saveToSupabase('projects', updatedProjects);
+            const deleted = await this.deleteFromSupabase('projects', id);
             
-            if (saved) {
+            if (deleted) {
                 this.showNotification('Mission deleted from log!', 'success');
                 await this.loadData();
                 this.showAdminSection('projects');
@@ -2817,10 +2870,9 @@ class SpaceTeamApp {
         if (!confirm('Are you sure you want to delete this website project?')) return;
         
         try {
-            const updatedWebsites = this.state.websiteProjects.filter(w => w.id !== id);
-            const saved = await this.saveToSupabase('website_projects', updatedWebsites);
+            const deleted = await this.deleteFromSupabase('website_projects', id);
             
-            if (saved) {
+            if (deleted) {
                 this.showNotification('Website deleted successfully!', 'success');
                 await this.loadData();
                 this.showAdminSection('websites');
@@ -2837,10 +2889,9 @@ class SpaceTeamApp {
         if (!confirm('Are you sure you want to delete this mission briefing?')) return;
         
         try {
-            const updatedBlogPosts = this.state.blogPosts.filter(p => p.id !== id);
-            const saved = await this.saveToSupabase('blog_posts', updatedBlogPosts);
+            const deleted = await this.deleteFromSupabase('blog_posts', id);
             
-            if (saved) {
+            if (deleted) {
                 this.showNotification('Mission briefing deleted!', 'success');
                 await this.loadData();
                 this.showAdminSection('blog');
@@ -2857,10 +2908,9 @@ class SpaceTeamApp {
         if (!confirm('Are you sure you want to delete this transmission?')) return;
         
         try {
-            const updatedMessages = this.state.messages.filter(m => m.id !== id);
-            const saved = await this.saveToSupabase('messages', updatedMessages);
+            const deleted = await this.deleteFromSupabase('messages', id);
             
-            if (saved) {
+            if (deleted) {
                 this.showNotification('Transmission deleted!', 'success');
                 await this.loadData();
                 this.showAdminSection('messages');
@@ -2992,8 +3042,15 @@ class SpaceTeamApp {
         localStorage.removeItem('spaceteam_messages');
         localStorage.removeItem('spaceteam_settings');
         
-        // Note about Supabase data
-        console.log('Note: To clear cloud data, you need to manually delete records from your Supabase tables.');
+        // Clear Supabase data
+        if (window.supabaseClient && CONFIG.supabaseUrl !== 'https://your-project.supabase.co') {
+            // We'll save empty arrays to clear data
+            this.saveToSupabase('developers', []);
+            this.saveToSupabase('projects', []);
+            this.saveToSupabase('website_projects', []);
+            this.saveToSupabase('blog_posts', []);
+            this.saveToSupabase('messages', []);
+        }
         
         this.showNotification('All mission data has been reset!', 'success');
         this.updateUI();
