@@ -18,7 +18,7 @@ const CONFIG = {
         contactPhone: '+62 821-3830-5820',
         runningText: '🚀 SpaceTeam | Dev • 💻 Full-Stack Development • 🎨 UI/UX Design • 📱 Mobile Applications • 🌌 Cutting-edge Technology • 🔧 Cloud Systems • 🤖 AI Integration',
         chatEnabled: true,
-        darkMode: true
+        darkMode: false
     },
     
     // Chat AI System Prompt
