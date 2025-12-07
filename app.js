@@ -1,3 +1,5 @@
+[file name]: app.js
+[file content begin]
 // Main Application - SpaceTeam | Dev
 class SpaceTeamApp {
     constructor() {
@@ -6,14 +8,19 @@ class SpaceTeamApp {
             const savedDarkMode = localStorage.getItem('darkMode');
             const defaultDarkMode = true; // Default to dark mode
             
+            // Get saved language or use default
+            const savedLanguage = localStorage.getItem('language') || CONFIG.defaultLanguage;
+            
             this.state = {
                 darkMode: savedDarkMode !== null ? savedDarkMode === 'true' : defaultDarkMode,
+                language: savedLanguage,
                 chatOpen: false,
                 isAdmin: false,
                 currentAdminSection: 'dashboard',
                 editingId: null,
                 developers: [],
                 projects: [],
+                websiteProjects: [],
                 blogPosts: [],
                 settings: {},
                 messages: [],
@@ -21,6 +28,7 @@ class SpaceTeamApp {
                 skillsChart: null,
                 projectIdCounter: 1,
                 developerIdCounter: 1,
+                websiteIdCounter: 1,
                 blogIdCounter: 1,
                 messageIdCounter: 1,
                 resizeHandler: null
@@ -38,8 +46,11 @@ class SpaceTeamApp {
             this.switchAdminTab = this.switchAdminTab.bind(this);
             this.handleDeveloperFormSubmit = this.handleDeveloperFormSubmit.bind(this);
             this.handleProjectFormSubmit = this.handleProjectFormSubmit.bind(this);
+            this.handleWebsiteFormSubmit = this.handleWebsiteFormSubmit.bind(this);
             this.handleBlogFormSubmit = this.handleBlogFormSubmit.bind(this);
             this.handleSettingsFormSubmit = this.handleSettingsFormSubmit.bind(this);
+            this.switchLanguage = this.switchLanguage.bind(this);
+            this.updateLanguage = this.updateLanguage.bind(this);
             
             this.init();
         } catch (error) {
@@ -64,6 +75,9 @@ class SpaceTeamApp {
                     themeIcon.className = 'fas fa-sun';
                 }
             }
+            
+            // Apply language
+            await this.updateLanguage(this.state.language);
             
             // Setup event listeners
             this.setupEventListeners();
@@ -143,6 +157,18 @@ class SpaceTeamApp {
                 ? Math.max(...this.state.projects.map(p => p.id || 0), 0) + 1
                 : 1;
             
+            // Load website projects
+            const { data: websiteProjects, error: websiteError } = await supabaseClient
+                .from('website_projects')
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            if (websiteError) throw websiteError;
+            this.state.websiteProjects = websiteProjects || [];
+            this.state.websiteIdCounter = this.state.websiteProjects.length > 0
+                ? Math.max(...this.state.websiteProjects.map(w => w.id || 0), 0) + 1
+                : 1;
+            
             // Load blog posts
             const { data: blogPosts, error: blogError } = await supabaseClient
                 .from('blog_posts')
@@ -194,6 +220,7 @@ class SpaceTeamApp {
     loadFromLocalStorage() {
         this.state.developers = JSON.parse(localStorage.getItem('spaceteam_developers')) || [];
         this.state.projects = JSON.parse(localStorage.getItem('spaceteam_projects')) || [];
+        this.state.websiteProjects = JSON.parse(localStorage.getItem('spaceteam_websites')) || [];
         this.state.blogPosts = JSON.parse(localStorage.getItem('spaceteam_blog')) || [];
         this.state.settings = JSON.parse(localStorage.getItem('spaceteam_settings')) || { ...CONFIG.defaults };
         this.state.messages = JSON.parse(localStorage.getItem('spaceteam_messages')) || [];
@@ -204,6 +231,9 @@ class SpaceTeamApp {
             : 1;
         this.state.projectIdCounter = this.state.projects.length > 0
             ? Math.max(...this.state.projects.map(p => p.id || 0), 0) + 1
+            : 1;
+        this.state.websiteIdCounter = this.state.websiteProjects.length > 0
+            ? Math.max(...this.state.websiteProjects.map(w => w.id || 0), 0) + 1
             : 1;
         this.state.blogIdCounter = this.state.blogPosts.length > 0
             ? Math.max(...this.state.blogPosts.map(b => b.id || 0), 0) + 1
@@ -286,6 +316,23 @@ class SpaceTeamApp {
                     }
                     break;
                     
+                case 'website_projects':
+                    if (Array.isArray(data)) {
+                        localStorage.setItem('spaceteam_websites', JSON.stringify(data));
+                        this.state.websiteProjects = data;
+                    } else {
+                        let websites = [...this.state.websiteProjects];
+                        const index = websites.findIndex(w => w.id === data.id);
+                        if (index >= 0) {
+                            websites[index] = data;
+                        } else {
+                            websites.push(data);
+                        }
+                        localStorage.setItem('spaceteam_websites', JSON.stringify(websites));
+                        this.state.websiteProjects = websites;
+                    }
+                    break;
+                    
                 case 'blog_posts':
                     if (Array.isArray(data)) {
                         localStorage.setItem('spaceteam_blog', JSON.stringify(data));
@@ -336,6 +383,7 @@ class SpaceTeamApp {
         // Render data
         this.renderDevelopers();
         this.renderProjects();
+        this.renderWebsiteProjects();
         this.renderBlogPosts();
         this.updateStats();
         
@@ -345,14 +393,18 @@ class SpaceTeamApp {
 
     applySettings() {
         // Apply running text
-        const runningText = this.state.settings.runningText || CONFIG.defaults.runningText;
+        const runningText = this.state.settings.runningText?.[this.state.language] || 
+                          CONFIG.defaults.runningText[this.state.language] || 
+                          CONFIG.defaults.runningText.en;
         const runningTextElement = document.getElementById('running-text');
         if (runningTextElement) {
             runningTextElement.textContent = runningText;
         }
         
         // Apply site title
-        const siteTitle = this.state.settings.siteTitle || CONFIG.defaults.siteTitle;
+        const siteTitle = this.state.settings.siteTitle?.[this.state.language] || 
+                         CONFIG.defaults.siteTitle[this.state.language] || 
+                         CONFIG.defaults.siteTitle.en;
         document.title = siteTitle;
         
         // Apply contact info
@@ -382,11 +434,61 @@ class SpaceTeamApp {
         }
     }
 
+    async updateLanguage(lang) {
+        this.state.language = lang;
+        localStorage.setItem('language', lang);
+        
+        // Update language selector
+        const languageSelector = document.getElementById('language-selector');
+        if (languageSelector) {
+            languageSelector.value = lang;
+        }
+        
+        // Get translations
+        const translations = CONFIG.translations[lang] || CONFIG.translations.en;
+        
+        // Update all elements with data-i18n attribute
+        document.querySelectorAll('[data-i18n]').forEach(element => {
+            const key = element.getAttribute('data-i18n');
+            if (translations[key]) {
+                if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                    element.setAttribute('placeholder', translations[key]);
+                } else {
+                    element.textContent = translations[key];
+                }
+            }
+        });
+        
+        // Update placeholder elements
+        document.querySelectorAll('[data-i18n-ph]').forEach(element => {
+            const key = element.getAttribute('data-i18n-ph');
+            if (translations[key]) {
+                element.setAttribute('placeholder', translations[key]);
+            }
+        });
+        
+        // Apply settings for current language
+        this.applySettings();
+        
+        // Re-render content with new language
+        this.updateUI();
+    }
+
+    switchLanguage() {
+        const languageSelector = document.getElementById('language-selector');
+        if (languageSelector) {
+            const newLang = languageSelector.value;
+            this.updateLanguage(newLang);
+        }
+    }
+
     renderDevelopers() {
         const container = document.getElementById('developers-container');
         if (!container) return;
         
         container.innerHTML = '';
+        
+        const translations = CONFIG.translations[this.state.language] || CONFIG.translations.en;
         
         if (this.state.developers.length === 0) {
             container.innerHTML = `
@@ -394,11 +496,11 @@ class SpaceTeamApp {
                     <div style="width: 80px; height: 80px; background: rgba(100, 255, 218, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-md);">
                         <i class="fas fa-user-astronaut fa-2x" style="color: var(--secondary);"></i>
                     </div>
-                    <h3 style="color: var(--secondary);">Mission Crew Assembling</h3>
-                    <p style="color: var(--gray); max-width: 400px; margin: 0 auto;">Our elite space engineers are preparing for mission. Stand by for crew manifest!</p>
+                    <h3 style="color: var(--secondary);">${translations.emptyCrew || 'Mission Crew Assembling'}</h3>
+                    <p style="color: var(--gray); max-width: 400px; margin: 0 auto;">${translations.emptyCrewText || 'Our elite space engineers are preparing for mission. Stand by for crew manifest!'}</p>
                     ${this.state.isAdmin ? `
                         <button class="btn btn-primary" onclick="window.showAdminSection('developers')" style="margin-top: var(--space-md);">
-                            <i class="fas fa-user-astronaut"></i> Assign First Crew Member
+                            <i class="fas fa-user-astronaut"></i> ${translations.emptyCrew ? 'Assign First Crew Member' : 'Assign First Crew Member'}
                         </button>
                     ` : ''}
                 </div>
@@ -423,6 +525,7 @@ class SpaceTeamApp {
                         <img src="${dev.image || defaultImage}" 
                              alt="${dev.name}" 
                              class="developer-image"
+                             loading="lazy"
                              onerror="this.onerror=null; this.src='${defaultImage}'">
                         <div class="developer-overlay">
                             <h3 class="developer-name">${dev.name}</h3>
@@ -456,6 +559,7 @@ class SpaceTeamApp {
         
         container.innerHTML = '';
         
+        const translations = CONFIG.translations[this.state.language] || CONFIG.translations.en;
         const filteredProjects = filter === 'all' 
             ? this.state.projects 
             : this.state.projects.filter(project => project.type === filter);
@@ -466,13 +570,15 @@ class SpaceTeamApp {
                     <div style="width: 80px; height: 80px; background: rgba(100, 255, 218, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-md);">
                         <i class="fas fa-satellite fa-2x" style="color: var(--secondary);"></i>
                     </div>
-                    <h3 style="color: var(--secondary);">Mission Log Empty</h3>
+                    <h3 style="color: var(--secondary);">${translations.emptyProjects || 'Mission Log Empty'}</h3>
                     <p style="color: var(--gray); max-width: 400px; margin: 0 auto;">
-                        ${filter === 'all' ? 'No missions completed yet. Preparing for launch!' : `No ${filter} missions found. Adjust mission parameters!`}
+                        ${filter === 'all' 
+                            ? translations.emptyProjectsText || 'No missions completed yet. Preparing for launch!' 
+                            : translations[`emptyProjects${filter.charAt(0).toUpperCase() + filter.slice(1)}`] || `No ${filter} missions found. Adjust mission parameters!`}
                     </p>
                     ${this.state.isAdmin ? `
                         <button class="btn btn-primary" onclick="window.showAdminSection('projects')" style="margin-top: var(--space-md);">
-                            <i class="fas fa-rocket"></i> Log First Mission
+                            <i class="fas fa-rocket"></i> ${translations.emptyProjects ? 'Log First Mission' : 'Log First Mission'}
                         </button>
                     ` : ''}
                 </div>
@@ -489,9 +595,9 @@ class SpaceTeamApp {
             ).join('');
             
             const typeMap = {
-                'web': 'Web Systems',
-                'mobile': 'Mobile App',
-                'design': 'UI/UX Design'
+                'web': translations.filterWeb || 'Web Systems',
+                'mobile': translations.filterMobile || 'Mobile App',
+                'design': translations.filterDesign || 'UI/UX Design'
             };
             
             // Space-themed default image
@@ -502,6 +608,7 @@ class SpaceTeamApp {
                     <img src="${project.image || defaultImage}" 
                          alt="${project.title}" 
                          class="project-image"
+                         loading="lazy"
                          onerror="this.onerror=null; this.src='${defaultImage}'">
                     <div class="project-content">
                         <h3 class="project-title">${project.title}</h3>
@@ -513,11 +620,11 @@ class SpaceTeamApp {
                             <span class="project-category">${typeMap[project.type] || project.type}</span>
                             ${project.link ? `
                                 <a href="${project.link}" target="_blank" class="btn btn-sm btn-primary">
-                                    <i class="fas fa-external-link-alt"></i> Launch
+                                    <i class="fas fa-external-link-alt"></i> ${translations.btnLaunch || 'Launch'}
                                 </a>
                             ` : `
                                 <button class="btn btn-sm btn-primary" onclick="window.viewProjectDetails(${project.id})">
-                                    <i class="fas fa-eye"></i> Mission Details
+                                    <i class="fas fa-eye"></i> ${translations.btnViewDetails || 'Mission Details'}
                                 </button>
                             `}
                         </div>
@@ -529,11 +636,89 @@ class SpaceTeamApp {
         });
     }
 
+    renderWebsiteProjects() {
+        const container = document.getElementById('websites-container');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        
+        const translations = CONFIG.translations[this.state.language] || CONFIG.translations.en;
+        
+        if (this.state.websiteProjects.length === 0) {
+            container.innerHTML = `
+                <div class="text-center" style="grid-column: 1/-1; padding: var(--space-xl);">
+                    <div style="width: 80px; height: 80px; background: rgba(100, 255, 218, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-md);">
+                        <i class="fas fa-globe fa-2x" style="color: var(--secondary);"></i>
+                    </div>
+                    <h3 style="color: var(--secondary);">${translations.emptyWebsites || 'No Websites Deployed'}</h3>
+                    <p style="color: var(--gray); max-width: 400px; margin: 0 auto;">${translations.emptyWebsitesText || 'No website projects have been deployed yet.'}</p>
+                    ${this.state.isAdmin ? `
+                        <button class="btn btn-primary" onclick="window.showAdminSection('websites')" style="margin-top: var(--space-md);">
+                            <i class="fas fa-cloud-upload-alt"></i> ${translations.emptyWebsites ? 'Deploy First Website' : 'Deploy First Website'}
+                        </button>
+                    ` : ''}
+                </div>
+            `;
+            return;
+        }
+        
+        this.state.websiteProjects.forEach((website, index) => {
+            const statusText = {
+                'live': translations.websiteStatusLive || '🚀 Live',
+                'maintenance': translations.websiteStatusMaintenance || '🚧 Maintenance',
+                'development': translations.websiteStatusDev || '👨‍💻 Development'
+            };
+            
+            const websiteHTML = `
+                <div class="website-card animate__animated animate__fadeInUp" style="animation-delay: ${index * 100}ms">
+                    <div class="website-preview">
+                        <img src="${website.screenshot || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" 
+                             alt="${website.title}" 
+                             class="website-image"
+                             loading="lazy"
+                             onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'">
+                        <div class="website-status ${website.status || 'live'}">
+                            <span>${statusText[website.status] || statusText.live}</span>
+                        </div>
+                    </div>
+                    <div class="website-content">
+                        <h3 class="website-title">${website.title}</h3>
+                        <p class="website-description">${website.description}</p>
+                        
+                        <div class="website-meta">
+                            <span><i class="fas fa-calendar-alt"></i> ${new Date(website.created_at).toLocaleDateString()}</span>
+                            <span><i class="fas fa-eye"></i> ${website.views || 0} views</span>
+                        </div>
+                        
+                        <div class="website-tech">
+                            ${Array.isArray(website.technologies) ? website.technologies.map(tech => 
+                                `<span class="tech-tag">${tech}</span>`
+                            ).join('') : ''}
+                        </div>
+                        
+                        <div class="website-actions">
+                            <a href="${website.url}" target="_blank" class="btn btn-sm btn-primary">
+                                <i class="fas fa-external-link-alt"></i> ${translations.btnVisitSite || 'Visit Site'}
+                            </a>
+                            <button class="btn btn-sm btn-outline" onclick="window.viewWebsiteDetails(${website.id})">
+                                <i class="fas fa-info-circle"></i> Details
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', websiteHTML);
+        });
+    }
+
     renderBlogPosts() {
         const container = document.getElementById('blog-container');
         if (!container) return;
         
         container.innerHTML = '';
+        
+        const translations = CONFIG.translations[this.state.language] || CONFIG.translations.en;
         
         if (this.state.blogPosts.length === 0) {
             container.innerHTML = `
@@ -541,11 +726,11 @@ class SpaceTeamApp {
                     <div style="width: 80px; height: 80px; background: rgba(100, 255, 218, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-md);">
                         <i class="fas fa-newspaper fa-2x" style="color: var(--secondary);"></i>
                     </div>
-                    <h3 style="color: var(--secondary);">Mission Briefings Pending</h3>
-                    <p style="color: var(--gray); max-width: 400px; margin: 0 auto;">Stand by for mission briefings and tech discoveries!</p>
+                    <h3 style="color: var(--secondary);">${translations.emptyBlog || 'Mission Briefings Pending'}</h3>
+                    <p style="color: var(--gray); max-width: 400px; margin: 0 auto;">${translations.emptyBlogText || 'Stand by for mission briefings and tech discoveries!'}</p>
                     ${this.state.isAdmin ? `
                         <button class="btn btn-primary" onclick="window.showAdminSection('blog')" style="margin-top: var(--space-md);">
-                            <i class="fas fa-edit"></i> Create First Briefing
+                            <i class="fas fa-edit"></i> ${translations.emptyBlog ? 'Create First Briefing' : 'Create First Briefing'}
                         </button>
                     ` : ''}
                 </div>
@@ -564,6 +749,7 @@ class SpaceTeamApp {
                     <img src="${post.image || defaultImage}" 
                          alt="${post.title}" 
                          class="blog-image"
+                         loading="lazy"
                          onerror="this.onerror=null; this.src='${defaultImage}'">
                     <div class="blog-content">
                         <span class="blog-category">${post.category || 'Mission Briefing'}</span>
@@ -572,7 +758,7 @@ class SpaceTeamApp {
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
                             <span><i class="fas fa-user-astronaut"></i> ${post.author || 'Mission Control'}</span>
                             <button class="btn btn-sm btn-outline" onclick="window.viewBlogPost(${post.id})">
-                                Read Briefing
+                                ${translations.btnReadMore || 'Read Briefing'}
                             </button>
                         </div>
                     </div>
@@ -789,6 +975,12 @@ class SpaceTeamApp {
             document.querySelectorAll('.nav-links a[href^="#"]').forEach(link => {
                 link.addEventListener('click', (e) => this.handleNavClick(e, link));
             });
+            
+            // Language selector
+            const languageSelector = document.getElementById('language-selector');
+            if (languageSelector) {
+                languageSelector.addEventListener('change', this.switchLanguage);
+            }
             
             // Contact form
             const contactForm = document.getElementById('contact-form');
@@ -1161,7 +1353,7 @@ class SpaceTeamApp {
         chatBody.scrollTop = chatBody.scrollHeight;
         
         try {
-            // Get AI response
+            // Get AI response based on language
             const response = await this.getAIResponse(message);
             
             // Remove loading indicator
@@ -1188,8 +1380,12 @@ class SpaceTeamApp {
 
     async getAIResponse(message) {
         // Check if Gemini API key is available
-        if (CONFIG.geminiApiKey && CONFIG.geminiApiKey !== '' && CONFIG.geminiApiKey !== 'AIzaSyBNFp4JFNfx2bd37V0SgFueK4vEEKIZHsk') {
+        if (CONFIG.geminiApiKey && CONFIG.geminiApiKey !== '') {
             try {
+                const systemPrompt = this.state.language === 'id' 
+                    ? `You are SpaceTeam AI Assistant. Respond in Indonesian. ${CONFIG.aiSystemPrompt}`
+                    : CONFIG.aiSystemPrompt;
+                    
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${CONFIG.geminiApiKey}`, {
                     method: 'POST',
                     headers: {
@@ -1198,7 +1394,7 @@ class SpaceTeamApp {
                     body: JSON.stringify({
                         contents: [{
                             parts: [{
-                                text: `${CONFIG.aiSystemPrompt}\n\nAstronaut: ${message}\n\nSpaceTeam AI:`
+                                text: `${systemPrompt}\n\nAstronaut: ${message}\n\nSpaceTeam AI:`
                             }]
                         }]
                     })
@@ -1218,16 +1414,26 @@ class SpaceTeamApp {
             }
         }
         
-        // Default responses if no API key or API fails
-        const responses = [
-            "Transmission received! SpaceTeam specializes in cutting-edge web and mobile development. Ready to discuss your mission parameters.",
-            "Excellent inquiry! We offer mission briefings to plan your project. Would you like to schedule a transmission with mission control?",
-            "Based on your transmission, I recommend checking our mission log for similar operations we've completed.",
-            "We build digital solutions that push technological boundaries. How can we assist with your mission objectives?",
-            "For mission estimates, we typically require mission parameters. Would you like to share more details about your operation?"
-        ];
+        // Default responses based on language
+        const responses = {
+            en: [
+                "Transmission received! SpaceTeam specializes in cutting-edge web and mobile development. Ready to discuss your mission parameters.",
+                "Excellent inquiry! We offer mission briefings to plan your project. Would you like to schedule a transmission with mission control?",
+                "Based on your transmission, I recommend checking our mission log for similar operations we've completed.",
+                "We build digital solutions that push technological boundaries. How can we assist with your mission objectives?",
+                "For mission estimates, we typically require mission parameters. Would you like to share more details about your operation?"
+            ],
+            id: [
+                "Transmisi diterima! SpaceTeam mengkhususkan diri dalam pengembangan web dan mobile terkini. Siap mendiskusikan parameter misi Anda.",
+                "Pertanyaan yang bagus! Kami menawarkan pengarahan misi untuk merencanakan proyek Anda. Apakah Anda ingin menjadwalkan transmisi dengan kontrol misi?",
+                "Berdasarkan transmisi Anda, saya merekomendasikan untuk memeriksa log misi kami untuk operasi serupa yang telah kami selesaikan.",
+                "Kami membangun solusi digital yang mendorong batas teknologi. Bagaimana kami dapat membantu dengan tujuan misi Anda?",
+                "Untuk perkiraan misi, kami biasanya memerlukan parameter misi. Apakah Anda ingin berbagi lebih banyak detail tentang operasi Anda?"
+            ]
+        };
         
-        return responses[Math.floor(Math.random() * responses.length)];
+        const langResponses = responses[this.state.language] || responses.en;
+        return langResponses[Math.floor(Math.random() * langResponses.length)];
     }
 
     showLoginModal() {
@@ -1403,28 +1609,29 @@ class SpaceTeamApp {
         const sectionsContainer = document.getElementById('admin-sections');
         if (!sectionsContainer) return;
         
+        const translations = CONFIG.translations[this.state.language] || CONFIG.translations.en;
         const unreadMessages = this.state.messages.filter(msg => !msg.read).length;
         const recentMessages = this.state.messages.slice(0, 5);
         
         const dashboardHTML = `
             <div class="admin-section">
-                <h2>Mission Control Dashboard</h2>
+                <h2>${translations.adminDashboard || 'Mission Control Dashboard'}</h2>
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-number">${this.state.developers.length}</div>
-                        <div class="stat-label">Active Crew</div>
+                        <div class="stat-label">${translations.adminActiveCrew || 'Active Crew'}</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-number">${this.state.projects.length}</div>
-                        <div class="stat-label">Active Missions</div>
+                        <div class="stat-label">${translations.adminActiveMissions || 'Active Missions'}</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-number">${this.state.blogPosts.length}</div>
-                        <div class="stat-label">Mission Briefings</div>
+                        <div class="stat-label">${translations.adminMissionBriefings || 'Mission Briefings'}</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-number">${this.state.messages.length}</div>
-                        <div class="stat-label">Transmissions</div>
+                        <div class="stat-label">${translations.adminTransmissions || 'Transmissions'}</div>
                         ${unreadMessages > 0 ? `<span style="position: absolute; top: 10px; right: 10px; background: var(--danger); color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem;">${unreadMessages}</span>` : ''}
                     </div>
                 </div>
@@ -1435,19 +1642,22 @@ class SpaceTeamApp {
                             <h3>Mission Controls</h3>
                             <div style="display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap;">
                                 <button class="btn btn-primary" onclick="window.showAdminSection('developers')">
-                                    <i class="fas fa-user-astronaut"></i> Manage Crew
+                                    <i class="fas fa-user-astronaut"></i> ${translations.adminManageCrew || 'Manage Crew'}
                                 </button>
                                 <button class="btn btn-secondary" onclick="window.showAdminSection('projects')">
-                                    <i class="fas fa-rocket"></i> Manage Missions
+                                    <i class="fas fa-rocket"></i> ${translations.adminManageMissions || 'Manage Missions'}
+                                </button>
+                                <button class="btn btn-outline" onclick="window.showAdminSection('websites')">
+                                    <i class="fas fa-globe"></i> ${translations.adminManageWebsites || 'Manage Websites'}
                                 </button>
                                 <button class="btn btn-outline" onclick="window.showAdminSection('blog')">
-                                    <i class="fas fa-edit"></i> Manage Briefings
+                                    <i class="fas fa-edit"></i> ${translations.adminManageBriefings || 'Manage Briefings'}
                                 </button>
                             </div>
                         </div>
                         
                         <div>
-                            <h3>Recent Transmissions</h3>
+                            <h3>${translations.adminRecentTransmissions || 'Recent Transmissions'}</h3>
                             ${recentMessages.length > 0 ? `
                                 <div style="margin-top: 15px; max-height: 200px; overflow-y: auto;">
                                     ${recentMessages.map(msg => `
@@ -1462,7 +1672,7 @@ class SpaceTeamApp {
                                 </div>
                                 ${unreadMessages > 0 ? `
                                     <button class="btn btn-sm btn-primary" onclick="window.showAdminSection('messages')" style="margin-top: 10px;">
-                                        <i class="fas fa-satellite"></i> View All Transmissions (${unreadMessages} unread)
+                                        <i class="fas fa-satellite"></i> ${translations.adminTransmissions || 'View All Transmissions'} (${unreadMessages} unread)
                                     </button>
                                 ` : ''}
                             ` : `
@@ -1500,6 +1710,9 @@ class SpaceTeamApp {
                 break;
             case 'projects':
                 sectionHTML = this.getProjectsManagementHTML();
+                break;
+            case 'websites':
+                sectionHTML = this.getWebsiteManagementHTML();
                 break;
             case 'blog':
                 sectionHTML = this.getBlogManagementHTML();
@@ -1551,6 +1764,13 @@ class SpaceTeamApp {
                 const newForm = form.cloneNode(true);
                 form.parentNode.replaceChild(newForm, form);
                 newForm.addEventListener('submit', this.handleProjectFormSubmit);
+            }
+        } else if (section === 'websites') {
+            const form = document.getElementById('admin-website-form');
+            if (form) {
+                const newForm = form.cloneNode(true);
+                form.parentNode.replaceChild(newForm, form);
+                newForm.addEventListener('submit', this.handleWebsiteFormSubmit);
             }
         } else if (section === 'blog') {
             const form = document.getElementById('admin-blog-form');
@@ -1796,6 +2016,132 @@ class SpaceTeamApp {
         `;
     }
 
+    getWebsiteManagementHTML() {
+        const websitesListHTML = this.state.websiteProjects.map(website => `
+            <div class="admin-list-item">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <img src="${website.screenshot || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w-100&q=80'}" 
+                         alt="${website.title}" 
+                         style="width: 60px; height: 40px; object-fit: cover; border-radius: var(--radius);">
+                    <div>
+                        <h4 style="margin: 0; color: var(--dark);">${website.title}</h4>
+                        <p style="margin: 5px 0; color: var(--gray); font-size: 0.875rem;">${website.url}</p>
+                        <small style="color: var(--gray);">${website.status || 'live'}</small>
+                    </div>
+                </div>
+                <div class="admin-list-actions">
+                    <button class="btn btn-sm" onclick="window.editWebsite(${website.id})">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="window.deleteWebsite(${website.id})">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </div>
+            </div>
+        `).join('');
+        
+        const websiteToEdit = this.state.editingId ? 
+            this.state.websiteProjects.find(w => w.id === this.state.editingId) : null;
+        
+        return `
+            <div class="admin-section">
+                <div class="tab-nav">
+                    <button class="tab-btn active" data-tab="websites-list">Deployed Websites (${this.state.websiteProjects.length})</button>
+                    <button class="tab-btn" data-tab="add-website">${this.state.editingId ? 'Edit Website' : 'Deploy New Website'}</button>
+                </div>
+                
+                <div id="websites-list" class="tab-content active">
+                    <h3>Manage Deployed Websites</h3>
+                    ${this.state.websiteProjects.length > 0 ? `
+                        <div class="admin-list">
+                            ${websitesListHTML}
+                        </div>
+                    ` : `
+                        <div class="text-center" style="padding: var(--space-2xl);">
+                            <i class="fas fa-globe fa-3x" style="color: var(--gray); margin-bottom: var(--space-md);"></i>
+                            <h3 style="color: var(--dark);">No Websites Deployed</h3>
+                            <p style="color: var(--gray);">Deploy your first website project!</p>
+                            <button class="btn btn-primary" onclick="window.switchAdminTab('add-website')" style="margin-top: var(--space-md);">
+                                <i class="fas fa-cloud-upload-alt"></i> Deploy First Website
+                            </button>
+                        </div>
+                    `}
+                </div>
+                
+                <div id="add-website" class="tab-content">
+                    <h3>${this.state.editingId ? 'Edit Website' : 'Deploy New Website'}</h3>
+                    <form id="admin-website-form">
+                        <input type="hidden" id="admin-website-id" value="${websiteToEdit?.id || ''}">
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Website Title *</label>
+                                <input type="text" class="form-control" id="admin-website-title" value="${websiteToEdit?.title || ''}" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Website URL *</label>
+                                <input type="url" class="form-control" id="admin-website-url" value="${websiteToEdit?.url || ''}" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Screenshot URL *</label>
+                                <input type="text" class="form-control" id="admin-website-screenshot" value="${websiteToEdit?.screenshot || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'}" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Status</label>
+                                <select class="form-control" id="admin-website-status">
+                                    <option value="live" ${websiteToEdit?.status === 'live' ? 'selected' : ''}>🚀 Live</option>
+                                    <option value="maintenance" ${websiteToEdit?.status === 'maintenance' ? 'selected' : ''}>🚧 Maintenance</option>
+                                    <option value="development" ${websiteToEdit?.status === 'development' ? 'selected' : ''}>👨‍💻 Development</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Description *</label>
+                            <textarea class="form-control" id="admin-website-description" rows="3" required>${websiteToEdit?.description || ''}</textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Technologies Used *</label>
+                            <input type="text" class="form-control" id="admin-website-technologies" value="${Array.isArray(websiteToEdit?.technologies) ? websiteToEdit.technologies.join(', ') : websiteToEdit?.technologies || ''}" required>
+                            <small style="color: var(--gray);">Separate with commas: React, Node.js, MongoDB, etc.</small>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">GitHub Repository (Optional)</label>
+                                <input type="url" class="form-control" id="admin-website-github" value="${websiteToEdit?.github || ''}">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Custom Icon (Optional)</label>
+                                <input type="text" class="form-control" id="admin-website-icon" value="${websiteToEdit?.icon || 'fas fa-globe'}">
+                                <small style="color: var(--gray);">FontAwesome icon class</small>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Additional Features</label>
+                            <textarea class="form-control" id="admin-website-features" rows="2">${Array.isArray(websiteToEdit?.features) ? websiteToEdit.features.join(', ') : websiteToEdit?.features || ''}</textarea>
+                            <small style="color: var(--gray);">Separate features with commas</small>
+                        </div>
+                        
+                        <div style="display: flex; gap: 15px; margin-top: 30px;">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> ${this.state.editingId ? 'Update Website' : 'Deploy Website'}
+                            </button>
+                            <button type="button" class="btn btn-outline" onclick="window.resetWebsiteForm()">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+    }
+
     getBlogManagementHTML() {
         const blogListHTML = this.state.blogPosts.map(post => `
             <div class="admin-list-item">
@@ -1934,6 +2280,8 @@ class SpaceTeamApp {
     }
 
     getSettingsManagementHTML() {
+        const translations = CONFIG.translations[this.state.language] || CONFIG.translations.en;
+        
         return `
             <div class="admin-section">
                 <h2>Mission Control Systems</h2>
@@ -1942,24 +2290,35 @@ class SpaceTeamApp {
                 <form id="admin-settings-form">
                     <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label">Mission Name *</label>
-                            <input type="text" class="form-control" id="admin-settings-title" value="${this.state.settings.siteTitle || CONFIG.defaults.siteTitle}" required>
+                            <label class="form-label">Mission Name (English) *</label>
+                            <input type="text" class="form-control" id="admin-settings-title-en" value="${this.state.settings.siteTitle?.en || CONFIG.defaults.siteTitle.en}" required>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Transmission Address *</label>
-                            <input type="email" class="form-control" id="admin-settings-email" value="${this.state.settings.contactEmail || CONFIG.defaults.contactEmail}" required>
+                            <label class="form-label">Mission Name (Indonesian) *</label>
+                            <input type="text" class="form-control" id="admin-settings-title-id" value="${this.state.settings.siteTitle?.id || CONFIG.defaults.siteTitle.id}" required>
                         </div>
                     </div>
                     
                     <div class="form-row">
                         <div class="form-group">
+                            <label class="form-label">Transmission Address *</label>
+                            <input type="email" class="form-control" id="admin-settings-email" value="${this.state.settings.contactEmail || CONFIG.defaults.contactEmail}" required>
+                        </div>
+                        <div class="form-group">
                             <label class="form-label">Transmission Frequency *</label>
                             <input type="text" class="form-control" id="admin-settings-phone" value="${this.state.settings.contactPhone || CONFIG.defaults.contactPhone}" required>
                         </div>
+                    </div>
+                    
+                    <div class="form-row">
                         <div class="form-group">
-                            <label class="form-label">Mission Status Text *</label>
-                            <input type="text" class="form-control" id="admin-settings-running-text" value="${this.state.settings.runningText || CONFIG.defaults.runningText}" required>
+                            <label class="form-label">Mission Status Text (English) *</label>
+                            <input type="text" class="form-control" id="admin-settings-running-text-en" value="${this.state.settings.runningText?.en || CONFIG.defaults.runningText.en}" required>
                             <small style="color: var(--gray);">Text that runs at the top of mission control</small>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Mission Status Text (Indonesian) *</label>
+                            <input type="text" class="form-control" id="admin-settings-running-text-id" value="${this.state.settings.runningText?.id || CONFIG.defaults.runningText.id}" required>
                         </div>
                     </div>
                     
@@ -2128,6 +2487,64 @@ class SpaceTeamApp {
         }
     }
 
+    async handleWebsiteFormSubmit(e) {
+        e.preventDefault();
+        
+        const titleInput = document.getElementById('admin-website-title');
+        const urlInput = document.getElementById('admin-website-url');
+        const screenshotInput = document.getElementById('admin-website-screenshot');
+        const descriptionInput = document.getElementById('admin-website-description');
+        const technologiesInput = document.getElementById('admin-website-technologies');
+        
+        if (!titleInput || !urlInput || !screenshotInput || !descriptionInput || !technologiesInput) {
+            this.showNotification('Required fields missing', 'error');
+            return;
+        }
+        
+        const websiteData = {
+            id: this.state.editingId || this.state.websiteIdCounter++,
+            title: titleInput.value.trim(),
+            url: urlInput.value.trim(),
+            screenshot: screenshotInput.value.trim(),
+            status: document.getElementById('admin-website-status')?.value || 'live',
+            description: descriptionInput.value.trim(),
+            technologies: technologiesInput.value.split(',').map(t => t.trim()).filter(t => t),
+            github: document.getElementById('admin-website-github')?.value.trim() || '',
+            icon: document.getElementById('admin-website-icon')?.value.trim() || 'fas fa-globe',
+            features: document.getElementById('admin-website-features')?.value.split(',').map(f => f.trim()).filter(f => f) || [],
+            views: 0,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+        };
+        
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+        }
+        
+        try {
+            const saved = await this.saveToSupabase('website_projects', websiteData);
+            
+            if (saved) {
+                this.showNotification(`Website ${this.state.editingId ? 'updated' : 'deployed'} successfully!`, 'success');
+                this.state.editingId = null;
+                await this.loadData();
+                this.showAdminSection('websites');
+            } else {
+                this.showNotification('Error saving website', 'error');
+            }
+        } catch (error) {
+            console.error('Error saving website:', error);
+            this.showNotification('Error saving website', 'error');
+        } finally {
+            if (submitBtn) {
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
+            }
+        }
+    }
+
     async handleBlogFormSubmit(e) {
         e.preventDefault();
         
@@ -2186,24 +2603,32 @@ class SpaceTeamApp {
     async handleSettingsFormSubmit(e) {
         e.preventDefault();
         
-        const titleInput = document.getElementById('admin-settings-title');
+        const titleInputEn = document.getElementById('admin-settings-title-en');
+        const titleInputId = document.getElementById('admin-settings-title-id');
         const emailInput = document.getElementById('admin-settings-email');
         const phoneInput = document.getElementById('admin-settings-phone');
-        const runningTextInput = document.getElementById('admin-settings-running-text');
+        const runningTextEn = document.getElementById('admin-settings-running-text-en');
+        const runningTextId = document.getElementById('admin-settings-running-text-id');
         const chatEnabledInput = document.getElementById('admin-settings-chat-enabled');
         const darkModeInput = document.getElementById('admin-settings-dark-mode');
         const geminiKeyInput = document.getElementById('admin-settings-gemini-key');
         
-        if (!titleInput || !emailInput || !phoneInput || !runningTextInput || !chatEnabledInput || !darkModeInput) {
+        if (!titleInputEn || !titleInputId || !emailInput || !phoneInput || !runningTextEn || !runningTextId || !chatEnabledInput || !darkModeInput) {
             this.showNotification('Form fields missing', 'error');
             return;
         }
         
         const settingsData = {
-            siteTitle: titleInput.value.trim(),
+            siteTitle: {
+                en: titleInputEn.value.trim(),
+                id: titleInputId.value.trim()
+            },
             contactEmail: emailInput.value.trim(),
             contactPhone: phoneInput.value.trim(),
-            runningText: runningTextInput.value.trim(),
+            runningText: {
+                en: runningTextEn.value.trim(),
+                id: runningTextId.value.trim()
+            },
             chatEnabled: chatEnabledInput.checked,
             darkMode: darkModeInput.checked
         };
@@ -2253,6 +2678,12 @@ class SpaceTeamApp {
         this.switchAdminTab('add-project');
     }
 
+    editWebsite(id) {
+        this.state.editingId = id;
+        this.showAdminSection('websites');
+        this.switchAdminTab('add-website');
+    }
+
     editBlogPost(id) {
         this.state.editingId = id;
         this.showAdminSection('blog');
@@ -2297,6 +2728,26 @@ class SpaceTeamApp {
         } catch (error) {
             console.error('Error deleting mission:', error);
             this.showNotification('Error deleting mission', 'error');
+        }
+    }
+
+    async deleteWebsite(id) {
+        if (!confirm('Are you sure you want to delete this website project?')) return;
+        
+        try {
+            const updatedWebsites = this.state.websiteProjects.filter(w => w.id !== id);
+            const saved = await this.saveToSupabase('website_projects', updatedWebsites);
+            
+            if (saved) {
+                this.showNotification('Website deleted successfully!', 'success');
+                await this.loadData();
+                this.showAdminSection('websites');
+            } else {
+                this.showNotification('Error deleting website', 'error');
+            }
+        } catch (error) {
+            console.error('Error deleting website:', error);
+            this.showNotification('Error deleting website', 'error');
         }
     }
 
@@ -2365,6 +2816,13 @@ class SpaceTeamApp {
         }
     }
 
+    viewWebsiteDetails(id) {
+        const website = this.state.websiteProjects.find(w => w.id === id);
+        if (website) {
+            alert(`Website Details:\n\nTitle: ${website.title}\nURL: ${website.url}\nStatus: ${website.status}\nDescription: ${website.description}\nTechnologies: ${Array.isArray(website.technologies) ? website.technologies.join(', ') : website.technologies || 'Not specified'}\n${website.github ? `GitHub: ${website.github}` : ''}`);
+        }
+    }
+
     viewBlogPost(id) {
         const post = this.state.blogPosts.find(p => p.id === id);
         if (post) {
@@ -2383,6 +2841,11 @@ class SpaceTeamApp {
         this.showAdminSection('projects');
     }
 
+    resetWebsiteForm() {
+        this.state.editingId = null;
+        this.showAdminSection('websites');
+    }
+
     resetBlogForm() {
         this.state.editingId = null;
         this.showAdminSection('blog');
@@ -2393,6 +2856,7 @@ class SpaceTeamApp {
         const data = {
             developers: this.state.developers,
             projects: this.state.projects,
+            websiteProjects: this.state.websiteProjects,
             blogPosts: this.state.blogPosts,
             messages: this.state.messages,
             settings: this.state.settings,
@@ -2415,7 +2879,7 @@ class SpaceTeamApp {
     }
 
     resetData() {
-        if (!confirm('WARNING: This will delete ALL mission data including crew, missions, briefings, and transmissions. This action cannot be undone. Are you sure?')) {
+        if (!confirm('WARNING: This will delete ALL mission data including crew, missions, websites, briefings, and transmissions. This action cannot be undone. Are you sure?')) {
             return;
         }
         
@@ -2426,6 +2890,7 @@ class SpaceTeamApp {
         // Reset all data
         this.state.developers = [];
         this.state.projects = [];
+        this.state.websiteProjects = [];
         this.state.blogPosts = [];
         this.state.messages = [];
         this.state.settings = { ...CONFIG.defaults };
@@ -2433,12 +2898,14 @@ class SpaceTeamApp {
         // Reset counters
         this.state.developerIdCounter = 1;
         this.state.projectIdCounter = 1;
+        this.state.websiteIdCounter = 1;
         this.state.blogIdCounter = 1;
         this.state.messageIdCounter = 1;
         
         // Clear localStorage
         localStorage.removeItem('spaceteam_developers');
         localStorage.removeItem('spaceteam_projects');
+        localStorage.removeItem('spaceteam_websites');
         localStorage.removeItem('spaceteam_blog');
         localStorage.removeItem('spaceteam_messages');
         localStorage.removeItem('spaceteam_settings');
@@ -2457,6 +2924,14 @@ class SpaceTeamApp {
     showNotification(message, type = 'info') {
         const container = document.getElementById('notification-container');
         if (!container) return;
+        
+        const translations = CONFIG.translations[this.state.language] || CONFIG.translations.en;
+        const typeLabels = {
+            success: translations.notificationSuccess || 'Success',
+            error: translations.notificationError || 'Error',
+            warning: translations.notificationWarning || 'Warning',
+            info: translations.notificationInfo || 'Info'
+        };
         
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
@@ -2511,16 +2986,20 @@ document.addEventListener('DOMContentLoaded', () => {
         // Expose methods for inline onclick handlers
         window.showAdminSection = (section) => app.showAdminSection(section);
         window.viewProjectDetails = (id) => app.viewProjectDetails(id);
+        window.viewWebsiteDetails = (id) => app.viewWebsiteDetails(id);
         window.viewBlogPost = (id) => app.viewBlogPost(id);
         window.switchAdminTab = (tabId) => app.switchAdminTab(tabId);
         window.resetDeveloperForm = () => app.resetDeveloperForm();
         window.resetProjectForm = () => app.resetProjectForm();
+        window.resetWebsiteForm = () => app.resetWebsiteForm();
         window.resetBlogForm = () => app.resetBlogForm();
         window.editDeveloper = (id) => app.editDeveloper(id);
         window.editProject = (id) => app.editProject(id);
+        window.editWebsite = (id) => app.editWebsite(id);
         window.editBlogPost = (id) => app.editBlogPost(id);
         window.deleteDeveloper = (id) => app.deleteDeveloper(id);
         window.deleteProject = (id) => app.deleteProject(id);
+        window.deleteWebsite = (id) => app.deleteWebsite(id);
         window.deleteBlogPost = (id) => app.deleteBlogPost(id);
         window.deleteMessage = (id) => app.deleteMessage(id);
         window.viewMessage = (id) => app.viewMessage(id);
@@ -2536,3 +3015,4 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(errorDiv);
     }
 });
+[file content end]

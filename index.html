@@ -1,3 +1,5 @@
+[file name]: index.html
+[file content begin]
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -47,7 +49,7 @@
 </head>
 <body>
     <!-- Skip to Main Content (Accessibility) -->
-    <a href="#main-content" class="skip-to-main">
+    <a href="#main-content" class="skip-to-main" data-i18n="skipToMain">
         Skip to main content
     </a>
 
@@ -71,15 +73,23 @@
             </a>
             
             <ul class="nav-links">
-                <li><a href="#home" class="active">Home</a></li>
-                <li><a href="#developers">Team</a></li>
-                <li><a href="#projects">Projects</a></li>
-                <li><a href="#blog">Blog</a></li>
-                <li><a href="#contact">Contact</a></li>
-                <li><a href="#" id="admin-login-btn" class="btn btn-sm btn-outline">Admin</a></li>
+                <li><a href="#home" class="active" data-i18n="navHome">Home</a></li>
+                <li><a href="#developers" data-i18n="navTeam">Team</a></li>
+                <li><a href="#projects" data-i18n="navProjects">Projects</a></li>
+                <li><a href="#blog" data-i18n="navBlog">Blog</a></li>
+                <li><a href="#contact" data-i18n="navContact">Contact</a></li>
+                <li><a href="#" id="admin-login-btn" class="btn btn-sm btn-outline" data-i18n="navAdmin">Admin</a></li>
             </ul>
             
             <div class="nav-actions">
+                <!-- Language Selector -->
+                <div class="language-selector">
+                    <select id="language-selector" class="language-dropdown" aria-label="Select language">
+                        <option value="en" selected>🇺🇸 EN</option>
+                        <option value="id">🇮🇩 ID</option>
+                    </select>
+                </div>
+                
                 <button class="theme-toggle" id="theme-toggle" title="Toggle theme" aria-label="Toggle dark mode">
                     <i class="fas fa-moon"></i>
                 </button>
@@ -97,40 +107,40 @@
             <div class="container">
                 <div class="hero-content animate__animated animate__fadeInUp">
                     <h1 class="hero-title">
-                        Launching Digital 
-                        <span class="text-gradient">Innovations Beyond Limits</span>
+                        <span data-i18n="heroTitle">Launching Digital</span> 
+                        <span class="text-gradient" data-i18n="heroTitleHighlight">Innovations Beyond Limits</span>
                     </h1>
-                    <p class="hero-subtitle">
+                    <p class="hero-subtitle" data-i18n="heroSubtitle">
                         We are SpaceTeam | Dev, a crew of elite developers exploring the frontiers of technology. 
                         We build scalable, futuristic solutions that propel businesses into the digital cosmos.
                     </p>
                     <div class="hero-actions">
                         <a href="#projects" class="btn btn-primary">
                             <i class="fas fa-rocket"></i>
-                            Explore Projects
+                            <span data-i18n="btnExploreProjects">Explore Projects</span>
                         </a>
                         <a href="#contact" class="btn btn-outline">
                             <i class="fas fa-satellite"></i>
-                            Mission Control
+                            <span data-i18n="btnMissionControl">Mission Control</span>
                         </a>
                     </div>
                     
                     <div class="hero-stats">
                         <div class="stat-item">
                             <div class="stat-number" id="projects-count">0</div>
-                            <div class="stat-label">Successful Missions</div>
+                            <div class="stat-label" data-i18n="statMissions">Successful Missions</div>
                         </div>
                         <div class="stat-item">
                             <div class="stat-number">99%</div>
-                            <div class="stat-label">Client Satisfaction</div>
+                            <div class="stat-label" data-i18n="statSatisfaction">Client Satisfaction</div>
                         </div>
                         <div class="stat-item">
                             <div class="stat-number">7+</div>
-                            <div class="stat-label">Light Years Experience</div>
+                            <div class="stat-label" data-i18n="statExperience">Light Years Experience</div>
                         </div>
                         <div class="stat-item">
                             <div class="stat-number">24/7</div>
-                            <div class="stat-label">Mission Control</div>
+                            <div class="stat-label" data-i18n="statControl">Mission Control</div>
                         </div>
                     </div>
                 </div>
@@ -141,8 +151,8 @@
         <section class="section section-alt" id="developers">
             <div class="container">
                 <div class="section-header">
-                    <h2>Mission Crew</h2>
-                    <p class="section-subtitle">
+                    <h2 data-i18n="sectionTeam">Mission Crew</h2>
+                    <p class="section-subtitle" data-i18n="sectionTeamSubtitle">
                         Meet our elite team of space engineers, each specialized in different tech galaxies.
                     </p>
                 </div>
@@ -154,8 +164,8 @@
                 <!-- Skills Visualization -->
                 <div class="skills-section">
                     <div class="section-header">
-                        <h3>Tech Galaxy Map</h3>
-                        <p class="section-subtitle">
+                        <h3 data-i18n="sectionSkills">Tech Galaxy Map</h3>
+                        <p class="section-subtitle" data-i18n="sectionSkillsSubtitle">
                             Our expertise spans across multiple technology constellations
                         </p>
                     </div>
@@ -170,21 +180,35 @@
         <section class="section" id="projects">
             <div class="container">
                 <div class="section-header">
-                    <h2>Mission Log</h2>
-                    <p class="section-subtitle">
+                    <h2 data-i18n="sectionProjects">Mission Log</h2>
+                    <p class="section-subtitle" data-i18n="sectionProjectsSubtitle">
                         Explore our portfolio of successful missions across the digital universe
                     </p>
                 </div>
                 
                 <div class="projects-filter">
-                    <button class="filter-btn active" data-filter="all" aria-label="Show all projects">All Missions</button>
-                    <button class="filter-btn" data-filter="web" aria-label="Filter web projects">Web Systems</button>
-                    <button class="filter-btn" data-filter="mobile" aria-label="Filter mobile projects">Mobile Apps</button>
-                    <button class="filter-btn" data-filter="design" aria-label="Filter design projects">UI/UX Design</button>
+                    <button class="filter-btn active" data-filter="all" aria-label="Show all projects" data-i18n="filterAll">All Missions</button>
+                    <button class="filter-btn" data-filter="web" aria-label="Filter web projects" data-i18n="filterWeb">Web Systems</button>
+                    <button class="filter-btn" data-filter="mobile" aria-label="Filter mobile projects" data-i18n="filterMobile">Mobile Apps</button>
+                    <button class="filter-btn" data-filter="design" aria-label="Filter design projects" data-i18n="filterDesign">UI/UX Design</button>
                 </div>
                 
                 <div class="projects-grid" id="projects-container">
                     <!-- Projects will be loaded here -->
+                </div>
+                
+                <!-- Website Projects Section -->
+                <div class="website-projects-section">
+                    <div class="section-header">
+                        <h3 data-i18n="sectionWebsites">Website Projects</h3>
+                        <p class="section-subtitle" data-i18n="sectionWebsitesSubtitle">
+                            Our deployed websites and web applications
+                        </p>
+                    </div>
+                    
+                    <div class="websites-grid" id="websites-container">
+                        <!-- Website projects will be loaded here -->
+                    </div>
                 </div>
             </div>
         </section>
@@ -193,8 +217,8 @@
         <section class="section section-alt" id="blog">
             <div class="container">
                 <div class="section-header">
-                    <h2>Mission Briefings</h2>
-                    <p class="section-subtitle">
+                    <h2 data-i18n="sectionBlog">Mission Briefings</h2>
+                    <p class="section-subtitle" data-i18n="sectionBlogSubtitle">
                         Latest updates and discoveries from our tech expeditions
                     </p>
                 </div>
@@ -209,8 +233,8 @@
         <section class="section" id="contact">
             <div class="container">
                 <div class="section-header">
-                    <h2>Mission Control</h2>
-                    <p class="section-subtitle">
+                    <h2 data-i18n="sectionContact">Mission Control</h2>
+                    <p class="section-subtitle" data-i18n="sectionContactSubtitle">
                         Ready to launch your next project? Connect with mission control.
                     </p>
                 </div>
@@ -221,59 +245,59 @@
                             <div class="info-icon">
                                 <i class="fas fa-satellite-dish"></i>
                             </div>
-                            <h3>Transmit Signal</h3>
+                            <h3 data-i18n="contactTransmit">Transmit Signal</h3>
                             <p id="contact-email-display">mission@spaceteam.dev</p>
-                            <p>Response within 24 light-minutes</p>
+                            <p data-i18n="responseTime">Response within 24 light-minutes</p>
                         </div>
                         
                         <div class="info-card">
                             <div class="info-icon">
                                 <i class="fas fa-broadcast-tower"></i>
                             </div>
-                            <h3>Transmission Frequency</h3>
+                            <h3 data-i18n="contactFrequency">Transmission Frequency</h3>
                             <p id="contact-phone-display">+62 821 3830 5820</p>
-                            <p>Available for transmissions</p>
+                            <p data-i18n="available">Available for transmissions</p>
                         </div>
                         
                         <div class="info-card">
                             <div class="info-icon">
                                 <i class="fas fa-globe-americas"></i>
                             </div>
-                            <h3>Ground Station</h3>
+                            <h3 data-i18n="contactStation">Ground Station</h3>
                             <p>Jakarta, Indonesia</p>
-                            <p>Orbital meetings available</p>
+                            <p data-i18n="orbitalMeetings">Orbital meetings available</p>
                         </div>
                     </div>
                     
                     <div class="contact-form">
                         <form id="contact-form">
                             <div class="form-group">
-                                <label class="form-label" for="contact-name">Astronaut Name *</label>
+                                <label class="form-label" for="contact-name" data-i18n="formName">Astronaut Name *</label>
                                 <input type="text" class="form-control" id="contact-name" required aria-required="true">
                                 <div class="form-error" id="name-error"></div>
                             </div>
                             
                             <div class="form-group">
-                                <label class="form-label" for="contact-email">Transmission Address *</label>
+                                <label class="form-label" for="contact-email" data-i18n="formEmail">Transmission Address *</label>
                                 <input type="email" class="form-control" id="contact-email" required aria-required="true">
                                 <div class="form-error" id="email-error"></div>
                             </div>
                             
                             <div class="form-group">
-                                <label class="form-label" for="contact-subject">Mission Type *</label>
+                                <label class="form-label" for="contact-subject" data-i18n="formSubject">Mission Type *</label>
                                 <input type="text" class="form-control" id="contact-subject" required aria-required="true">
                                 <div class="form-error" id="subject-error"></div>
                             </div>
                             
                             <div class="form-group">
-                                <label class="form-label" for="contact-message">Mission Briefing *</label>
+                                <label class="form-label" for="contact-message" data-i18n="formMessage">Mission Briefing *</label>
                                 <textarea class="form-control" id="contact-message" rows="5" required aria-required="true"></textarea>
                                 <div class="form-error" id="message-error"></div>
                             </div>
                             
                             <button type="submit" class="btn btn-primary btn-lg" id="contact-submit-btn">
                                 <i class="fas fa-paper-plane"></i>
-                                Launch Transmission
+                                <span data-i18n="btnLaunchTransmission">Launch Transmission</span>
                             </button>
                         </form>
                     </div>
@@ -290,7 +314,7 @@
                             <i class="fas fa-satellite"></i>
                         </div>
                         <div class="stat-number" id="stats-projects">0</div>
-                        <div class="stat-label">Missions Completed</div>
+                        <div class="stat-label" data-i18n="statCompleted">Missions Completed</div>
                     </div>
                     
                     <div class="stat-card">
@@ -298,7 +322,7 @@
                             <i class="fas fa-user-astronaut"></i>
                         </div>
                         <div class="stat-number" id="stats-clients">0</div>
-                        <div class="stat-label">Satisfied Cosmonauts</div>
+                        <div class="stat-label" data-i18n="statCosmonauts">Satisfied Cosmonauts</div>
                     </div>
                     
                     <div class="stat-card">
@@ -306,7 +330,7 @@
                             <i class="fas fa-clock"></i>
                         </div>
                         <div class="stat-number" id="stats-experience">7+</div>
-                        <div class="stat-label">Light Years Experience</div>
+                        <div class="stat-label" data-i18n="statExperience">Light Years Experience</div>
                     </div>
                     
                     <div class="stat-card">
@@ -314,7 +338,7 @@
                             <i class="fas fa-newspaper"></i>
                         </div>
                         <div class="stat-number" id="stats-articles">0</div>
-                        <div class="stat-label">Mission Logs</div>
+                        <div class="stat-label" data-i18n="statLogs">Mission Logs</div>
                     </div>
                 </div>
             </div>
@@ -331,7 +355,7 @@
                         <span class="logo-secondary">Team</span>
                         <span style="color: var(--gray);"> | Dev</span>
                     </div>
-                    <p class="footer-description">
+                    <p class="footer-description" data-i18n="footerDescription">
                         We explore the digital universe, building solutions that reach beyond the stars. 
                         Our mission is to propel businesses into the future with cutting-edge technology.
                     </p>
@@ -352,29 +376,29 @@
                 </div>
                 
                 <div class="footer-col">
-                    <h3 class="footer-heading">Flight Path</h3>
+                    <h3 class="footer-heading" data-i18n="footerFlightPath">Flight Path</h3>
                     <ul class="footer-links">
-                        <li><a href="#home">Command Center</a></li>
-                        <li><a href="#developers">Mission Crew</a></li>
-                        <li><a href="#projects">Mission Log</a></li>
-                        <li><a href="#blog">Briefings</a></li>
-                        <li><a href="#contact">Control Room</a></li>
+                        <li><a href="#home" data-i18n="footerCommandCenter">Command Center</a></li>
+                        <li><a href="#developers" data-i18n="footerMissionCrew">Mission Crew</a></li>
+                        <li><a href="#projects" data-i18n="footerMissionLog">Mission Log</a></li>
+                        <li><a href="#blog" data-i18n="footerBriefings">Briefings</a></li>
+                        <li><a href="#contact" data-i18n="footerControlRoom">Control Room</a></li>
                     </ul>
                 </div>
                 
                 <div class="footer-col">
-                    <h3 class="footer-heading">Services</h3>
+                    <h3 class="footer-heading" data-i18n="footerServices">Services</h3>
                     <ul class="footer-links">
-                        <li><a href="#">Web Development</a></li>
-                        <li><a href="#">Mobile Apps</a></li>
-                        <li><a href="#">UI/UX Design</a></li>
-                        <li><a href="#">Cloud Systems</a></li>
-                        <li><a href="#">AI Integration</a></li>
+                        <li><a href="#" data-i18n="footerWebDev">Web Development</a></li>
+                        <li><a href="#" data-i18n="footerMobileApps">Mobile Apps</a></li>
+                        <li><a href="#" data-i18n="footerUIDesign">UI/UX Design</a></li>
+                        <li><a href="#" data-i18n="footerCloud">Cloud Systems</a></li>
+                        <li><a href="#" data-i18n="footerAI">AI Integration</a></li>
                     </ul>
                 </div>
                 
                 <div class="footer-col">
-                    <h3 class="footer-heading">Ground Control</h3>
+                    <h3 class="footer-heading" data-i18n="footerGroundControl">Ground Control</h3>
                     <ul class="footer-links">
                         <li><i class="fas fa-map-marker-alt"></i> Jakarta, Indonesia</li>
                         <li><i class="fas fa-satellite"></i> <span id="footer-phone">+62 821 3830 5820</span></li>
@@ -384,7 +408,7 @@
             </div>
             
             <div class="footer-bottom">
-                <p>&copy; <span id="current-year"></span> SpaceTeam | Dev. All systems operational.</p>
+                <p>&copy; <span id="current-year"></span> SpaceTeam | Dev. <span data-i18n="footerCopyright">All systems operational.</span></p>
             </div>
         </div>
     </footer>
@@ -402,14 +426,14 @@
             </button>
         </div>
         <div class="chat-body" id="chat-body">
-            <div class="chat-message bot">
+            <div class="chat-message bot" data-i18n="chatGreeting">
                 Greetings, astronaut! I'm your SpaceTeam AI assistant. How can I assist with your mission today? You can ask about our services, mission logs, or request a briefing.
             </div>
         </div>
         <div class="chat-input">
-            <input type="text" id="chat-input" placeholder="Type your transmission..." aria-label="Chat message">
+            <input type="text" id="chat-input" placeholder="Type your transmission..." aria-label="Chat message" data-i18n-ph="chatPlaceholder">
             <button class="btn btn-sm btn-primary" id="send-chat" style="margin-top: 10px;">
-                <i class="fas fa-paper-plane"></i> Transmit
+                <i class="fas fa-paper-plane"></i> <span data-i18n="chatSend">Transmit</span>
             </button>
         </div>
     </div>
@@ -418,25 +442,25 @@
     <div class="modal hidden" id="login-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Mission Control Access</h2>
+                <h2 data-i18n="loginTitle">Mission Control Access</h2>
                 <button class="modal-close" id="close-login" aria-label="Close login">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <form id="login-form">
                 <div class="form-group">
-                    <label class="form-label" for="username">Access Code *</label>
+                    <label class="form-label" for="username" data-i18n="formAccessCode">Access Code *</label>
                     <input type="email" class="form-control" id="username" required aria-required="true">
                     <div class="form-error" id="login-email-error"></div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="password">Security Key *</label>
+                    <label class="form-label" for="password" data-i18n="formSecurityKey">Security Key *</label>
                     <input type="password" class="form-control" id="password" required aria-required="true">
                     <div class="form-error" id="login-password-error"></div>
                 </div>
                 <button type="submit" class="btn btn-primary btn-lg" id="login-submit-btn">
                     <i class="fas fa-sign-in-alt"></i>
-                    Access Control
+                    <span data-i18n="btnAccessControl">Access Control</span>
                 </button>
             </form>
         </div>
@@ -455,6 +479,7 @@
                         <li><a href="#dashboard" class="admin-nav-btn active" data-section="dashboard">Dashboard</a></li>
                         <li><a href="#developers" class="admin-nav-btn" data-section="developers">Crew</a></li>
                         <li><a href="#projects" class="admin-nav-btn" data-section="projects">Missions</a></li>
+                        <li><a href="#websites" class="admin-nav-btn" data-section="websites">Websites</a></li>
                         <li><a href="#blog" class="admin-nav-btn" data-section="blog">Logs</a></li>
                         <li><a href="#messages" class="admin-nav-btn" data-section="messages">Transmissions</a></li>
                         <li><a href="#settings" class="admin-nav-btn" data-section="settings">Systems</a></li>
@@ -486,5 +511,69 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
     <script src="app.js"></script>
+    
+    <!-- Lazy Loading Script -->
+    <script>
+    // Lazy loading images with Intersection Observer
+    document.addEventListener('DOMContentLoaded', function() {
+        const lazyImages = document.querySelectorAll('img[loading="lazy"]');
+        
+        if ('IntersectionObserver' in window) {
+            const imageObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        const src = img.getAttribute('data-src');
+                        if (src) {
+                            img.src = src;
+                            img.removeAttribute('data-src');
+                        }
+                        img.classList.add('loaded');
+                        imageObserver.unobserve(img);
+                    }
+                });
+            }, {
+                rootMargin: '50px 0px',
+                threshold: 0.1
+            });
+            
+            lazyImages.forEach(img => {
+                if (!img.src) {
+                    const dataSrc = img.getAttribute('data-src');
+                    if (dataSrc) {
+                        img.setAttribute('src', 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"%3E%3C/svg%3E');
+                    }
+                }
+                imageObserver.observe(img);
+            });
+        } else {
+            // Fallback for browsers without Intersection Observer
+            lazyImages.forEach(img => {
+                const src = img.getAttribute('data-src');
+                if (src) {
+                    img.src = src;
+                    img.removeAttribute('data-src');
+                }
+            });
+        }
+        
+        // Lazy load sections
+        const sections = document.querySelectorAll('.section');
+        const sectionObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    sectionObserver.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        });
+        
+        sections.forEach(section => sectionObserver.observe(section));
+    });
+    </script>
 </body>
 </html>
+[file content end]
