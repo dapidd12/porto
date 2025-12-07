@@ -499,7 +499,7 @@ class SpaceTeamApp {
                     <h3 style="color: var(--secondary);">${translations.emptyCrew || 'Mission Crew Assembling'}</h3>
                     <p style="color: var(--gray); max-width: 400px; margin: 0 auto;">${translations.emptyCrewText || 'Our elite space engineers are preparing for mission. Stand by for crew manifest!'}</p>
                     ${this.state.isAdmin ? `
-                        <button class="btn btn-primary" onclick="window.showAdminSection('developers')" style="margin-top: var(--space-md);">
+                        <button class="btn btn-primary" onclick="app.showAdminSection('developers')" style="margin-top: var(--space-md);">
                             <i class="fas fa-user-astronaut"></i> ${translations.emptyCrew ? 'Assign First Crew Member' : 'Assign First Crew Member'}
                         </button>
                     ` : ''}
@@ -577,7 +577,7 @@ class SpaceTeamApp {
                             : translations[`emptyProjects${filter.charAt(0).toUpperCase() + filter.slice(1)}`] || `No ${filter} missions found. Adjust mission parameters!`}
                     </p>
                     ${this.state.isAdmin ? `
-                        <button class="btn btn-primary" onclick="window.showAdminSection('projects')" style="margin-top: var(--space-md);">
+                        <button class="btn btn-primary" onclick="app.showAdminSection('projects')" style="margin-top: var(--space-md);">
                             <i class="fas fa-rocket"></i> ${translations.emptyProjects ? 'Log First Mission' : 'Log First Mission'}
                         </button>
                     ` : ''}
@@ -623,7 +623,7 @@ class SpaceTeamApp {
                                     <i class="fas fa-external-link-alt"></i> ${translations.btnLaunch || 'Launch'}
                                 </a>
                             ` : `
-                                <button class="btn btn-sm btn-primary" onclick="window.viewProjectDetails(${project.id})">
+                                <button class="btn btn-sm btn-primary" onclick="app.viewProjectDetails(${project.id})">
                                     <i class="fas fa-eye"></i> ${translations.btnViewDetails || 'Mission Details'}
                                 </button>
                             `}
@@ -653,7 +653,7 @@ class SpaceTeamApp {
                     <h3 style="color: var(--secondary);">${translations.emptyWebsites || 'No Websites Deployed'}</h3>
                     <p style="color: var(--gray); max-width: 400px; margin: 0 auto;">${translations.emptyWebsitesText || 'No website projects have been deployed yet.'}</p>
                     ${this.state.isAdmin ? `
-                        <button class="btn btn-primary" onclick="window.showAdminSection('websites')" style="margin-top: var(--space-md);">
+                        <button class="btn btn-primary" onclick="app.showAdminSection('websites')" style="margin-top: var(--space-md);">
                             <i class="fas fa-cloud-upload-alt"></i> ${translations.emptyWebsites ? 'Deploy First Website' : 'Deploy First Website'}
                         </button>
                     ` : ''}
@@ -700,7 +700,7 @@ class SpaceTeamApp {
                             <a href="${website.url}" target="_blank" class="btn btn-sm btn-primary">
                                 <i class="fas fa-external-link-alt"></i> ${translations.btnVisitSite || 'Visit Site'}
                             </a>
-                            <button class="btn btn-sm btn-outline" onclick="window.viewWebsiteDetails(${website.id})">
+                            <button class="btn btn-sm btn-outline" onclick="app.viewWebsiteDetails(${website.id})">
                                 <i class="fas fa-info-circle"></i> Details
                             </button>
                         </div>
@@ -729,7 +729,7 @@ class SpaceTeamApp {
                     <h3 style="color: var(--secondary);">${translations.emptyBlog || 'Mission Briefings Pending'}</h3>
                     <p style="color: var(--gray); max-width: 400px; margin: 0 auto;">${translations.emptyBlogText || 'Stand by for mission briefings and tech discoveries!'}</p>
                     ${this.state.isAdmin ? `
-                        <button class="btn btn-primary" onclick="window.showAdminSection('blog')" style="margin-top: var(--space-md);">
+                        <button class="btn btn-primary" onclick="app.showAdminSection('blog')" style="margin-top: var(--space-md);">
                             <i class="fas fa-edit"></i> ${translations.emptyBlog ? 'Create First Briefing' : 'Create First Briefing'}
                         </button>
                     ` : ''}
@@ -757,7 +757,7 @@ class SpaceTeamApp {
                         <p class="blog-excerpt">${excerpt}</p>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
                             <span><i class="fas fa-user-astronaut"></i> ${post.author || 'Mission Control'}</span>
-                            <button class="btn btn-sm btn-outline" onclick="window.viewBlogPost(${post.id})">
+                            <button class="btn btn-sm btn-outline" onclick="app.viewBlogPost(${post.id})">
                                 ${translations.btnReadMore || 'Read Briefing'}
                             </button>
                         </div>
@@ -826,7 +826,7 @@ class SpaceTeamApp {
                     <h3 style="color: var(--secondary);">Tech Galaxy Map Unavailable</h3>
                     <p style="color: var(--gray);">Assign crew members with skills to map the tech galaxy</p>
                     ${this.state.isAdmin ? `
-                        <button class="btn btn-primary" onclick="window.showAdminSection('developers')" style="margin-top: var(--space-md);">
+                        <button class="btn btn-primary" onclick="app.showAdminSection('developers')" style="margin-top: var(--space-md);">
                             <i class="fas fa-user-astronaut"></i> Assign Crew Members
                         </button>
                     ` : ''}
@@ -1353,8 +1353,13 @@ class SpaceTeamApp {
         chatBody.scrollTop = chatBody.scrollHeight;
         
         try {
-            // Get AI response based on language
-            const response = await this.getAIResponse(message);
+            // FIXED: Use proper fallback for aiSystemPrompt
+            const systemPrompt = this.state.language === 'id' 
+                ? `You are SpaceTeam AI Assistant. Respond in Indonesian. ${CONFIG.aiSystemPrompt || 'You are a helpful AI assistant for SpaceTeam.'}`
+                : CONFIG.aiSystemPrompt || 'You are a helpful AI assistant for SpaceTeam.';
+            
+            // Get AI response
+            const response = await this.getAIResponse(message, systemPrompt);
             
             // Remove loading indicator
             loadingMsg.remove();
@@ -1378,14 +1383,10 @@ class SpaceTeamApp {
         chatBody.scrollTop = chatBody.scrollHeight;
     }
 
-    async getAIResponse(message) {
+    async getAIResponse(message, systemPrompt) {
         // Check if Gemini API key is available
         if (CONFIG.geminiApiKey && CONFIG.geminiApiKey !== '') {
             try {
-                const systemPrompt = this.state.language === 'id' 
-                    ? `You are SpaceTeam AI Assistant. Respond in Indonesian. ${CONFIG.aiSystemPrompt}`
-                    : CONFIG.aiSystemPrompt;
-                    
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${CONFIG.geminiApiKey}`, {
                     method: 'POST',
                     headers: {
@@ -1641,16 +1642,16 @@ class SpaceTeamApp {
                         <div>
                             <h3>Mission Controls</h3>
                             <div style="display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap;">
-                                <button class="btn btn-primary" onclick="window.showAdminSection('developers')">
+                                <button class="btn btn-primary" onclick="app.showAdminSection('developers')">
                                     <i class="fas fa-user-astronaut"></i> ${translations.adminManageCrew || 'Manage Crew'}
                                 </button>
-                                <button class="btn btn-secondary" onclick="window.showAdminSection('projects')">
+                                <button class="btn btn-secondary" onclick="app.showAdminSection('projects')">
                                     <i class="fas fa-rocket"></i> ${translations.adminManageMissions || 'Manage Missions'}
                                 </button>
-                                <button class="btn btn-outline" onclick="window.showAdminSection('websites')">
+                                <button class="btn btn-outline" onclick="app.showAdminSection('websites')">
                                     <i class="fas fa-globe"></i> ${translations.adminManageWebsites || 'Manage Websites'}
                                 </button>
-                                <button class="btn btn-outline" onclick="window.showAdminSection('blog')">
+                                <button class="btn btn-outline" onclick="app.showAdminSection('blog')">
                                     <i class="fas fa-edit"></i> ${translations.adminManageBriefings || 'Manage Briefings'}
                                 </button>
                             </div>
@@ -1671,7 +1672,7 @@ class SpaceTeamApp {
                                     `).join('')}
                                 </div>
                                 ${unreadMessages > 0 ? `
-                                    <button class="btn btn-sm btn-primary" onclick="window.showAdminSection('messages')" style="margin-top: 10px;">
+                                    <button class="btn btn-sm btn-primary" onclick="app.showAdminSection('messages')" style="margin-top: 10px;">
                                         <i class="fas fa-satellite"></i> ${translations.adminTransmissions || 'View All Transmissions'} (${unreadMessages} unread)
                                     </button>
                                 ` : ''}
@@ -1822,10 +1823,10 @@ class SpaceTeamApp {
                     <small style="color: var(--gray);">${Array.isArray(dev.skills) ? dev.skills.slice(0, 3).join(', ') : dev.skills || ''}</small>
                 </div>
                 <div class="admin-list-actions">
-                    <button class="btn btn-sm" onclick="window.editDeveloper(${dev.id})">
+                    <button class="btn btn-sm" onclick="app.editDeveloper(${dev.id})">
                         <i class="fas fa-edit"></i> Edit
                     </button>
-                    <button class="btn btn-sm btn-danger" onclick="window.deleteDeveloper(${dev.id})">
+                    <button class="btn btn-sm btn-danger" onclick="app.deleteDeveloper(${dev.id})">
                         <i class="fas fa-trash"></i> Delete
                     </button>
                 </div>
@@ -1853,7 +1854,7 @@ class SpaceTeamApp {
                             <i class="fas fa-user-astronaut fa-3x" style="color: var(--gray); margin-bottom: var(--space-md);"></i>
                             <h3 style="color: var(--dark);">No Crew Assigned</h3>
                             <p style="color: var(--gray);">Assign your first crew member to begin operations!</p>
-                            <button class="btn btn-primary" onclick="window.switchAdminTab('add-developer')" style="margin-top: var(--space-md);">
+                            <button class="btn btn-primary" onclick="app.switchAdminTab('add-developer')" style="margin-top: var(--space-md);">
                                 <i class="fas fa-user-astronaut"></i> Assign First Crew
                             </button>
                         </div>
@@ -1904,7 +1905,7 @@ class SpaceTeamApp {
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save"></i> ${this.state.editingId ? 'Update Crew Member' : 'Assign to Mission'}
                             </button>
-                            <button type="button" class="btn btn-outline" onclick="window.resetDeveloperForm()">
+                            <button type="button" class="btn btn-outline" onclick="app.resetDeveloperForm()">
                                 <i class="fas fa-times"></i> Cancel
                             </button>
                         </div>
@@ -1927,10 +1928,10 @@ class SpaceTeamApp {
                     <small style="color: var(--gray);">${Array.isArray(project.tech) ? project.tech.slice(0, 3).join(', ') : project.tech || ''}</small>
                 </div>
                 <div class="admin-list-actions">
-                    <button class="btn btn-sm" onclick="window.editProject(${project.id})">
+                    <button class="btn btn-sm" onclick="app.editProject(${project.id})">
                         <i class="fas fa-edit"></i> Edit
                     </button>
-                    <button class="btn btn-sm btn-danger" onclick="window.deleteProject(${project.id})">
+                    <button class="btn btn-sm btn-danger" onclick="app.deleteProject(${project.id})">
                         <i class="fas fa-trash"></i> Delete
                     </button>
                 </div>
@@ -1958,7 +1959,7 @@ class SpaceTeamApp {
                             <i class="fas fa-rocket fa-3x" style="color: var(--gray); margin-bottom: var(--space-md);"></i>
                             <h3 style="color: var(--dark);">No Missions Logged</h3>
                             <p style="color: var(--gray);">Log your first mission to showcase operations!</p>
-                            <button class="btn btn-primary" onclick="window.switchAdminTab('add-project')" style="margin-top: var(--space-md);">
+                            <button class="btn btn-primary" onclick="app.switchAdminTab('add-project')" style="margin-top: var(--space-md);">
                                 <i class="fas fa-rocket"></i> Log First Mission
                             </button>
                         </div>
@@ -2006,7 +2007,7 @@ class SpaceTeamApp {
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save"></i> ${this.state.editingId ? 'Update Mission' : 'Log Mission'}
                             </button>
-                            <button type="button" class="btn btn-outline" onclick="window.resetProjectForm()">
+                            <button type="button" class="btn btn-outline" onclick="app.resetProjectForm()">
                                 <i class="fas fa-times"></i> Cancel
                             </button>
                         </div>
@@ -2030,10 +2031,10 @@ class SpaceTeamApp {
                     </div>
                 </div>
                 <div class="admin-list-actions">
-                    <button class="btn btn-sm" onclick="window.editWebsite(${website.id})">
+                    <button class="btn btn-sm" onclick="app.editWebsite(${website.id})">
                         <i class="fas fa-edit"></i> Edit
                     </button>
-                    <button class="btn btn-sm btn-danger" onclick="window.deleteWebsite(${website.id})">
+                    <button class="btn btn-sm btn-danger" onclick="app.deleteWebsite(${website.id})">
                         <i class="fas fa-trash"></i> Delete
                     </button>
                 </div>
@@ -2061,7 +2062,7 @@ class SpaceTeamApp {
                             <i class="fas fa-globe fa-3x" style="color: var(--gray); margin-bottom: var(--space-md);"></i>
                             <h3 style="color: var(--dark);">No Websites Deployed</h3>
                             <p style="color: var(--gray);">Deploy your first website project!</p>
-                            <button class="btn btn-primary" onclick="window.switchAdminTab('add-website')" style="margin-top: var(--space-md);">
+                            <button class="btn btn-primary" onclick="app.switchAdminTab('add-website')" style="margin-top: var(--space-md);">
                                 <i class="fas fa-cloud-upload-alt"></i> Deploy First Website
                             </button>
                         </div>
@@ -2132,7 +2133,7 @@ class SpaceTeamApp {
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save"></i> ${this.state.editingId ? 'Update Website' : 'Deploy Website'}
                             </button>
-                            <button type="button" class="btn btn-outline" onclick="window.resetWebsiteForm()">
+                            <button type="button" class="btn btn-outline" onclick="app.resetWebsiteForm()">
                                 <i class="fas fa-times"></i> Cancel
                             </button>
                         </div>
@@ -2153,10 +2154,10 @@ class SpaceTeamApp {
                     <small style="color: var(--gray);">${new Date(post.created_at).toLocaleDateString()}</small>
                 </div>
                 <div class="admin-list-actions">
-                    <button class="btn btn-sm" onclick="window.editBlogPost(${post.id})">
+                    <button class="btn btn-sm" onclick="app.editBlogPost(${post.id})">
                         <i class="fas fa-edit"></i> Edit
                     </button>
-                    <button class="btn btn-sm btn-danger" onclick="window.deleteBlogPost(${post.id})">
+                    <button class="btn btn-sm btn-danger" onclick="app.deleteBlogPost(${post.id})">
                         <i class="fas fa-trash"></i> Delete
                     </button>
                 </div>
@@ -2184,7 +2185,7 @@ class SpaceTeamApp {
                             <i class="fas fa-newspaper fa-3x" style="color: var(--gray); margin-bottom: var(--space-md);"></i>
                             <h3 style="color: var(--dark);">No Briefings Available</h3>
                             <p style="color: var(--gray);">Create your first mission briefing!</p>
-                            <button class="btn btn-primary" onclick="window.switchAdminTab('add-blog')" style="margin-top: var(--space-md);">
+                            <button class="btn btn-primary" onclick="app.switchAdminTab('add-blog')" style="margin-top: var(--space-md);">
                                 <i class="fas fa-edit"></i> Create First Briefing
                             </button>
                         </div>
@@ -2229,7 +2230,7 @@ class SpaceTeamApp {
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save"></i> ${this.state.editingId ? 'Update Briefing' : 'Publish Briefing'}
                             </button>
-                            <button type="button" class="btn btn-outline" onclick="window.resetBlogForm()">
+                            <button type="button" class="btn btn-outline" onclick="app.resetBlogForm()">
                                 <i class="fas fa-times"></i> Cancel
                             </button>
                         </div>
@@ -2249,10 +2250,10 @@ class SpaceTeamApp {
                     <small style="color: var(--gray);">${new Date(msg.created_at).toLocaleString()}</small>
                 </div>
                 <div class="admin-list-actions">
-                    <button class="btn btn-sm" onclick="window.viewMessage(${msg.id})">
+                    <button class="btn btn-sm" onclick="app.viewMessage(${msg.id})">
                         <i class="fas fa-eye"></i> View
                     </button>
-                    <button class="btn btn-sm btn-danger" onclick="window.deleteMessage(${msg.id})">
+                    <button class="btn btn-sm btn-danger" onclick="app.deleteMessage(${msg.id})">
                         <i class="fas fa-trash"></i> Delete
                     </button>
                 </div>
@@ -2366,10 +2367,10 @@ class SpaceTeamApp {
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-save"></i> Save Systems
                         </button>
-                        <button type="button" class="btn btn-outline" onclick="window.exportData()">
+                        <button type="button" class="btn btn-outline" onclick="app.exportData()">
                             <i class="fas fa-download"></i> Backup Data
                         </button>
-                        <button type="button" class="btn btn-danger" onclick="window.resetData()">
+                        <button type="button" class="btn btn-danger" onclick="app.resetData()">
                             <i class="fas fa-trash"></i> System Reset
                         </button>
                     </div>

@@ -456,7 +456,7 @@ body:not(.dark-theme) .section-alt {
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364ffda' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364ffda' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.75rem center;
     background-size: 1em;
@@ -468,7 +468,7 @@ body:not(.dark-theme) .language-dropdown {
     background: rgba(0, 122, 204, 0.1);
     border-color: rgba(0, 122, 204, 0.2);
     color: var(--secondary);
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23007acc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23007acc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
 }
 
 .language-dropdown:hover {
@@ -2141,24 +2141,22 @@ textarea:focus,
     .nav-links {
         position: fixed;
         top: 0;
-        left: 0;
+        left: -100%;
         width: 100%;
         height: 100vh;
         background: var(--primary);
         flex-direction: column;
         padding: var(--space-3xl) var(--space-xl);
-        display: none;
+        display: flex !important;
         z-index: 999;
         gap: var(--space-lg);
         justify-content: center;
         align-items: center;
-        transition: transform 0.3s ease;
-        transform: translateX(-100%);
+        transition: left 0.3s ease;
     }
     
     .nav-links.active {
-        display: flex;
-        transform: translateX(0);
+        left: 0;
     }
     
     .nav-links a {

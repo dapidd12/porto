@@ -13,6 +13,9 @@ const CONFIG = {
     // Gemini AI Configuration - SET YOUR API KEY IN PRODUCTION
     geminiApiKey: '', // Leave empty or set your actual API key
     
+    // AI System Prompt
+    aiSystemPrompt: "You are the SpaceTeam AI assistant. Provide helpful responses about web development, projects, and services. Keep responses professional and space-themed.",
+    
     // Default language
     defaultLanguage: 'id', // 'id' for Indonesian, 'en' for English
     
