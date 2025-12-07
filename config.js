@@ -1,8 +1,8 @@
 // Configuration for SpaceTeam | Dev - FIXED VERSION
 const CONFIG = {
     // Supabase Configuration - UPDATE WITH YOUR CREDENTIALS
-    supabaseUrl: 'https://your-project.supabase.co',
-    supabaseKey: 'your-anon-key',
+    supabaseUrl: 'https://ktvfoxucvcggekbhabix.supabase.co',
+    supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0dmZveHVjdmNnZ2VrYmhhYml4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxMzExOTAsImV4cCI6MjA4MDcwNzE5MH0.-LMeM5FjepOfE69aieZ8g9vyN5bmDK25ZeHj4Ij9fmg',
     
     // Admin credentials - CHANGE THESE IN PRODUCTION!
     adminEmail: 'mission@spaceteam.dev',
