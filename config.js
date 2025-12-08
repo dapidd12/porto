@@ -1,3 +1,5 @@
+[file name]: config.js
+[file content begin]
 // Configuration for SpaceTeam | Dev - FIXED VERSION
 const CONFIG = {
     // Supabase Configuration - UPDATE WITH YOUR CREDENTIALS
@@ -368,3 +370,4 @@ window.addEventListener('unhandledrejection', function(e) {
     console.error('Unhandled promise rejection:', e.reason);
     // You can add error reporting here
 });
+[file content end]
