@@ -16,7 +16,6 @@ class SpaceTeamApp {
                 isAdmin: false,
                 currentAdminSection: 'dashboard',
                 editingId: null,
-                editingItem: null, // NEW: Store the item being edited
                 developers: [],
                 projects: [],
                 websiteProjects: [],
@@ -2063,7 +2062,6 @@ class SpaceTeamApp {
     showAdminSection(section) {
         this.state.currentAdminSection = section;
         this.state.editingId = null; // Reset editing state
-        this.state.editingItem = null; // Reset editing item
         
         const sectionsContainer = document.getElementById('admin-sections');
         if (!sectionsContainer) return;
@@ -2193,13 +2191,13 @@ class SpaceTeamApp {
         `).join('');
         
         const developerToEdit = this.state.editingId ? 
-            this.state.developers.find(d => d.id === this.state.editingId) : this.state.editingItem;
+            this.state.developers.find(d => d.id === this.state.editingId) : null;
         
         return `
             <div class="admin-section">
                 <div class="tab-nav">
                     <button class="tab-btn active" data-tab="developers-list">Mission Crew (${this.state.developers.length})</button>
-                    <button class="tab-btn" data-tab="add-developer">${this.state.editingId || this.state.editingItem ? 'Edit Crew Member' : 'Assign New Crew'}</button>
+                    <button class="tab-btn" data-tab="add-developer">${this.state.editingId ? 'Edit Crew Member' : 'Assign New Crew'}</button>
                 </div>
                 
                 <div id="developers-list" class="tab-content active">
@@ -2221,7 +2219,7 @@ class SpaceTeamApp {
                 </div>
                 
                 <div id="add-developer" class="tab-content">
-                    <h3>${this.state.editingId || this.state.editingItem ? 'Edit Crew Member' : 'Assign New Crew Member'}</h3>
+                    <h3>${this.state.editingId ? 'Edit Crew Member' : 'Assign New Crew Member'}</h3>
                     <form id="admin-developer-form">
                         <input type="hidden" id="admin-developer-id" value="${developerToEdit?.id || ''}">
                         <div class="form-row">
@@ -2262,7 +2260,7 @@ class SpaceTeamApp {
                         </div>
                         <div style="display: flex; gap: 15px; margin-top: 20px;">
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> ${this.state.editingId || this.state.editingItem ? 'Update Crew Member' : 'Assign to Mission'}
+                                <i class="fas fa-save"></i> ${this.state.editingId ? 'Update Crew Member' : 'Assign to Mission'}
                             </button>
                             <button type="button" class="btn btn-outline" onclick="app.resetDeveloperForm()">
                                 <i class="fas fa-times"></i> Cancel
@@ -2298,13 +2296,13 @@ class SpaceTeamApp {
         `).join('');
         
         const projectToEdit = this.state.editingId ? 
-            this.state.projects.find(p => p.id === this.state.editingId) : this.state.editingItem;
+            this.state.projects.find(p => p.id === this.state.editingId) : null;
         
         return `
             <div class="admin-section">
                 <div class="tab-nav">
                     <button class="tab-btn active" data-tab="projects-list">Mission Log (${this.state.projects.length})</button>
-                    <button class="tab-btn" data-tab="add-project">${this.state.editingId || this.state.editingItem ? 'Edit Mission' : 'Log New Mission'}</button>
+                    <button class="tab-btn" data-tab="add-project">${this.state.editingId ? 'Edit Mission' : 'Log New Mission'}</button>
                 </div>
                 
                 <div id="projects-list" class="tab-content active">
@@ -2326,7 +2324,7 @@ class SpaceTeamApp {
                 </div>
                 
                 <div id="add-project" class="tab-content">
-                    <h3>${this.state.editingId || this.state.editingItem ? 'Edit Mission' : 'Log New Mission'}</h3>
+                    <h3>${this.state.editingId ? 'Edit Mission' : 'Log New Mission'}</h3>
                     <form id="admin-project-form">
                         <input type="hidden" id="admin-project-id" value="${projectToEdit?.id || ''}">
                         <div class="form-row">
@@ -2364,7 +2362,7 @@ class SpaceTeamApp {
                         </div>
                         <div style="display: flex; gap: 15px; margin-top: 20px;">
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> ${this.state.editingId || this.state.editingItem ? 'Update Mission' : 'Log Mission'}
+                                <i class="fas fa-save"></i> ${this.state.editingId ? 'Update Mission' : 'Log Mission'}
                             </button>
                             <button type="button" class="btn btn-outline" onclick="app.resetProjectForm()">
                                 <i class="fas fa-times"></i> Cancel
@@ -2401,13 +2399,13 @@ class SpaceTeamApp {
         `).join('');
         
         const websiteToEdit = this.state.editingId ? 
-            this.state.websiteProjects.find(w => w.id === this.state.editingId) : this.state.editingItem;
+            this.state.websiteProjects.find(w => w.id === this.state.editingId) : null;
         
         return `
             <div class="admin-section">
                 <div class="tab-nav">
                     <button class="tab-btn active" data-tab="websites-list">Deployed Websites (${this.state.websiteProjects.length})</button>
-                    <button class="tab-btn" data-tab="add-website">${this.state.editingId || this.state.editingItem ? 'Edit Website' : 'Deploy New Website'}</button>
+                    <button class="tab-btn" data-tab="add-website">${this.state.editingId ? 'Edit Website' : 'Deploy New Website'}</button>
                 </div>
                 
                 <div id="websites-list" class="tab-content active">
@@ -2429,7 +2427,7 @@ class SpaceTeamApp {
                 </div>
                 
                 <div id="add-website" class="tab-content">
-                    <h3>${this.state.editingId || this.state.editingItem ? 'Edit Website' : 'Deploy New Website'}</h3>
+                    <h3>${this.state.editingId ? 'Edit Website' : 'Deploy New Website'}</h3>
                     <form id="admin-website-form">
                         <input type="hidden" id="admin-website-id" value="${websiteToEdit?.id || ''}">
                         
@@ -2490,7 +2488,7 @@ class SpaceTeamApp {
                         
                         <div style="display: flex; gap: 15px; margin-top: 30px;">
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> ${this.state.editingId || this.state.editingItem ? 'Update Website' : 'Deploy Website'}
+                                <i class="fas fa-save"></i> ${this.state.editingId ? 'Update Website' : 'Deploy Website'}
                             </button>
                             <button type="button" class="btn btn-outline" onclick="app.resetWebsiteForm()">
                                 <i class="fas fa-times"></i> Cancel
@@ -2524,13 +2522,13 @@ class SpaceTeamApp {
         `).join('');
         
         const postToEdit = this.state.editingId ? 
-            this.state.blogPosts.find(p => p.id === this.state.editingId) : this.state.editingItem;
+            this.state.blogPosts.find(p => p.id === this.state.editingId) : null;
         
         return `
             <div class="admin-section">
                 <div class="tab-nav">
                     <button class="tab-btn active" data-tab="blog-list">Mission Briefings (${this.state.blogPosts.length})</button>
-                    <button class="tab-btn" data-tab="add-blog">${this.state.editingId || this.state.editingItem ? 'Edit Briefing' : 'Create Briefing'}</button>
+                    <button class="tab-btn" data-tab="add-blog">${this.state.editingId ? 'Edit Briefing' : 'Create Briefing'}</button>
                 </div>
                 
                 <div id="blog-list" class="tab-content active">
@@ -2552,7 +2550,7 @@ class SpaceTeamApp {
                 </div>
                 
                 <div id="add-blog" class="tab-content">
-                    <h3>${this.state.editingId || this.state.editingItem ? 'Edit Mission Briefing' : 'Create Mission Briefing'}</h3>
+                    <h3>${this.state.editingId ? 'Edit Mission Briefing' : 'Create Mission Briefing'}</h3>
                     <form id="admin-blog-form">
                         <input type="hidden" id="admin-blog-id" value="${postToEdit?.id || ''}">
                         <div class="form-row">
@@ -2587,7 +2585,7 @@ class SpaceTeamApp {
                         </div>
                         <div style="display: flex; gap: 15px; margin-top: 20px;">
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> ${this.state.editingId || this.state.editingItem ? 'Update Briefing' : 'Publish Briefing'}
+                                <i class="fas fa-save"></i> ${this.state.editingId ? 'Update Briefing' : 'Publish Briefing'}
                             </button>
                             <button type="button" class="btn btn-outline" onclick="app.resetBlogForm()">
                                 <i class="fas fa-times"></i> Cancel
@@ -2753,7 +2751,7 @@ class SpaceTeamApp {
         }
         
         const developerData = {
-            id: this.state.editingId || this.state.editingItem?.id || this.state.developerIdCounter++,
+            id: this.state.editingId || this.state.developerIdCounter++,
             name: nameInput.value.trim(),
             role: roleInput.value.trim(),
             image: imageInput.value.trim(),
@@ -2761,7 +2759,7 @@ class SpaceTeamApp {
             github: document.getElementById('admin-dev-github')?.value.trim() || '',
             skills: skillsInput.value.split(',').map(s => s.trim()).filter(s => s),
             bio: bioInput.value.trim(),
-            created_at: this.state.editingId || this.state.editingItem ? this.state.editingItem?.created_at : new Date().toISOString(),
+            created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
         };
         
@@ -2777,7 +2775,6 @@ class SpaceTeamApp {
             if (saved) {
                 this.showNotification(`Crew member ${this.state.editingId ? 'updated' : 'assigned'} successfully!`, 'success');
                 this.state.editingId = null;
-                this.state.editingItem = null;
                 await this.loadData();
                 this.showAdminSection('developers');
             } else {
@@ -2809,14 +2806,14 @@ class SpaceTeamApp {
         }
         
         const projectData = {
-            id: this.state.editingId || this.state.editingItem?.id || this.state.projectIdCounter++,
+            id: this.state.editingId || this.state.projectIdCounter++,
             title: titleInput.value.trim(),
             type: typeInput.value,
             image: imageInput.value.trim(),
             link: document.getElementById('admin-project-link')?.value.trim() || '',
             tech: techInput.value.split(',').map(t => t.trim()).filter(t => t),
             description: descriptionInput.value.trim(),
-            created_at: this.state.editingId || this.state.editingItem ? this.state.editingItem?.created_at : new Date().toISOString(),
+            created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
         };
         
@@ -2832,7 +2829,6 @@ class SpaceTeamApp {
             if (saved) {
                 this.showNotification(`Mission ${this.state.editingId ? 'updated' : 'logged'} successfully!`, 'success');
                 this.state.editingId = null;
-                this.state.editingItem = null;
                 await this.loadData();
                 this.showAdminSection('projects');
             } else {
@@ -2864,7 +2860,7 @@ class SpaceTeamApp {
         }
         
         const websiteData = {
-            id: this.state.editingId || this.state.editingItem?.id || this.state.websiteIdCounter++,
+            id: this.state.editingId || this.state.websiteIdCounter++,
             title: titleInput.value.trim(),
             url: urlInput.value.trim(),
             screenshot: screenshotInput.value.trim(),
@@ -2874,8 +2870,8 @@ class SpaceTeamApp {
             github: document.getElementById('admin-website-github')?.value.trim() || '',
             icon: document.getElementById('admin-website-icon')?.value.trim() || 'fas fa-globe',
             features: document.getElementById('admin-website-features')?.value.split(',').map(f => f.trim()).filter(f => f) || [],
-            views: this.state.editingId || this.state.editingItem ? this.state.editingItem?.views || 0 : 0,
-            created_at: this.state.editingId || this.state.editingItem ? this.state.editingItem?.created_at : new Date().toISOString(),
+            views: 0,
+            created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
         };
         
@@ -2891,7 +2887,6 @@ class SpaceTeamApp {
             if (saved) {
                 this.showNotification(`Website ${this.state.editingId ? 'updated' : 'deployed'} successfully!`, 'success');
                 this.state.editingId = null;
-                this.state.editingItem = null;
                 await this.loadData();
                 this.showAdminSection('websites');
             } else {
@@ -2924,14 +2919,14 @@ class SpaceTeamApp {
         }
         
         const blogData = {
-            id: this.state.editingId || this.state.editingItem?.id || this.state.blogIdCounter++,
+            id: this.state.editingId || this.state.blogIdCounter++,
             title: titleInput.value.trim(),
             category: categoryInput.value.trim(),
             author: authorInput.value.trim(),
             image: imageInput.value.trim(),
             excerpt: excerptInput.value.trim(),
             content: contentInput.value.trim(),
-            created_at: this.state.editingId || this.state.editingItem ? this.state.editingItem?.created_at : new Date().toISOString(),
+            created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
         };
         
@@ -2947,7 +2942,6 @@ class SpaceTeamApp {
             if (saved) {
                 this.showNotification(`Mission briefing ${this.state.editingId ? 'updated' : 'published'} successfully!`, 'success');
                 this.state.editingId = null;
-                this.state.editingItem = null;
                 await this.loadData();
                 this.showAdminSection('blog');
             } else {
@@ -3029,61 +3023,32 @@ class SpaceTeamApp {
         }
     }
 
-    // Edit methods - FIXED
+    // Edit methods
     editDeveloper(id) {
-        const developer = this.state.developers.find(d => d.id === id);
-        if (!developer) return;
-        
         this.state.editingId = id;
-        this.state.editingItem = developer;
         this.showAdminSection('developers');
-        
-        // Switch to edit tab after a small delay to ensure DOM is ready
-        setTimeout(() => {
-            this.switchAdminTab('add-developer');
-        }, 100);
+        this.switchAdminTab('add-developer');
     }
 
     editProject(id) {
-        const project = this.state.projects.find(p => p.id === id);
-        if (!project) return;
-        
         this.state.editingId = id;
-        this.state.editingItem = project;
         this.showAdminSection('projects');
-        
-        setTimeout(() => {
-            this.switchAdminTab('add-project');
-        }, 100);
+        this.switchAdminTab('add-project');
     }
 
     editWebsite(id) {
-        const website = this.state.websiteProjects.find(w => w.id === id);
-        if (!website) return;
-        
         this.state.editingId = id;
-        this.state.editingItem = website;
         this.showAdminSection('websites');
-        
-        setTimeout(() => {
-            this.switchAdminTab('add-website');
-        }, 100);
+        this.switchAdminTab('add-website');
     }
 
     editBlogPost(id) {
-        const post = this.state.blogPosts.find(p => p.id === id);
-        if (!post) return;
-        
         this.state.editingId = id;
-        this.state.editingItem = post;
         this.showAdminSection('blog');
-        
-        setTimeout(() => {
-            this.switchAdminTab('add-blog');
-        }, 100);
+        this.switchAdminTab('add-blog');
     }
 
-    // Delete methods
+    // Delete methods - FIXED
     async deleteDeveloper(id) {
         if (!confirm('Are you sure you want to remove this crew member from the mission?')) return;
         
@@ -3221,25 +3186,21 @@ class SpaceTeamApp {
     // Reset methods
     resetDeveloperForm() {
         this.state.editingId = null;
-        this.state.editingItem = null;
         this.showAdminSection('developers');
     }
 
     resetProjectForm() {
         this.state.editingId = null;
-        this.state.editingItem = null;
         this.showAdminSection('projects');
     }
 
     resetWebsiteForm() {
         this.state.editingId = null;
-        this.state.editingItem = null;
         this.showAdminSection('websites');
     }
 
     resetBlogForm() {
         this.state.editingId = null;
-        this.state.editingItem = null;
         this.showAdminSection('blog');
     }
 
