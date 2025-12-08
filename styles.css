@@ -1,4 +1,4 @@
-/* ========== CSS VARIABLES & RESET - FIXED ========== */
+/* ========== CSS VARIABLES & RESET - ENHANCED VERSION ========== */
 :root {
     /* Primary Color Palette - Space & Tech Theme */
     --primary-dark: #0a192f;
@@ -15,7 +15,7 @@
     --accent-pink: #ff6b9d;
     --accent-orange: #ff9e64;
     
-    /* Neutral Colors - Dark Theme Default - FIXED NAMING */
+    /* Neutral Colors - Dark Theme Default */
     --text-primary: #e6f1ff;
     --text-secondary: #a8b2d1;
     --text-tertiary: #8892b0;
@@ -61,7 +61,7 @@
     --font-heading: 'Calibre', 'Inter', -apple-system, sans-serif;
 }
 
-/* ========== LIGHT THEME VARIABLES - FIXED ========== */
+/* ========== LIGHT THEME VARIABLES ========== */
 body:not(.dark-theme) {
     --primary-dark: #f1f5f9;
     --primary: #f8fafc;
@@ -77,7 +77,7 @@ body:not(.dark-theme) {
     --accent-pink: #e8368c;
     --accent-orange: #ff7b42;
     
-    /* Neutral Colors - Light Theme - FIXED */
+    /* Neutral Colors - Light Theme */
     --text-primary: #1e293b;
     --text-secondary: #334155;
     --text-tertiary: #64748b;
@@ -120,6 +120,8 @@ body {
     overflow-x: hidden;
     transition: background-color var(--transition-slow), 
                 color var(--transition-slow);
+    position: relative;
+    min-height: 100vh;
 }
 
 /* Custom Scrollbar */
@@ -155,14 +157,19 @@ body {
 .website-description,
 .blog-excerpt,
 p,
-.form-label {
+.form-label,
+textarea,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="url"] {
     user-select: text;
     -webkit-user-select: text;
     -moz-user-select: text;
     -ms-user-select: text;
 }
 
-/* ========== TYPOGRAPHY - FIXED ========== */
+/* ========== TYPOGRAPHY ========== */
 h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
     font-weight: 600;
@@ -474,7 +481,7 @@ body:not(.dark-theme) .language-dropdown:hover {
     color: var(--text-primary);
 }
 
-/* ========== NAVIGATION - IMPROVED ========== */
+/* ========== NAVIGATION ========== */
 .navbar {
     position: fixed;
     top: 0;
@@ -690,7 +697,7 @@ body:not(.dark-theme) .hero-stats {
     letter-spacing: 1px;
 }
 
-/* ========== DEVELOPERS SECTION - IMPROVED ========== */
+/* ========== DEVELOPERS SECTION ========== */
 .developers-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -736,6 +743,7 @@ body:not(.dark-theme) .developer-card {
     transition: transform var(--transition-slow);
     opacity: 0;
     animation: fadeIn 0.5s ease forwards;
+    cursor: pointer;
 }
 
 .developer-card:hover .developer-image {
@@ -917,6 +925,7 @@ body:not(.dark-theme) .project-card {
     opacity: 0;
     animation: fadeIn 0.5s ease forwards;
     flex-shrink: 0;
+    cursor: pointer;
 }
 
 .project-card:hover .project-image {
@@ -1039,6 +1048,7 @@ body:not(.dark-theme) .website-card {
     transition: transform var(--transition-slow);
     opacity: 0;
     animation: fadeIn 0.5s ease forwards;
+    cursor: pointer;
 }
 
 .website-card:hover .website-image {
@@ -1159,6 +1169,7 @@ body:not(.dark-theme) .blog-card {
     opacity: 0;
     animation: fadeIn 0.5s ease forwards;
     flex-shrink: 0;
+    cursor: pointer;
 }
 
 .blog-content {
@@ -1199,7 +1210,7 @@ body:not(.dark-theme) .blog-category {
     margin-top: auto;
 }
 
-/* ========== CONTACT SECTION - FIXED ========== */
+/* ========== CONTACT SECTION ========== */
 .contact-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1550,7 +1561,7 @@ body:not(.dark-theme) .theme-toggle {
     color: var(--white);
 }
 
-/* ========== CHAT WIDGET - FIXED MOBILE ========== */
+/* ========== CHAT WIDGET ========== */
 .chat-toggle {
     position: fixed;
     bottom: var(--space-xl);
@@ -1693,10 +1704,11 @@ body:not(.dark-theme) .chat-input input:focus {
     background: var(--bg-surface);
 }
 
-/* ========== ADMIN PANEL - FIXED (MENU TIDAK MEMENUHI LAYAR) ========== */
+/* ========== ADMIN PANEL ========== */
 #admin-panel {
     background: var(--bg-primary);
     min-height: 100vh;
+    position: relative;
 }
 
 .admin-header {
@@ -1890,6 +1902,7 @@ body:not(.dark-theme) .notification {
     justify-content: center;
     z-index: 2000;
     padding: var(--space-md);
+    overflow-y: auto;
 }
 
 body:not(.dark-theme) .modal {
@@ -1907,11 +1920,17 @@ body:not(.dark-theme) .modal {
     box-shadow: var(--shadow-xl);
     border: 1px solid rgba(100, 255, 218, 0.2);
     color: var(--text-primary);
+    animation: modalFadeIn 0.3s ease;
 }
 
 body:not(.dark-theme) .modal-content {
     background: var(--bg-surface);
     border-color: rgba(0, 122, 204, 0.2);
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
 }
 
 .modal-header {
@@ -1999,7 +2018,7 @@ body:not(.dark-theme) .tab-btn.active {
     animation: fadeIn 0.3s ease;
 }
 
-/* ========== LOADING - FIXED ========== */
+/* ========== LOADING ========== */
 .loading-overlay {
     position: fixed;
     top: 0;
@@ -2092,22 +2111,76 @@ textarea:focus,
     outline-offset: 2px;
 }
 
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-    .btn-primary {
-        border: 2px solid var(--white);
-    }
-    
-    .btn-outline {
-        border-width: 3px;
-    }
-    
-    .nav-links a::after {
-        height: 3px;
-    }
+/* ========== FULLSCREEN IMAGE OVERLAY ========== */
+.fullscreen-image-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(2, 12, 27, 0.95);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+    padding: var(--space-xl);
+    cursor: pointer;
+    animation: fadeIn 0.3s ease;
 }
 
-/* ========== RESPONSIVE DESIGN - FIXED MOBILE & ADMIN ========== */
+body:not(.dark-theme) .fullscreen-image-overlay {
+    background: rgba(0, 0, 0, 0.95);
+}
+
+.fullscreen-image-overlay img {
+    max-width: 90%;
+    max-height: 70vh;
+    object-fit: contain;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xl);
+    cursor: default;
+}
+
+/* ========== FORM CHECKBOXES ========== */
+.form-check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: var(--space-md);
+}
+
+.form-check input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.form-check label {
+    margin: 0;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+/* ========== CLICKABLE IMAGES ========== */
+.clickable-image {
+    cursor: pointer;
+    transition: transform var(--transition);
+}
+
+.clickable-image:hover {
+    transform: scale(1.02);
+}
+
+/* ========== CARD HOVER EFFECTS ========== */
+.developer-card:hover .developer-image,
+.project-card:hover .project-image,
+.website-card:hover .website-image,
+.blog-card:hover .blog-image {
+    transform: scale(1.05);
+}
+
+/* ========== RESPONSIVE DESIGN ========== */
 @media (max-width: 1024px) {
     .hero-title {
         font-size: 2.75rem;
@@ -2132,7 +2205,7 @@ textarea:focus,
         font-size: 15px;
     }
     
-    /* FIXED MOBILE NAVIGATION */
+    /* MOBILE NAVIGATION */
     .nav-links {
         position: fixed;
         top: 0;
@@ -2221,7 +2294,7 @@ textarea:focus,
         bottom: calc(var(--space-md) + 70px);
     }
     
-    /* FIXED ADMIN PANEL MOBILE */
+    /* ADMIN PANEL MOBILE */
     .admin-nav {
         flex-direction: column;
         gap: var(--space-md);
@@ -2270,6 +2343,16 @@ textarea:focus,
     
     .running-text {
         animation: runText 20s linear infinite;
+    }
+    
+    /* Fullscreen image adjustments */
+    .fullscreen-image-overlay {
+        padding: var(--space-md);
+    }
+    
+    .fullscreen-image-overlay img {
+        max-width: 95%;
+        max-height: 60vh;
     }
 }
 
@@ -2334,7 +2417,7 @@ textarea:focus,
         grid-template-columns: 1fr;
     }
     
-    /* FIXED ADMIN PANEL SMALL MOBILE */
+    /* ADMIN PANEL SMALL MOBILE */
     .admin-nav-links {
         justify-content: flex-start;
         padding-bottom: var(--space-sm);
@@ -2343,5 +2426,135 @@ textarea:focus,
     .admin-nav-btn {
         padding: 0.4rem 0.6rem;
         font-size: 0.7rem;
+    }
+    
+    /* Modal adjustments */
+    .modal-content {
+        padding: var(--space-lg);
+    }
+}
+
+/* ========== PRINT STYLES ========== */
+@media print {
+    .navbar,
+    .chat-toggle,
+    .chat-widget,
+    .running-text-container,
+    .footer,
+    .admin-header,
+    .admin-nav {
+        display: none !important;
+    }
+    
+    body {
+        background: white !important;
+        color: black !important;
+    }
+    
+    .container {
+        max-width: 100%;
+    }
+    
+    .section {
+        padding: 1rem 0 !important;
+        break-inside: avoid;
+    }
+    
+    a {
+        color: black !important;
+        text-decoration: underline;
+    }
+}
+
+/* ========== ANIMATION PERFORMANCE OPTIMIZATION ========== */
+.animate__animated {
+    will-change: transform, opacity;
+}
+
+/* ========== HIGH CONTRAST MODE SUPPORT ========== */
+@media (prefers-contrast: high) {
+    .btn-primary {
+        border: 2px solid var(--white);
+    }
+    
+    .btn-outline {
+        border-width: 3px;
+    }
+    
+    .nav-links a::after {
+        height: 3px;
+    }
+    
+    .form-control {
+        border-width: 2px;
+    }
+}
+
+/* ========== REDUCED MOTION ========== */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .running-text {
+        animation: none;
+        white-space: normal;
+        padding-left: 0;
+    }
+    
+    .section {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+    
+    .developer-card:hover,
+    .project-card:hover,
+    .website-card:hover,
+    .blog-card:hover {
+        transform: none;
+    }
+    
+    .btn:hover,
+    .btn-primary:hover,
+    .btn-secondary:hover,
+    .btn-outline:hover {
+        transform: none;
+    }
+    
+    .developer-image,
+    .project-image,
+    .website-image,
+    .blog-image {
+        transition: none;
+    }
+}
+
+/* ========== FALLBACK STYLES FOR OLDER BROWSERS ========== */
+/* Flexbox gap fallback */
+@supports not (gap: var(--space-md)) {
+    .hero-actions > * + *,
+    .nav-actions > * + *,
+    .admin-list-actions > * + *,
+    .website-actions > * + * {
+        margin-left: var(--space-md);
+    }
+    
+    .developers-grid,
+    .projects-grid,
+    .websites-grid,
+    .blog-grid {
+        margin: -var(--space-sm);
+    }
+    
+    .developers-grid > *,
+    .projects-grid > *,
+    .websites-grid > *,
+    .blog-grid > * {
+        margin: var(--space-sm);
     }
 }

@@ -1,4 +1,4 @@
-// Main Application - SpaceTeam | Dev - FIXED VERSION
+// Main Application - SpaceTeam | Dev - ENHANCED VERSION
 class SpaceTeamApp {
     constructor() {
         try {
@@ -32,7 +32,8 @@ class SpaceTeamApp {
                 resizeObserver: null,
                 chartObserver: null,
                 loadingStartTime: null,
-                isMobileMenuOpen: false
+                isMobileMenuOpen: false,
+                fullscreenImage: null // For fullscreen image view
             };
 
             // Bind methods to maintain context
@@ -57,6 +58,8 @@ class SpaceTeamApp {
             this.handleScroll = this.handleScroll.bind(this);
             this.initLazyLoading = this.initLazyLoading.bind(this);
             this.safeParseJSON = this.safeParseJSON.bind(this);
+            this.showFullscreenImage = this.showFullscreenImage.bind(this);
+            this.closeFullscreenImage = this.closeFullscreenImage.bind(this);
             
             this.init();
         } catch (error) {
@@ -484,6 +487,9 @@ class SpaceTeamApp {
         
         // Initialize lazy loading for new images
         this.initLazyLoading();
+        
+        // Setup image click handlers for fullscreen view
+        this.setupImageClickHandlers();
     }
 
     applySettings() {
@@ -616,7 +622,10 @@ class SpaceTeamApp {
                     <div class="developer-header">
                         <img src="${dev.image || 'https://images.unsplash.com/photo-1534796636910-9c1825470300?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" 
                              alt="${dev.name}" 
-                             class="developer-image"
+                             class="developer-image clickable-image"
+                             data-image="${dev.image || 'https://images.unsplash.com/photo-1534796636910-9c1825470300?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}"
+                             data-title="${dev.name}"
+                             data-description="${dev.role}"
                              loading="lazy">
                         <div class="developer-overlay">
                             <h3 class="developer-name">${dev.name}</h3>
@@ -695,7 +704,10 @@ class SpaceTeamApp {
                 <div class="project-card animate__animated animate__fadeInUp" style="animation-delay: ${index * 100}ms">
                     <img src="${project.image || 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" 
                          alt="${project.title}" 
-                         class="project-image"
+                         class="project-image clickable-image"
+                         data-image="${project.image || 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}"
+                         data-title="${project.title}"
+                         data-description="${project.description}"
                          loading="lazy">
                     <div class="project-content">
                         <h3 class="project-title">${project.title}</h3>
@@ -761,7 +773,10 @@ class SpaceTeamApp {
                     <div class="website-preview">
                         <img src="${website.screenshot || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" 
                              alt="${website.title}" 
-                             class="website-image"
+                             class="website-image clickable-image"
+                             data-image="${website.screenshot || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}"
+                             data-title="${website.title}"
+                             data-description="${website.description}"
                              loading="lazy">
                         <div class="website-status ${website.status || 'live'}">
                             <span>${statusText[website.status] || statusText.live}</span>
@@ -831,7 +846,10 @@ class SpaceTeamApp {
                 <div class="blog-card animate__animated animate__fadeInUp" style="animation-delay: ${index * 100}ms">
                     <img src="${post.image || 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" 
                          alt="${post.title}" 
-                         class="blog-image"
+                         class="blog-image clickable-image"
+                         data-image="${post.image || 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}"
+                         data-title="${post.title}"
+                         data-description="${post.category || 'Mission Briefing'}"
                          loading="lazy">
                     <div class="blog-content">
                         <span class="blog-category">${post.category || 'Mission Briefing'}</span>
@@ -1116,6 +1134,7 @@ class SpaceTeamApp {
             document.addEventListener('click', (e) => {
                 if (e.target.classList.contains('modal')) {
                     this.hideLoginModal();
+                    this.closeFullscreenImage();
                 }
                 
                 // Close mobile menu when clicking outside
@@ -1133,11 +1152,153 @@ class SpaceTeamApp {
                     if (this.state.isMobileMenuOpen) {
                         this.closeMobileMenu();
                     }
+                    this.closeFullscreenImage();
                 }
             });
             
         } catch (error) {
             console.error('Error setting up event listeners:', error);
+        }
+    }
+
+    setupImageClickHandlers() {
+        // Delegate click events for images
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('clickable-image')) {
+                const img = e.target;
+                this.showFullscreenImage(
+                    img.dataset.image || img.src,
+                    img.dataset.title || img.alt,
+                    img.dataset.description || ''
+                );
+            }
+        });
+    }
+
+    showFullscreenImage(src, title, description) {
+        // Create fullscreen image overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'fullscreen-image-overlay';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(2, 12, 27, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: var(--space-xl);
+            cursor: pointer;
+        `;
+        
+        if (!document.body.classList.contains('dark-theme')) {
+            overlay.style.background = 'rgba(0, 0, 0, 0.95)';
+        }
+        
+        const imageContainer = document.createElement('div');
+        imageContainer.style.cssText = `
+            position: relative;
+            max-width: 90%;
+            max-height: 80%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        `;
+        
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = title;
+        img.style.cssText = `
+            max-width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-xl);
+            cursor: default;
+        `;
+        
+        const closeBtn = document.createElement('button');
+        closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+        closeBtn.style.cssText = `
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--danger);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            z-index: 2001;
+        `;
+        closeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.closeFullscreenImage();
+        });
+        
+        const infoPanel = document.createElement('div');
+        infoPanel.style.cssText = `
+            background: var(--bg-surface);
+            color: var(--text-primary);
+            padding: var(--space-lg);
+            border-radius: var(--radius);
+            margin-top: var(--space-lg);
+            max-width: 600px;
+            text-align: center;
+            border: 1px solid rgba(100, 255, 218, 0.2);
+        `;
+        
+        const titleElement = document.createElement('h3');
+        titleElement.textContent = title;
+        titleElement.style.cssText = `
+            margin: 0 0 var(--space-sm) 0;
+            color: var(--text-primary);
+        `;
+        
+        const descElement = document.createElement('p');
+        descElement.textContent = description;
+        descElement.style.cssText = `
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+        `;
+        
+        infoPanel.appendChild(titleElement);
+        if (description) {
+            infoPanel.appendChild(descElement);
+        }
+        
+        imageContainer.appendChild(img);
+        imageContainer.appendChild(closeBtn);
+        overlay.appendChild(imageContainer);
+        overlay.appendChild(infoPanel);
+        
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                this.closeFullscreenImage();
+            }
+        });
+        
+        document.body.appendChild(overlay);
+        document.body.style.overflow = 'hidden';
+        
+        this.state.fullscreenImage = overlay;
+    }
+
+    closeFullscreenImage() {
+        if (this.state.fullscreenImage) {
+            document.body.removeChild(this.state.fullscreenImage);
+            document.body.style.overflow = '';
+            this.state.fullscreenImage = null;
         }
     }
 
@@ -1953,10 +2114,15 @@ class SpaceTeamApp {
     getDevelopersManagementHTML() {
         const developersListHTML = this.state.developers.map(dev => `
             <div class="admin-list-item">
-                <div>
-                    <h4 style="margin: 0; color: var(--text-primary);">${dev.name}</h4>
-                    <p style="margin: 5px 0; color: var(--text-secondary);">${dev.role}</p>
-                    <small style="color: var(--text-tertiary);">${Array.isArray(dev.skills) ? dev.skills.slice(0, 3).join(', ') : dev.skills || ''}</small>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <img src="${dev.image || 'https://images.unsplash.com/photo-1534796636910-9c1825470300?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80'}" 
+                         alt="${dev.name}" 
+                         style="width: 60px; height: 60px; object-fit: cover; border-radius: var(--radius);">
+                    <div>
+                        <h4 style="margin: 0; color: var(--text-primary);">${dev.name}</h4>
+                        <p style="margin: 5px 0; color: var(--text-secondary);">${dev.role}</p>
+                        <small style="color: var(--text-tertiary);">${Array.isArray(dev.skills) ? dev.skills.slice(0, 3).join(', ') : dev.skills || ''}</small>
+                    </div>
                 </div>
                 <div class="admin-list-actions">
                     <button class="btn btn-sm" onclick="app.editDeveloper(${dev.id})">
@@ -2044,6 +2210,11 @@ class SpaceTeamApp {
                             <button type="button" class="btn btn-outline" onclick="app.resetDeveloperForm()">
                                 <i class="fas fa-times"></i> Cancel
                             </button>
+                            ${developerToEdit ? `
+                                <button type="button" class="btn btn-secondary" onclick="app.previewImage('admin-dev-image')">
+                                    <i class="fas fa-eye"></i> Preview Image
+                                </button>
+                            ` : ''}
                         </div>
                     </form>
                 </div>
@@ -2054,14 +2225,19 @@ class SpaceTeamApp {
     getProjectsManagementHTML() {
         const projectsListHTML = this.state.projects.map(project => `
             <div class="admin-list-item">
-                <div>
-                    <h4 style="margin: 0; color: var(--text-primary);">${project.title}</h4>
-                    <p style="margin: 5px 0; color: var(--text-secondary);">
-                        ${project.type === 'web' ? 'Web Systems' : 
-                          project.type === 'mobile' ? 'Mobile App' : 
-                          'UI/UX Design'}
-                    </p>
-                    <small style="color: var(--text-tertiary);">${Array.isArray(project.tech) ? project.tech.slice(0, 3).join(', ') : project.tech || ''}</small>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <img src="${project.image || 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80'}" 
+                         alt="${project.title}" 
+                         style="width: 60px; height: 40px; object-fit: cover; border-radius: var(--radius);">
+                    <div>
+                        <h4 style="margin: 0; color: var(--text-primary);">${project.title}</h4>
+                        <p style="margin: 5px 0; color: var(--text-secondary);">
+                            ${project.type === 'web' ? 'Web Systems' : 
+                              project.type === 'mobile' ? 'Mobile App' : 
+                              'UI/UX Design'}
+                        </p>
+                        <small style="color: var(--text-tertiary);">${Array.isArray(project.tech) ? project.tech.slice(0, 3).join(', ') : project.tech || ''}</small>
+                    </div>
                 </div>
                 <div class="admin-list-actions">
                     <button class="btn btn-sm" onclick="app.editProject(${project.id})">
@@ -2146,6 +2322,11 @@ class SpaceTeamApp {
                             <button type="button" class="btn btn-outline" onclick="app.resetProjectForm()">
                                 <i class="fas fa-times"></i> Cancel
                             </button>
+                            ${projectToEdit ? `
+                                <button type="button" class="btn btn-secondary" onclick="app.previewImage('admin-project-image')">
+                                    <i class="fas fa-eye"></i> Preview Image
+                                </button>
+                            ` : ''}
                         </div>
                     </form>
                 </div>
@@ -2272,6 +2453,11 @@ class SpaceTeamApp {
                             <button type="button" class="btn btn-outline" onclick="app.resetWebsiteForm()">
                                 <i class="fas fa-times"></i> Cancel
                             </button>
+                            ${websiteToEdit ? `
+                                <button type="button" class="btn btn-secondary" onclick="app.previewImage('admin-website-screenshot')">
+                                    <i class="fas fa-eye"></i> Preview Image
+                                </button>
+                            ` : ''}
                         </div>
                     </form>
                 </div>
@@ -2282,12 +2468,17 @@ class SpaceTeamApp {
     getBlogManagementHTML() {
         const blogListHTML = this.state.blogPosts.map(post => `
             <div class="admin-list-item">
-                <div>
-                    <h4 style="margin: 0; color: var(--text-primary);">${post.title}</h4>
-                    <p style="margin: 5px 0; color: var(--text-secondary);">
-                        ${post.category || 'Mission Briefing'} • By ${post.author || 'Mission Control'}
-                    </p>
-                    <small style="color: var(--text-tertiary);">${new Date(post.created_at).toLocaleDateString()}</small>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <img src="${post.image || 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80'}" 
+                         alt="${post.title}" 
+                         style="width: 60px; height: 40px; object-fit: cover; border-radius: var(--radius);">
+                    <div>
+                        <h4 style="margin: 0; color: var(--text-primary);">${post.title}</h4>
+                        <p style="margin: 5px 0; color: var(--text-secondary);">
+                            ${post.category || 'Mission Briefing'} • By ${post.author || 'Mission Control'}
+                        </p>
+                        <small style="color: var(--text-tertiary);">${new Date(post.created_at).toLocaleDateString()}</small>
+                    </div>
                 </div>
                 <div class="admin-list-actions">
                     <button class="btn btn-sm" onclick="app.editBlogPost(${post.id})">
@@ -2369,6 +2560,11 @@ class SpaceTeamApp {
                             <button type="button" class="btn btn-outline" onclick="app.resetBlogForm()">
                                 <i class="fas fa-times"></i> Cancel
                             </button>
+                            ${postToEdit ? `
+                                <button type="button" class="btn btn-secondary" onclick="app.previewImage('admin-blog-image')">
+                                    <i class="fas fa-eye"></i> Preview Image
+                                </button>
+                            ` : ''}
                         </div>
                     </form>
                 </div>
@@ -2802,7 +2998,7 @@ class SpaceTeamApp {
         }
     }
 
-    // Edit methods
+    // Edit methods - FIXED
     editDeveloper(id) {
         this.state.editingId = id;
         this.showAdminSection('developers');
@@ -2825,6 +3021,14 @@ class SpaceTeamApp {
         this.state.editingId = id;
         this.showAdminSection('blog');
         this.switchAdminTab('add-blog');
+    }
+
+    // Preview image method
+    previewImage(inputId) {
+        const input = document.getElementById(inputId);
+        if (input && input.value) {
+            this.showFullscreenImage(input.value, 'Image Preview', '');
+        }
     }
 
     // Delete methods - FIXED
@@ -2923,7 +3127,7 @@ class SpaceTeamApp {
         }
     }
 
-    // View methods
+    // View methods - ENHANCED
     viewMessage(id) {
         const message = this.state.messages.find(m => m.id === id);
         if (message) {
@@ -2931,7 +3135,55 @@ class SpaceTeamApp {
             message.read = true;
             this.saveToSupabase('messages', message).catch(console.error);
             
-            alert(`Transmission Details:\n\nFrom: ${message.name} (${message.email})\nMission Type: ${message.subject}\nTransmission Time: ${new Date(message.created_at).toLocaleString()}\n\nTransmission:\n${message.message}`);
+            // Create modal for better viewing
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'flex';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Transmission Details</h2>
+                        <button class="modal-close" onclick="this.parentElement.parentElement.remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div style="padding: var(--space-lg);">
+                        <div style="margin-bottom: var(--space-lg);">
+                            <h3 style="color: var(--text-primary); margin-bottom: var(--space-sm);">${message.name}</h3>
+                            <p style="color: var(--text-secondary); margin-bottom: var(--space-xs);">${message.email}</p>
+                            <p style="color: var(--text-tertiary); font-size: 0.875rem;">${new Date(message.created_at).toLocaleString()}</p>
+                        </div>
+                        
+                        <div style="margin-bottom: var(--space-lg);">
+                            <h4 style="color: var(--secondary); margin-bottom: var(--space-sm);">Mission Type</h4>
+                            <p style="color: var(--text-primary);">${message.subject}</p>
+                        </div>
+                        
+                        <div>
+                            <h4 style="color: var(--secondary); margin-bottom: var(--space-sm);">Transmission</h4>
+                            <div style="background: rgba(100, 255, 218, 0.05); padding: var(--space-lg); border-radius: var(--radius); border: 1px solid rgba(100, 255, 218, 0.1);">
+                                <p style="color: var(--text-primary); line-height: 1.6; white-space: pre-wrap;">${message.message}</p>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 15px; margin-top: 30px;">
+                            <button class="btn btn-primary" onclick="this.parentElement.parentElement.querySelector('.modal-close').click()">
+                                <i class="fas fa-check"></i> Close
+                            </button>
+                            <button class="btn btn-danger" onclick="app.deleteMessage(${message.id}); this.parentElement.parentElement.querySelector('.modal-close').click()">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
         }
     }
 
@@ -2944,21 +3196,247 @@ class SpaceTeamApp {
                 'design': 'UI/UX Design'
             };
             
-            alert(`Mission Details:\n\nMission Name: ${project.title}\nMission Type: ${typeMap[project.type] || project.type}\nMission Report: ${project.description}\nTechnologies: ${Array.isArray(project.tech) ? project.tech.join(', ') : project.tech || 'Not specified'}\n${project.link ? `Mission Link: ${project.link}` : ''}`);
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'flex';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 600px;">
+                    <div class="modal-header">
+                        <h2>Mission Details</h2>
+                        <button class="modal-close" onclick="this.parentElement.parentElement.remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div style="padding: var(--space-lg);">
+                        <img src="${project.image || 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'}" 
+                             alt="${project.title}" 
+                             style="width: 100%; height: 200px; object-fit: cover; border-radius: var(--radius); margin-bottom: var(--space-lg); cursor: pointer;"
+                             class="clickable-image"
+                             data-image="${project.image || 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'}"
+                             data-title="${project.title}"
+                             data-description="${project.description}">
+                        
+                        <div style="margin-bottom: var(--space-lg);">
+                            <h3 style="color: var(--text-primary); margin-bottom: var(--space-sm);">${project.title}</h3>
+                            <div style="display: flex; gap: 10px; margin-bottom: var(--space-md);">
+                                <span class="project-category">${typeMap[project.type] || project.type}</span>
+                                ${project.link ? `<a href="${project.link}" target="_blank" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-external-link-alt"></i> Launch Mission
+                                </a>` : ''}
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: var(--space-lg);">
+                            <h4 style="color: var(--secondary); margin-bottom: var(--space-sm);">Mission Report</h4>
+                            <p style="color: var(--text-primary); line-height: 1.6;">${project.description}</p>
+                        </div>
+                        
+                        <div style="margin-bottom: var(--space-lg);">
+                            <h4 style="color: var(--secondary); margin-bottom: var(--space-sm);">Technologies</h4>
+                            <div class="project-tech">
+                                ${Array.isArray(project.tech) ? project.tech.map(tech => 
+                                    `<span class="tech-tag">${tech}</span>`
+                                ).join('') : ''}
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="this.parentElement.parentElement.querySelector('.modal-close').click()" style="width: 100%;">
+                            <i class="fas fa-check"></i> Close
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+            
+            // Setup image click inside modal
+            setTimeout(() => {
+                modal.querySelector('.clickable-image')?.addEventListener('click', (e) => {
+                    const img = e.target;
+                    this.showFullscreenImage(
+                        img.dataset.image || img.src,
+                        img.dataset.title || img.alt,
+                        img.dataset.description || ''
+                    );
+                });
+            }, 100);
         }
     }
 
     viewWebsiteDetails(id) {
         const website = this.state.websiteProjects.find(w => w.id === id);
         if (website) {
-            alert(`Website Details:\n\nTitle: ${website.title}\nURL: ${website.url}\nStatus: ${website.status}\nDescription: ${website.description}\nTechnologies: ${Array.isArray(website.technologies) ? website.technologies.join(', ') : website.technologies || 'Not specified'}\n${website.github ? `GitHub: ${website.github}` : ''}`);
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'flex';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 600px;">
+                    <div class="modal-header">
+                        <h2>Website Details</h2>
+                        <button class="modal-close" onclick="this.parentElement.parentElement.remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div style="padding: var(--space-lg);">
+                        <img src="${website.screenshot || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'}" 
+                             alt="${website.title}" 
+                             style="width: 100%; height: 200px; object-fit: cover; border-radius: var(--radius); margin-bottom: var(--space-lg); cursor: pointer;"
+                             class="clickable-image"
+                             data-image="${website.screenshot || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'}"
+                             data-title="${website.title}"
+                             data-description="${website.description}">
+                        
+                        <div style="margin-bottom: var(--space-lg);">
+                            <h3 style="color: var(--text-primary); margin-bottom: var(--space-sm);">${website.title}</h3>
+                            <div style="display: flex; gap: 10px; margin-bottom: var(--space-md); flex-wrap: wrap;">
+                                <span class="website-status ${website.status || 'live'}">
+                                    ${website.status === 'live' ? '🚀 Live' : 
+                                      website.status === 'maintenance' ? '🚧 Maintenance' : 
+                                      '👨‍💻 Development'}
+                                </span>
+                                <a href="${website.url}" target="_blank" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-external-link-alt"></i> Visit Site
+                                </a>
+                                ${website.github ? `<a href="${website.github}" target="_blank" class="btn btn-sm btn-secondary">
+                                    <i class="fab fa-github"></i> GitHub
+                                </a>` : ''}
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: var(--space-lg);">
+                            <h4 style="color: var(--secondary); margin-bottom: var(--space-sm);">Description</h4>
+                            <p style="color: var(--text-primary); line-height: 1.6;">${website.description}</p>
+                        </div>
+                        
+                        <div style="margin-bottom: var(--space-lg);">
+                            <h4 style="color: var(--secondary); margin-bottom: var(--space-sm);">Technologies</h4>
+                            <div class="website-tech">
+                                ${Array.isArray(website.technologies) ? website.technologies.map(tech => 
+                                    `<span class="tech-tag">${tech}</span>`
+                                ).join('') : ''}
+                            </div>
+                        </div>
+                        
+                        ${website.features && website.features.length > 0 ? `
+                            <div style="margin-bottom: var(--space-lg);">
+                                <h4 style="color: var(--secondary); margin-bottom: var(--space-sm);">Features</h4>
+                                <ul style="color: var(--text-primary); padding-left: 20px;">
+                                    ${Array.isArray(website.features) ? website.features.map(feature => 
+                                        `<li>${feature}</li>`
+                                    ).join('') : ''}
+                                </ul>
+                            </div>
+                        ` : ''}
+                        
+                        <div style="display: flex; gap: 15px; margin-top: 30px;">
+                            <button class="btn btn-primary" onclick="this.parentElement.parentElement.querySelector('.modal-close').click()">
+                                <i class="fas fa-check"></i> Close
+                            </button>
+                            <a href="${website.url}" target="_blank" class="btn btn-secondary">
+                                <i class="fas fa-external-link-alt"></i> Open Website
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+            
+            // Setup image click inside modal
+            setTimeout(() => {
+                modal.querySelector('.clickable-image')?.addEventListener('click', (e) => {
+                    const img = e.target;
+                    this.showFullscreenImage(
+                        img.dataset.image || img.src,
+                        img.dataset.title || img.alt,
+                        img.dataset.description || ''
+                    );
+                });
+            }, 100);
         }
     }
 
     viewBlogPost(id) {
         const post = this.state.blogPosts.find(p => p.id === id);
         if (post) {
-            alert(`Mission Briefing:\n\nTitle: ${post.title}\nAuthor: ${post.author}\nBriefing Type: ${post.category}\nTransmission Date: ${new Date(post.created_at).toLocaleDateString()}\n\n${post.content || post.excerpt}`);
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'flex';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
+                    <div class="modal-header">
+                        <h2>Mission Briefing</h2>
+                        <button class="modal-close" onclick="this.parentElement.parentElement.remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div style="padding: var(--space-lg);">
+                        <img src="${post.image || 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'}" 
+                             alt="${post.title}" 
+                             style="width: 100%; height: 300px; object-fit: cover; border-radius: var(--radius); margin-bottom: var(--space-lg); cursor: pointer;"
+                             class="clickable-image"
+                             data-image="${post.image || 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'}"
+                             data-title="${post.title}"
+                             data-description="${post.category || 'Mission Briefing'}">
+                        
+                        <div style="margin-bottom: var(--space-lg);">
+                            <span class="blog-category">${post.category || 'Mission Briefing'}</span>
+                            <h3 style="color: var(--text-primary); margin: var(--space-sm) 0;">${post.title}</h3>
+                            <div style="display: flex; align-items: center; gap: 10px; color: var(--text-tertiary); font-size: 0.875rem;">
+                                <i class="fas fa-user-astronaut"></i>
+                                <span>${post.author || 'Mission Control'}</span>
+                                <i class="fas fa-calendar-alt" style="margin-left: 15px;"></i>
+                                <span>${new Date(post.created_at).toLocaleDateString()}</span>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: var(--space-lg);">
+                            <h4 style="color: var(--secondary); margin-bottom: var(--space-sm);">Briefing Summary</h4>
+                            <p style="color: var(--text-primary); line-height: 1.6; font-size: 1.1rem;">${post.excerpt || ''}</p>
+                        </div>
+                        
+                        <div>
+                            <h4 style="color: var(--secondary); margin-bottom: var(--space-sm);">Full Briefing</h4>
+                            <div style="color: var(--text-primary); line-height: 1.7;">
+                                ${post.content ? post.content.replace(/\n/g, '<br>') : 'Briefing details classified.'}
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary" onclick="this.parentElement.parentElement.querySelector('.modal-close').click()" style="width: 100%; margin-top: 30px;">
+                            <i class="fas fa-check"></i> Close Briefing
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+            
+            // Setup image click inside modal
+            setTimeout(() => {
+                modal.querySelector('.clickable-image')?.addEventListener('click', (e) => {
+                    const img = e.target;
+                    this.showFullscreenImage(
+                        img.dataset.image || img.src,
+                        img.dataset.title || img.alt,
+                        img.dataset.description || ''
+                    );
+                });
+            }, 100);
         }
     }
 
@@ -3144,6 +3622,7 @@ document.addEventListener('DOMContentLoaded', () => {
         window.viewMessage = (id) => app.viewMessage(id);
         window.exportData = () => app.exportData();
         window.resetData = () => app.resetData();
+        window.previewImage = (inputId) => app.previewImage(inputId);
         
     } catch (error) {
         console.error('Failed to initialize application:', error);

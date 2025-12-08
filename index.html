@@ -22,30 +22,34 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
-    <!-- Security Script - Improved -->
+    <!-- Security Script - Enhanced -->
     <script>
-        // Block right-click with error handling
+        // Enhanced security with better error handling
         (function() {
             try {
                 // Context menu prevention
                 document.addEventListener('contextmenu', function(e) {
-                    e.preventDefault();
-                    return false;
+                    if (!e.target.classList.contains('allow-select')) {
+                        e.preventDefault();
+                        return false;
+                    }
                 }, true);
                 
-                // DevTools detection
-                const devtools = /./;
-                devtools.toString = function() {
-                    console.clear();
-                    return '';
+                // DevTools detection with improved method
+                const devtools = {
+                    toString: function() {
+                        console.clear();
+                        return '';
+                    }
                 };
                 
                 // Block common DevTools shortcuts
                 document.addEventListener('keydown', function(e) {
-                    // F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+                    // F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U, Ctrl+S
                     if (e.key === 'F12' || 
                         (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
-                        (e.ctrlKey && e.key === 'U')) {
+                        (e.ctrlKey && e.key === 'U') ||
+                        (e.ctrlKey && e.key === 'S')) {
                         e.preventDefault();
                         e.stopPropagation();
                         return false;
@@ -59,12 +63,17 @@
                 
                 // Block text selection on critical elements only
                 document.addEventListener('DOMContentLoaded', function() {
-                    const elements = document.querySelectorAll('.logo, .hero-title, .stat-number, .developer-name, .project-title, .blog-title, .footer-logo');
+                    const elements = document.querySelectorAll('.logo, .hero-title, .stat-number, .developer-name, .project-title, .blog-title, .footer-logo, .admin-header .logo');
                     elements.forEach(el => {
                         el.style.userSelect = 'none';
                         el.style.webkitUserSelect = 'none';
                         el.style.MozUserSelect = 'none';
                     });
+                });
+                
+                // Add performance monitoring
+                window.addEventListener('load', function() {
+                    console.log('SpaceTeam | Dev - All systems operational');
                 });
                 
             } catch (error) {

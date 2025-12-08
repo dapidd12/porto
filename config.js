@@ -1,4 +1,4 @@
-// Configuration for SpaceTeam | Dev - FIXED VERSION
+// Configuration for SpaceTeam | Dev - ENHANCED VERSION
 const CONFIG = {
     // Supabase Configuration - UPDATE WITH YOUR CREDENTIALS
     supabaseUrl: 'https://ktvfoxucvcggekbhabix.supabase.co',
@@ -9,7 +9,7 @@ const CONFIG = {
     adminPassword: 'SpaceTeam2024!',
     
     // Gemini AI Configuration - SET YOUR API KEY IN PRODUCTION
-    geminiApiKey: '', // Kosongkan atau isi dengan API key Anda
+    geminiApiKey: '', // Empty or fill with your API key
     
     // AI System Prompt
     aiSystemPrompt: "You are the SpaceTeam AI assistant. Provide helpful responses about web development, projects, and services. Keep responses professional and space-themed.",
@@ -30,7 +30,7 @@ const CONFIG = {
             id: '🚀 SpaceTeam | Dev • 💻 Pengembangan Full-Stack • 🎨 Desain UI/UX • 📱 Aplikasi Mobile • 🌌 Teknologi Terkini • 🔧 Sistem Cloud • 🤖 Integrasi AI'
         },
         chatEnabled: true,
-        darkMode: false
+        darkMode: true
     },
     
     // Language translations
@@ -165,7 +165,15 @@ const CONFIG = {
             notificationSuccess: 'Success',
             notificationError: 'Error',
             notificationWarning: 'Warning',
-            notificationInfo: 'Info'
+            notificationInfo: 'Info',
+            
+            // Admin Actions
+            edit: 'Edit',
+            delete: 'Delete',
+            save: 'Save',
+            cancel: 'Cancel',
+            preview: 'Preview',
+            update: 'Update'
         },
         
         id: {
@@ -298,12 +306,20 @@ const CONFIG = {
             notificationSuccess: 'Sukses',
             notificationError: 'Error',
             notificationWarning: 'Peringatan',
-            notificationInfo: 'Info'
+            notificationInfo: 'Info',
+            
+            // Admin Actions
+            edit: 'Edit',
+            delete: 'Hapus',
+            save: 'Simpan',
+            cancel: 'Batal',
+            preview: 'Pratinjau',
+            update: 'Perbarui'
         }
     }
 };
 
-// Initialize Supabase client with better error handling
+// Initialize Supabase client with enhanced error handling
 let supabaseClient = null;
 try {
     if (CONFIG.supabaseUrl && CONFIG.supabaseKey && 
@@ -312,15 +328,24 @@ try {
         supabaseClient = supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey, {
             auth: {
                 persistSession: true,
-                autoRefreshToken: true
+                autoRefreshToken: true,
+                detectSessionInUrl: true
+            },
+            db: {
+                schema: 'public'
+            },
+            global: {
+                headers: {
+                    'x-application-name': 'SpaceTeam-Dev'
+                }
             }
         });
-        console.log('Supabase client initialized successfully');
+        console.log('✅ Supabase client initialized successfully');
     } else {
-        console.warn('Supabase credentials not configured. Using localStorage mode.');
+        console.warn('⚠️ Supabase credentials not configured. Using localStorage mode.');
     }
 } catch (error) {
-    console.error('Supabase client initialization failed:', error);
+    console.error('❌ Supabase client initialization failed:', error);
 }
 
 // Export configuration
@@ -329,12 +354,32 @@ window.supabaseClient = supabaseClient;
 
 // Add global error handler
 window.addEventListener('error', function(e) {
-    console.error('Global error caught:', e.error);
-    // You can add error reporting here
+    console.error('🔴 Global error caught:', e.error);
+    // You can add error reporting here (e.g., to Sentry, LogRocket)
 });
 
 // Add unhandled promise rejection handler
 window.addEventListener('unhandledrejection', function(e) {
-    console.error('Unhandled promise rejection:', e.reason);
+    console.error('🔴 Unhandled promise rejection:', e.reason);
     // You can add error reporting here
 });
+
+// Add performance monitoring
+if (window.performance) {
+    window.addEventListener('load', function() {
+        const perfData = window.performance.timing;
+        const pageLoadTime = perfData.loadEventEnd - perfData.navigationStart;
+        console.log(`📊 Page loaded in ${pageLoadTime}ms`);
+    });
+}
+
+// Add service worker registration (optional)
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/sw.js').then(function(registration) {
+            console.log('⚡ ServiceWorker registered:', registration.scope);
+        }).catch(function(error) {
+            console.log('❌ ServiceWorker registration failed:', error);
+        });
+    });
+}
