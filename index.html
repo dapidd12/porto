@@ -14,17 +14,17 @@
     <meta property="og:type" content="website">
     <meta property="og:image" content="https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80">
     
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <link rel="stylesheet" href="styles.css">
     
-    <!-- Preload critical resources -->
+    <!-- Preload Resources -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
-    <!-- Security Script - Improved -->
+    <!-- Security Script -->
     <script>
-        // Block right-click with error handling
         (function() {
             try {
                 // Context menu prevention
@@ -40,9 +40,8 @@
                     return '';
                 };
                 
-                // Block common DevTools shortcuts
+                // Block DevTools shortcuts
                 document.addEventListener('keydown', function(e) {
-                    // F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
                     if (e.key === 'F12' || 
                         (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
                         (e.ctrlKey && e.key === 'U')) {
@@ -57,7 +56,7 @@
                     window.top.location = window.self.location;
                 }
                 
-                // Block text selection on critical elements only
+                // Block text selection on specific elements
                 document.addEventListener('DOMContentLoaded', function() {
                     const elements = document.querySelectorAll('.logo, .hero-title, .stat-number, .developer-name, .project-title, .blog-title, .footer-logo');
                     elements.forEach(el => {
@@ -66,7 +65,6 @@
                         el.style.MozUserSelect = 'none';
                     });
                 });
-                
             } catch (error) {
                 console.log('Security features initialized');
             }
@@ -74,12 +72,10 @@
     </script>
 </head>
 <body>
-    <!-- Skip to Main Content (Accessibility) -->
-    <a href="#main-content" class="skip-to-main" aria-label="Skip to main content">
-        Skip to main content
-    </a>
+    <!-- Accessibility -->
+    <a href="#main-content" class="skip-to-main" aria-label="Skip to main content">Skip to main content</a>
 
-    <!-- Scroll Progress Bar -->
+    <!-- Scroll Progress -->
     <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
 
     <!-- Running Text -->
@@ -93,18 +89,16 @@
     <nav class="navbar" id="navbar" role="navigation" aria-label="Main navigation">
         <div class="container nav-container">
             <a href="#home" class="logo" aria-label="SpaceTeam | Dev Home">
-                <span class="logo-primary">Space</span>
-                <span class="logo-secondary">Team</span>
-                <span class="logo-tertiary">| Dev</span>
+                <span class="logo-primary">Space</span><span class="logo-secondary">Team</span><span class="logo-tertiary">| Dev</span>
             </a>
             
             <ul class="nav-links" role="menubar">
-                <li role="none"><a href="#home" class="active" data-i18n="navHome" role="menuitem">Home</a></li>
-                <li role="none"><a href="#developers" data-i18n="navTeam" role="menuitem">Team</a></li>
-                <li role="none"><a href="#projects" data-i18n="navProjects" role="menuitem">Projects</a></li>
-                <li role="none"><a href="#blog" data-i18n="navBlog" role="menuitem">Blog</a></li>
-                <li role="none"><a href="#contact" data-i18n="navContact" role="menuitem">Contact</a></li>
-                <li role="none"><a href="#" id="admin-login-btn" class="btn btn-sm btn-outline" data-i18n="navAdmin" role="menuitem">Admin</a></li>
+                <li><a href="#home" class="active" data-i18n="navHome" role="menuitem">Home</a></li>
+                <li><a href="#developers" data-i18n="navTeam" role="menuitem">Team</a></li>
+                <li><a href="#projects" data-i18n="navProjects" role="menuitem">Projects</a></li>
+                <li><a href="#blog" data-i18n="navBlog" role="menuitem">Blog</a></li>
+                <li><a href="#contact" data-i18n="navContact" role="menuitem">Contact</a></li>
+                <li><a href="#" id="admin-login-btn" class="btn btn-sm btn-outline" data-i18n="navAdmin" role="menuitem">Admin</a></li>
             </ul>
             
             <div class="nav-actions">
@@ -116,9 +110,12 @@
                     </select>
                 </div>
                 
+                <!-- Theme Toggle -->
                 <button class="theme-toggle" id="theme-toggle" title="Toggle theme" aria-label="Toggle dark mode">
                     <i class="fas fa-moon"></i>
                 </button>
+                
+                <!-- Mobile Menu -->
                 <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle menu" aria-expanded="false" aria-controls="nav-links">
                     <i class="fas fa-bars"></i>
                 </button>
@@ -142,15 +139,14 @@
                     </p>
                     <div class="hero-actions">
                         <a href="#projects" class="btn btn-primary" aria-label="Explore our projects">
-                            <i class="fas fa-rocket"></i>
-                            <span data-i18n="btnExploreProjects">Explore Projects</span>
+                            <i class="fas fa-rocket"></i><span data-i18n="btnExploreProjects">Explore Projects</span>
                         </a>
                         <a href="#contact" class="btn btn-outline" aria-label="Contact mission control">
-                            <i class="fas fa-satellite"></i>
-                            <span data-i18n="btnMissionControl">Mission Control</span>
+                            <i class="fas fa-satellite"></i><span data-i18n="btnMissionControl">Mission Control</span>
                         </a>
                     </div>
                     
+                    <!-- Stats -->
                     <div class="hero-stats" aria-label="Company statistics">
                         <div class="stat-item">
                             <div class="stat-number" id="projects-count">0</div>
@@ -184,7 +180,7 @@
                 </div>
                 
                 <div class="developers-grid" id="developers-container" role="list" aria-label="Team members">
-                    <!-- Developers will be loaded here -->
+                    <!-- Dynamic Content -->
                 </div>
                 
                 <!-- Skills Visualization -->
@@ -212,18 +208,20 @@
                     </p>
                 </div>
                 
+                <!-- Filters -->
                 <div class="projects-filter" role="tablist" aria-label="Project filters">
-                    <button class="filter-btn active" data-filter="all" aria-label="Show all projects" data-i18n="filterAll" role="tab" aria-selected="true">All Missions</button>
-                    <button class="filter-btn" data-filter="web" aria-label="Filter web projects" data-i18n="filterWeb" role="tab" aria-selected="false">Web Systems</button>
-                    <button class="filter-btn" data-filter="mobile" aria-label="Filter mobile projects" data-i18n="filterMobile" role="tab" aria-selected="false">Mobile Apps</button>
-                    <button class="filter-btn" data-filter="design" aria-label="Filter design projects" data-i18n="filterDesign" role="tab" aria-selected="false">UI/UX Design</button>
+                    <button class="filter-btn active" data-filter="all" data-i18n="filterAll" role="tab" aria-selected="true">All Missions</button>
+                    <button class="filter-btn" data-filter="web" data-i18n="filterWeb" role="tab" aria-selected="false">Web Systems</button>
+                    <button class="filter-btn" data-filter="mobile" data-i18n="filterMobile" role="tab" aria-selected="false">Mobile Apps</button>
+                    <button class="filter-btn" data-filter="design" data-i18n="filterDesign" role="tab" aria-selected="false">UI/UX Design</button>
                 </div>
                 
+                <!-- Projects Grid -->
                 <div class="projects-grid" id="projects-container" role="list" aria-label="Project list">
-                    <!-- Projects will be loaded here -->
+                    <!-- Dynamic Content -->
                 </div>
                 
-                <!-- Website Projects Section -->
+                <!-- Website Projects -->
                 <div class="website-projects-section" aria-labelledby="websites-title">
                     <div class="section-header">
                         <h3 id="websites-title" data-i18n="sectionWebsites">Website Projects</h3>
@@ -233,7 +231,7 @@
                     </div>
                     
                     <div class="websites-grid" id="websites-container" role="list" aria-label="Website projects">
-                        <!-- Website projects will be loaded here -->
+                        <!-- Dynamic Content -->
                     </div>
                 </div>
             </div>
@@ -250,7 +248,7 @@
                 </div>
                 
                 <div class="blog-grid" id="blog-container" role="list" aria-label="Blog posts">
-                    <!-- Blog posts will be loaded here -->
+                    <!-- Dynamic Content -->
                 </div>
             </div>
         </section>
@@ -266,64 +264,59 @@
                 </div>
                 
                 <div class="contact-container">
+                    <!-- Contact Info -->
                     <div class="contact-info">
                         <div class="info-card" role="region" aria-label="Contact information">
-                            <div class="info-icon">
-                                <i class="fas fa-satellite-dish" aria-hidden="true"></i>
-                            </div>
+                            <div class="info-icon"><i class="fas fa-satellite-dish"></i></div>
                             <h3 data-i18n="contactTransmit">Transmit Signal</h3>
                             <p id="contact-email-display">mission@spaceteam.dev</p>
                             <p data-i18n="responseTime">Response within 24 light-minutes</p>
                         </div>
                         
                         <div class="info-card" role="region" aria-label="Phone information">
-                            <div class="info-icon">
-                                <i class="fas fa-broadcast-tower" aria-hidden="true"></i>
-                            </div>
+                            <div class="info-icon"><i class="fas fa-broadcast-tower"></i></div>
                             <h3 data-i18n="contactFrequency">Transmission Frequency</h3>
                             <p id="contact-phone-display">+62 821 3830 5820</p>
                             <p data-i18n="available">Available for transmissions</p>
                         </div>
                         
                         <div class="info-card" role="region" aria-label="Location information">
-                            <div class="info-icon">
-                                <i class="fas fa-globe-americas" aria-hidden="true"></i>
-                            </div>
+                            <div class="info-icon"><i class="fas fa-globe-americas"></i></div>
                             <h3 data-i18n="contactStation">Ground Station</h3>
                             <p>Jakarta, Indonesia</p>
                             <p data-i18n="orbitalMeetings">Orbital meetings available</p>
                         </div>
                     </div>
                     
+                    <!-- Contact Form -->
                     <div class="contact-form" role="form" aria-label="Contact form">
                         <form id="contact-form">
                             <div class="form-group">
                                 <label class="form-label" for="contact-name" data-i18n="formName">Astronaut Name *</label>
-                                <input type="text" class="form-control" id="contact-name" required aria-required="true" aria-describedby="name-error">
-                                <div class="form-error" id="name-error" role="alert" aria-live="polite"></div>
+                                <input type="text" class="form-control" id="contact-name" required>
+                                <div class="form-error" id="name-error"></div>
                             </div>
                             
                             <div class="form-group">
                                 <label class="form-label" for="contact-email" data-i18n="formEmail">Transmission Address *</label>
-                                <input type="email" class="form-control" id="contact-email" required aria-required="true" aria-describedby="email-error">
-                                <div class="form-error" id="email-error" role="alert" aria-live="polite"></div>
+                                <input type="email" class="form-control" id="contact-email" required>
+                                <div class="form-error" id="email-error"></div>
                             </div>
                             
                             <div class="form-group">
                                 <label class="form-label" for="contact-subject" data-i18n="formSubject">Mission Type *</label>
-                                <input type="text" class="form-control" id="contact-subject" required aria-required="true" aria-describedby="subject-error">
-                                <div class="form-error" id="subject-error" role="alert" aria-live="polite"></div>
+                                <input type="text" class="form-control" id="contact-subject" required>
+                                <div class="form-error" id="subject-error"></div>
                             </div>
                             
                             <div class="form-group">
                                 <label class="form-label" for="contact-message" data-i18n="formMessage">Mission Briefing *</label>
-                                <textarea class="form-control" id="contact-message" rows="5" required aria-required="true" aria-describedby="message-error"></textarea>
-                                <div class="form-error" id="message-error" role="alert" aria-live="polite"></div>
+                                <textarea class="form-control" id="contact-message" rows="5" required></textarea>
+                                <div class="form-error" id="message-error"></div>
                             </div>
                             
-                            <button type="submit" class="btn btn-primary btn-lg" id="contact-submit-btn" aria-label="Send message">
-                                <i class="fas fa-paper-plane"></i>
-                                <span data-i18n="btnLaunchTransmission">Launch Transmission</span>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-paper-plane"></i><span data-i18n="btnLaunchTransmission">Launch Transmission</span>
                             </button>
                         </form>
                     </div>
@@ -336,33 +329,25 @@
             <div class="container">
                 <div class="stats-grid">
                     <div class="stat-card" role="region" aria-label="Completed projects">
-                        <div class="stat-icon">
-                            <i class="fas fa-satellite" aria-hidden="true"></i>
-                        </div>
+                        <div class="stat-icon"><i class="fas fa-satellite"></i></div>
                         <div class="stat-number" id="stats-projects">0</div>
                         <div class="stat-label" data-i18n="statCompleted">Missions Completed</div>
                     </div>
                     
                     <div class="stat-card" role="region" aria-label="Satisfied clients">
-                        <div class="stat-icon">
-                            <i class="fas fa-user-astronaut" aria-hidden="true"></i>
-                        </div>
+                        <div class="stat-icon"><i class="fas fa-user-astronaut"></i></div>
                         <div class="stat-number" id="stats-clients">0</div>
                         <div class="stat-label" data-i18n="statCosmonauts">Satisfied Cosmonauts</div>
                     </div>
                     
                     <div class="stat-card" role="region" aria-label="Years of experience">
-                        <div class="stat-icon">
-                            <i class="fas fa-clock" aria-hidden="true"></i>
-                        </div>
+                        <div class="stat-icon"><i class="fas fa-clock"></i></div>
                         <div class="stat-number" id="stats-experience">7+</div>
                         <div class="stat-label" data-i18n="statExperience">Light Years Experience</div>
                     </div>
                     
                     <div class="stat-card" role="region" aria-label="Blog articles">
-                        <div class="stat-icon">
-                            <i class="fas fa-newspaper" aria-hidden="true"></i>
-                        </div>
+                        <div class="stat-icon"><i class="fas fa-newspaper"></i></div>
                         <div class="stat-number" id="stats-articles">0</div>
                         <div class="stat-label" data-i18n="statLogs">Mission Logs</div>
                     </div>
@@ -375,64 +360,59 @@
     <footer class="footer" id="footer" role="contentinfo">
         <div class="container">
             <div class="footer-content">
+                <!-- Company Info -->
                 <div class="footer-col">
                     <div class="footer-logo" aria-label="SpaceTeam | Dev">
-                        <span class="logo-primary">Space</span>
-                        <span class="logo-secondary">Team</span>
-                        <span class="logo-tertiary"> | Dev</span>
+                        <span class="logo-primary">Space</span><span class="logo-secondary">Team</span><span class="logo-tertiary"> | Dev</span>
                     </div>
                     <p class="footer-description" data-i18n="footerDescription">
                         We explore the digital universe, building solutions that reach beyond the stars. 
                         Our mission is to propel businesses into the future with cutting-edge technology.
                     </p>
                     <div class="social-links" aria-label="Social media links">
-                        <a href="#" class="social-link" aria-label="GitHub">
-                            <i class="fab fa-github" aria-hidden="true"></i>
-                        </a>
-                        <a href="#" class="social-link" aria-label="LinkedIn">
-                            <i class="fab fa-linkedin-in" aria-hidden="true"></i>
-                        </a>
-                        <a href="#" class="social-link" aria-label="Twitter">
-                            <i class="fab fa-twitter" aria-hidden="true"></i>
-                        </a>
-                        <a href="#" class="social-link" aria-label="Discord">
-                            <i class="fab fa-discord" aria-hidden="true"></i>
-                        </a>
+                        <a href="#" class="social-link" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                        <a href="#" class="social-link" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="social-link" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link" aria-label="Discord"><i class="fab fa-discord"></i></a>
                     </div>
                 </div>
                 
+                <!-- Quick Links -->
                 <div class="footer-col">
                     <h3 class="footer-heading" data-i18n="footerFlightPath">Flight Path</h3>
                     <ul class="footer-links" role="list">
-                        <li role="listitem"><a href="#home" data-i18n="footerCommandCenter">Command Center</a></li>
-                        <li role="listitem"><a href="#developers" data-i18n="footerMissionCrew">Mission Crew</a></li>
-                        <li role="listitem"><a href="#projects" data-i18n="footerMissionLog">Mission Log</a></li>
-                        <li role="listitem"><a href="#blog" data-i18n="footerBriefings">Briefings</a></li>
-                        <li role="listitem"><a href="#contact" data-i18n="footerControlRoom">Control Room</a></li>
+                        <li><a href="#home" data-i18n="footerCommandCenter">Command Center</a></li>
+                        <li><a href="#developers" data-i18n="footerMissionCrew">Mission Crew</a></li>
+                        <li><a href="#projects" data-i18n="footerMissionLog">Mission Log</a></li>
+                        <li><a href="#blog" data-i18n="footerBriefings">Briefings</a></li>
+                        <li><a href="#contact" data-i18n="footerControlRoom">Control Room</a></li>
                     </ul>
                 </div>
                 
+                <!-- Services -->
                 <div class="footer-col">
                     <h3 class="footer-heading" data-i18n="footerServices">Services</h3>
                     <ul class="footer-links" role="list">
-                        <li role="listitem"><a href="#" data-i18n="footerWebDev">Web Development</a></li>
-                        <li role="listitem"><a href="#" data-i18n="footerMobileApps">Mobile Apps</a></li>
-                        <li role="listitem"><a href="#" data-i18n="footerUIDesign">UI/UX Design</a></li>
-                        <li role="listitem"><a href="#" data-i18n="footerCloud">Cloud Systems</a></li>
-                        <li role="listitem"><a href="#" data-i18n="footerAI">AI Integration</a></li>
+                        <li><a href="#" data-i18n="footerWebDev">Web Development</a></li>
+                        <li><a href="#" data-i18n="footerMobileApps">Mobile Apps</a></li>
+                        <li><a href="#" data-i18n="footerUIDesign">UI/UX Design</a></li>
+                        <li><a href="#" data-i18n="footerCloud">Cloud Systems</a></li>
+                        <li><a href="#" data-i18n="footerAI">AI Integration</a></li>
                     </ul>
                 </div>
                 
+                <!-- Contact Info -->
                 <div class="footer-col">
                     <h3 class="footer-heading" data-i18n="footerGroundControl">Ground Control</h3>
                     <ul class="footer-links" role="list">
-                        <li><i class="fas fa-map-marker-alt" aria-hidden="true"></i> Jakarta, Indonesia</li>
-                        <li><i class="fas fa-satellite" aria-hidden="true"></i> <span id="footer-phone">+62 821 3830 5820</span></li>
-                        <li><i class="fas fa-envelope" aria-hidden="true"></i> <span id="footer-email">mission@spaceteam.dev</span></li>
+                        <li><i class="fas fa-map-marker-alt"></i> Jakarta, Indonesia</li>
+                        <li><i class="fas fa-satellite"></i> <span id="footer-phone">+62 821 3830 5820</span></li>
+                        <li><i class="fas fa-envelope"></i> <span id="footer-email">mission@spaceteam.dev</span></li>
                     </ul>
                 </div>
             </div>
             
+            <!-- Copyright -->
             <div class="footer-bottom">
                 <p>&copy; <span id="current-year"></span> SpaceTeam | Dev. <span data-i18n="footerCopyright">All systems operational.</span></p>
             </div>
@@ -440,53 +420,44 @@
     </footer>
 
     <!-- Chat Widget -->
-    <button class="chat-toggle" id="chat-toggle" aria-label="Open chat">
-        <i class="fas fa-robot" aria-hidden="true"></i>
-    </button>
+    <button class="chat-toggle" id="chat-toggle" aria-label="Open chat"><i class="fas fa-robot"></i></button>
     
-    <div class="chat-widget hidden" id="chat-widget" role="dialog" aria-label="AI Chat Assistant" aria-modal="true">
+    <div class="chat-widget hidden" id="chat-widget" role="dialog" aria-label="AI Chat Assistant">
         <div class="chat-header">
             <h3>SpaceTeam AI Assistant</h3>
-            <button class="btn btn-icon btn-sm" id="close-chat" aria-label="Close chat">
-                <i class="fas fa-times"></i>
-            </button>
+            <button class="btn btn-icon btn-sm" id="close-chat" aria-label="Close chat"><i class="fas fa-times"></i></button>
         </div>
-        <div class="chat-body" id="chat-body" role="log" aria-live="polite">
+        <div class="chat-body" id="chat-body" role="log">
             <div class="chat-message bot" data-i18n="chatGreeting">
-                Greetings, astronaut! I'm your SpaceTeam AI assistant. How can I assist with your mission today? You can ask about our services, mission logs, or request a briefing.
+                Greetings, astronaut! I'm your SpaceTeam AI assistant. How can I assist with your mission today?
             </div>
         </div>
         <div class="chat-input">
-            <input type="text" id="chat-input" placeholder="Type your transmission..." aria-label="Chat message" data-i18n-ph="chatPlaceholder">
-            <button class="btn btn-sm btn-primary" id="send-chat" aria-label="Send message">
-                <i class="fas fa-paper-plane"></i> <span data-i18n="chatSend">Transmit</span>
-            </button>
+            <input type="text" id="chat-input" placeholder="Type your transmission..." data-i18n-ph="chatPlaceholder">
+            <button class="btn btn-sm btn-primary" id="send-chat"><i class="fas fa-paper-plane"></i> <span data-i18n="chatSend">Transmit</span></button>
         </div>
     </div>
 
     <!-- Login Modal -->
-    <div class="modal hidden" id="login-modal" role="dialog" aria-labelledby="login-title" aria-modal="true">
+    <div class="modal hidden" id="login-modal" role="dialog" aria-labelledby="login-title">
         <div class="modal-content">
             <div class="modal-header">
                 <h2 id="login-title" data-i18n="loginTitle">Mission Control Access</h2>
-                <button class="modal-close" id="close-login" aria-label="Close login">
-                    <i class="fas fa-times"></i>
-                </button>
+                <button class="modal-close" id="close-login" aria-label="Close login"><i class="fas fa-times"></i></button>
             </div>
             <form id="login-form">
                 <div class="form-group">
                     <label class="form-label" for="username" data-i18n="formAccessCode">Access Code *</label>
-                    <input type="email" class="form-control" id="username" required aria-required="true" aria-describedby="login-email-error">
-                    <div class="form-error" id="login-email-error" role="alert" aria-live="polite"></div>
+                    <input type="email" class="form-control" id="username" required>
+                    <div class="form-error" id="login-email-error"></div>
                 </div>
                 <div class="form-group">
                     <label class="form-label" for="password" data-i18n="formSecurityKey">Security Key *</label>
-                    <input type="password" class="form-control" id="password" required aria-required="true" aria-describedby="login-password-error">
-                    <div class="form-error" id="login-password-error" role="alert" aria-live="polite"></div>
+                    <input type="password" class="form-control" id="password" required>
+                    <div class="form-error" id="login-password-error"></div>
                 </div>
-                <button type="submit" class="btn btn-primary btn-lg" id="login-submit-btn" aria-label="Login">
-                    <i class="fas fa-sign-in-alt"></i>
-                    <span data-i18n="btnAccessControl">Access Control</span>
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-sign-in-alt"></i><span data-i18n="btnAccessControl">Access Control</span>
                 </button>
             </form>
         </div>
@@ -497,19 +468,16 @@
         <div class="admin-header">
             <div class="container">
                 <nav class="admin-nav" role="navigation" aria-label="Admin navigation">
-                    <a href="#" class="logo" aria-label="Mission Control">
-                        <span class="logo-primary">Mission</span>
-                        <span class="logo-secondary">Control</span>
-                    </a>
+                    <a href="#" class="logo"><span class="logo-primary">Mission</span><span class="logo-secondary">Control</span></a>
                     <ul class="admin-nav-links" role="menubar">
-                        <li role="none"><a href="#dashboard" class="admin-nav-btn active" data-section="dashboard" role="menuitem">Dashboard</a></li>
-                        <li role="none"><a href="#developers" class="admin-nav-btn" data-section="developers" role="menuitem">Crew</a></li>
-                        <li role="none"><a href="#projects" class="admin-nav-btn" data-section="projects" role="menuitem">Missions</a></li>
-                        <li role="none"><a href="#websites" class="admin-nav-btn" data-section="websites" role="menuitem">Websites</a></li>
-                        <li role="none"><a href="#blog" class="admin-nav-btn" data-section="blog" role="menuitem">Logs</a></li>
-                        <li role="none"><a href="#messages" class="admin-nav-btn" data-section="messages" role="menuitem">Transmissions</a></li>
-                        <li role="none"><a href="#settings" class="admin-nav-btn" data-section="settings" role="menuitem">Systems</a></li>
-                        <li role="none"><a href="#" id="admin-logout" class="btn btn-sm btn-danger" role="menuitem">Logout</a></li>
+                        <li><a href="#dashboard" class="admin-nav-btn active" data-section="dashboard">Dashboard</a></li>
+                        <li><a href="#developers" class="admin-nav-btn" data-section="developers">Crew</a></li>
+                        <li><a href="#projects" class="admin-nav-btn" data-section="projects">Missions</a></li>
+                        <li><a href="#websites" class="admin-nav-btn" data-section="websites">Websites</a></li>
+                        <li><a href="#blog" class="admin-nav-btn" data-section="blog">Logs</a></li>
+                        <li><a href="#messages" class="admin-nav-btn" data-section="messages">Transmissions</a></li>
+                        <li><a href="#settings" class="admin-nav-btn" data-section="settings">Systems</a></li>
+                        <li><a href="#" id="admin-logout" class="btn btn-sm btn-danger">Logout</a></li>
                     </ul>
                 </nav>
             </div>
@@ -517,7 +485,6 @@
         
         <div class="admin-content">
             <div class="container">
-                <!-- Admin sections will be loaded dynamically -->
                 <div id="admin-sections"></div>
             </div>
         </div>
@@ -527,12 +494,10 @@
     <div id="notification-container" role="region" aria-live="polite" aria-label="Notifications"></div>
 
     <!-- Loading Overlay -->
-    <div class="loading-overlay hidden" id="loading-overlay" role="alert" aria-live="assertive" aria-label="Loading">
+    <div class="loading-overlay hidden" id="loading-overlay" role="alert" aria-label="Loading">
         <div class="loading-spinner"></div>
         <p>Initializing systems...</p>
     </div>
-
-    <!-- Developer Modal and Image Fullscreen Modal will be created dynamically -->
 
     <!-- External Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -540,45 +505,38 @@
     <script src="config.js"></script>
     <script src="app.js"></script>
     
-    <!-- Lazy Loading Script - Enhanced -->
+    <!-- Enhanced Lazy Loading -->
     <script>
-    // Enhanced lazy loading with better error handling
     (function() {
         'use strict';
         
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize Intersection Observer for lazy loading
+            // Initialize Intersection Observer
             if ('IntersectionObserver' in window) {
                 const lazyObserver = new IntersectionObserver(function(entries) {
                     entries.forEach(function(entry) {
                         if (entry.isIntersecting) {
                             const element = entry.target;
                             
-                            // Handle images
+                            // Lazy load images
                             if (element.tagName === 'IMG' && element.dataset.src) {
                                 element.src = element.dataset.src;
                                 element.classList.add('loaded');
                                 lazyObserver.unobserve(element);
                             }
                             
-                            // Handle sections
+                            // Animate sections
                             if (element.classList.contains('.section')) {
                                 element.classList.add('visible');
                                 lazyObserver.unobserve(element);
                             }
                         }
                     });
-                }, {
-                    rootMargin: '50px',
-                    threshold: 0.1
-                });
+                }, { rootMargin: '50px', threshold: 0.1 });
                 
-                // Observe lazy images
+                // Observe images
                 document.querySelectorAll('img[data-src]').forEach(function(img) {
-                    // Set placeholder
-                    if (!img.src || img.src.includes('data:')) {
-                        img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"%3E%3C/svg%3E';
-                    }
+                    img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"%3E%3C/svg%3E';
                     lazyObserver.observe(img);
                 });
                 
@@ -587,7 +545,7 @@
                     lazyObserver.observe(section);
                 });
                 
-                // Error handling for images
+                // Image error handling
                 document.addEventListener('error', function(e) {
                     if (e.target.tagName === 'IMG') {
                         const defaultImages = {
@@ -603,134 +561,20 @@
                         if (e.target.classList.contains('blog-image')) fallbackUrl = defaultImages.blog;
                         
                         e.target.src = fallbackUrl;
-                        e.target.onerror = null; // Prevent infinite loop
+                        e.target.onerror = null;
                     }
                 }, true);
-                
-            } else {
-                // Fallback for older browsers
-                document.querySelectorAll('img[data-src]').forEach(function(img) {
-                    img.src = img.dataset.src;
-                    img.classList.add('loaded');
-                });
-                
-                document.querySelectorAll('.section').forEach(function(section) {
-                    section.classList.add('visible');
-                });
             }
             
-            // Add keyboard navigation for developer cards
+            // Keyboard navigation
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter' && e.target.classList.contains('developer-card')) {
                     const developerId = e.target.getAttribute('data-developer-id');
-                    if (developerId && window.app) {
-                        window.app.showDeveloperModal(parseInt(developerId));
-                    }
+                    if (developerId && window.app) window.app.showDeveloperModal(parseInt(developerId));
                 }
             });
         });
     })();
-    
-    // Expose global functions for onclick handlers
-    window.showAdminSection = function(section) {
-        if (window.app) window.app.showAdminSection(section);
-    };
-    
-    window.viewProjectDetails = function(id) {
-        if (window.app) window.app.viewProjectDetails(id);
-    };
-    
-    window.viewWebsiteDetails = function(id) {
-        if (window.app) window.app.viewWebsiteDetails(id);
-    };
-    
-    window.viewBlogPost = function(id) {
-        if (window.app) window.app.viewBlogPost(id);
-    };
-    
-    window.switchAdminTab = function(tabId) {
-        if (window.app) window.app.switchAdminTab(tabId);
-    };
-    
-    window.resetDeveloperForm = function() {
-        if (window.app) window.app.resetDeveloperForm();
-    };
-    
-    window.resetProjectForm = function() {
-        if (window.app) window.app.resetProjectForm();
-    };
-    
-    window.resetWebsiteForm = function() {
-        if (window.app) window.app.resetWebsiteForm();
-    };
-    
-    window.resetBlogForm = function() {
-        if (window.app) window.app.resetBlogForm();
-    };
-    
-    window.editDeveloper = function(id) {
-        if (window.app) window.app.editDeveloper(id);
-    };
-    
-    window.editProject = function(id) {
-        if (window.app) window.app.editProject(id);
-    };
-    
-    window.editWebsite = function(id) {
-        if (window.app) window.app.editWebsite(id);
-    };
-    
-    window.editBlogPost = function(id) {
-        if (window.app) window.app.editBlogPost(id);
-    };
-    
-    window.deleteDeveloper = function(id) {
-        if (window.app) window.app.deleteDeveloper(id);
-    };
-    
-    window.deleteProject = function(id) {
-        if (window.app) window.app.deleteProject(id);
-    };
-    
-    window.deleteWebsite = function(id) {
-        if (window.app) window.app.deleteWebsite(id);
-    };
-    
-    window.deleteBlogPost = function(id) {
-        if (window.app) window.app.deleteBlogPost(id);
-    };
-    
-    window.deleteMessage = function(id) {
-        if (window.app) window.app.deleteMessage(id);
-    };
-    
-    window.viewMessage = function(id) {
-        if (window.app) window.app.viewMessage(id);
-    };
-    
-    window.exportData = function() {
-        if (window.app) window.app.exportData();
-    };
-    
-    window.resetData = function() {
-        if (window.app) window.app.resetData();
-    };
-    
-    window.showDeveloperModal = function(id) {
-        if (window.app) window.app.showDeveloperModal(id);
-    };
-    
-    window.hideDeveloperModal = function() {
-        if (window.app) window.app.hideDeveloperModal();
-    };
-    
-    window.showImageFullscreen = function(src, alt) {
-        if (window.app) window.app.showImageFullscreen(src, alt);
-    };
-    
-    window.hideImageFullscreen = function() {
-        if (window.app) window.app.hideImageFullscreen();
-    };
     </script>
 </body>
 </html>
