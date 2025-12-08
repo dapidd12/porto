@@ -1,4 +1,4 @@
-// Main Application - SpaceTeam | Dev - ENHANCED VERSION
+// Main Application - SpaceTeam | Dev - FIXED VERSION
 class SpaceTeamApp {
     constructor() {
         try {
@@ -32,9 +32,7 @@ class SpaceTeamApp {
                 resizeObserver: null,
                 chartObserver: null,
                 loadingStartTime: null,
-                isMobileMenuOpen: false,
-                currentDeveloperModal: null,
-                currentFullscreenImage: null
+                isMobileMenuOpen: false
             };
 
             // Bind methods to maintain context
@@ -59,10 +57,6 @@ class SpaceTeamApp {
             this.handleScroll = this.handleScroll.bind(this);
             this.initLazyLoading = this.initLazyLoading.bind(this);
             this.safeParseJSON = this.safeParseJSON.bind(this);
-            this.showDeveloperModal = this.showDeveloperModal.bind(this);
-            this.hideDeveloperModal = this.hideDeveloperModal.bind(this);
-            this.showImageFullscreen = this.showImageFullscreen.bind(this);
-            this.hideImageFullscreen = this.hideImageFullscreen.bind(this);
             
             this.init();
         } catch (error) {
@@ -618,19 +612,12 @@ class SpaceTeamApp {
             ).join('');
             
             const developerHTML = `
-                <div class="developer-card clickable animate__animated animate__fadeInUp" 
-                     style="animation-delay: ${index * 100}ms"
-                     onclick="app.showDeveloperModal(${dev.id})"
-                     onkeydown="if(event.key === 'Enter') app.showDeveloperModal(${dev.id})"
-                     tabindex="0"
-                     role="button"
-                     aria-label="View details for ${dev.name}">
+                <div class="developer-card animate__animated animate__fadeInUp" style="animation-delay: ${index * 100}ms">
                     <div class="developer-header">
                         <img src="${dev.image || 'https://images.unsplash.com/photo-1534796636910-9c1825470300?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" 
                              alt="${dev.name}" 
                              class="developer-image"
-                             loading="lazy"
-                             onclick="app.showImageFullscreen(this.src, '${dev.name}')">
+                             loading="lazy">
                         <div class="developer-overlay">
                             <h3 class="developer-name">${dev.name}</h3>
                             <p class="developer-role">${dev.role}</p>
@@ -642,10 +629,10 @@ class SpaceTeamApp {
                         </div>
                         <p class="developer-bio">${dev.bio}</p>
                         <div style="display: flex; gap: 10px; margin-top: 20px;">
-                            ${dev.email ? `<a href="mailto:${dev.email}" class="btn btn-sm btn-outline" onclick="event.stopPropagation()">
+                            ${dev.email ? `<a href="mailto:${dev.email}" class="btn btn-sm btn-outline">
                                 <i class="fas fa-satellite"></i> Contact
                             </a>` : ''}
-                            ${dev.github ? `<a href="https://github.com/${dev.github}" target="_blank" class="btn btn-sm btn-secondary" onclick="event.stopPropagation()">
+                            ${dev.github ? `<a href="https://github.com/${dev.github}" target="_blank" class="btn btn-sm btn-secondary">
                                 <i class="fab fa-github"></i> GitHub
                             </a>` : ''}
                         </div>
@@ -709,8 +696,7 @@ class SpaceTeamApp {
                     <img src="${project.image || 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" 
                          alt="${project.title}" 
                          class="project-image"
-                         loading="lazy"
-                         onclick="app.showImageFullscreen(this.src, '${project.title.replace(/'/g, "\\'")}')">
+                         loading="lazy">
                     <div class="project-content">
                         <h3 class="project-title">${project.title}</h3>
                         <p class="project-description">${project.description}</p>
@@ -776,8 +762,7 @@ class SpaceTeamApp {
                         <img src="${website.screenshot || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" 
                              alt="${website.title}" 
                              class="website-image"
-                             loading="lazy"
-                             onclick="app.showImageFullscreen(this.src, '${website.title.replace(/'/g, "\\'")}')">
+                             loading="lazy">
                         <div class="website-status ${website.status || 'live'}">
                             <span>${statusText[website.status] || statusText.live}</span>
                         </div>
@@ -847,8 +832,7 @@ class SpaceTeamApp {
                     <img src="${post.image || 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" 
                          alt="${post.title}" 
                          class="blog-image"
-                         loading="lazy"
-                         onclick="app.showImageFullscreen(this.src, '${post.title.replace(/'/g, "\\'")}')">
+                         loading="lazy">
                     <div class="blog-content">
                         <span class="blog-category">${post.category || 'Mission Briefing'}</span>
                         <h3 class="blog-title">${post.title}</h3>
@@ -873,26 +857,10 @@ class SpaceTeamApp {
         const statsClients = document.getElementById('stats-clients');
         const statsArticles = document.getElementById('stats-articles');
         
-        if (projectsCount) {
-            projectsCount.textContent = this.state.projects.length;
-            projectsCount.classList.add('animated');
-            setTimeout(() => projectsCount.classList.remove('animated'), 1000);
-        }
-        if (statsProjects) {
-            statsProjects.textContent = this.state.projects.length;
-            statsProjects.classList.add('animated');
-            setTimeout(() => statsProjects.classList.remove('animated'), 1000);
-        }
-        if (statsClients) {
-            statsClients.textContent = Math.floor(this.state.projects.length * 2.5);
-            statsClients.classList.add('animated');
-            setTimeout(() => statsClients.classList.remove('animated'), 1000);
-        }
-        if (statsArticles) {
-            statsArticles.textContent = this.state.blogPosts.length;
-            statsArticles.classList.add('animated');
-            setTimeout(() => statsArticles.classList.remove('animated'), 1000);
-        }
+        if (projectsCount) projectsCount.textContent = this.state.projects.length;
+        if (statsProjects) statsProjects.textContent = this.state.projects.length;
+        if (statsClients) statsClients.textContent = Math.floor(this.state.projects.length * 2.5);
+        if (statsArticles) statsArticles.textContent = this.state.blogPosts.length;
     }
 
     initSkillsChart() {
@@ -1146,17 +1114,6 @@ class SpaceTeamApp {
             
             // Close modals on outside click
             document.addEventListener('click', (e) => {
-                // Developer modal
-                if (e.target.classList.contains('developer-modal')) {
-                    this.hideDeveloperModal();
-                }
-                
-                // Image fullscreen modal
-                if (e.target.classList.contains('image-fullscreen-modal')) {
-                    this.hideImageFullscreen();
-                }
-                
-                // Login modal
                 if (e.target.classList.contains('modal')) {
                     this.hideLoginModal();
                 }
@@ -1169,12 +1126,10 @@ class SpaceTeamApp {
                 }
             });
             
-            // Escape key to close modals
+            // Escape key to close modal
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     this.hideLoginModal();
-                    this.hideDeveloperModal();
-                    this.hideImageFullscreen();
                     if (this.state.isMobileMenuOpen) {
                         this.closeMobileMenu();
                     }
@@ -1260,177 +1215,6 @@ class SpaceTeamApp {
         window.addEventListener('scroll', scrollHandler);
         // Initial call
         scrollHandler();
-    }
-
-    // NEW FEATURE: Developer Modal
-    showDeveloperModal(developerId) {
-        const developer = this.state.developers.find(d => d.id === developerId);
-        if (!developer) return;
-        
-        this.state.currentDeveloperModal = developerId;
-        
-        // Create modal if it doesn't exist
-        let modal = document.getElementById('developer-modal');
-        if (!modal) {
-            modal = document.createElement('div');
-            modal.id = 'developer-modal';
-            modal.className = 'developer-modal';
-            modal.innerHTML = `
-                <div class="developer-modal-content">
-                    <div class="developer-modal-header">
-                        <img src="${developer.image || 'https://images.unsplash.com/photo-1534796636910-9c1825470300?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" 
-                             alt="${developer.name}" 
-                             class="developer-modal-image"
-                             onclick="app.showImageFullscreen(this.src, '${developer.name.replace(/'/g, "\\'")}')">
-                        <div class="developer-modal-info">
-                            <h2 class="developer-modal-name">${developer.name}</h2>
-                            <p class="developer-modal-role">${developer.role}</p>
-                            <div class="developer-modal-skills">
-                                ${Array.isArray(developer.skills) ? developer.skills.map(skill => 
-                                    `<span class="skill-tag">${skill}</span>`
-                                ).join('') : ''}
-                            </div>
-                        </div>
-                        <button class="developer-modal-close" onclick="app.hideDeveloperModal()" aria-label="Close modal">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                    
-                    <div class="developer-modal-body">
-                        <div class="developer-modal-section">
-                            <h3>About</h3>
-                            <p class="developer-modal-bio">${developer.bio}</p>
-                        </div>
-                        
-                        ${developer.github || developer.email ? `
-                        <div class="developer-modal-section">
-                            <h3>Contact</h3>
-                            <div class="developer-modal-contact">
-                                ${developer.email ? `
-                                <div class="developer-modal-contact-item">
-                                    <i class="fas fa-envelope"></i>
-                                    <a href="mailto:${developer.email}">${developer.email}</a>
-                                </div>
-                                ` : ''}
-                                ${developer.github ? `
-                                <div class="developer-modal-contact-item">
-                                    <i class="fab fa-github"></i>
-                                    <a href="https://github.com/${developer.github}" target="_blank">GitHub Profile</a>
-                                </div>
-                                ` : ''}
-                            </div>
-                        </div>
-                        ` : ''}
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        } else {
-            // Update existing modal
-            modal.querySelector('.developer-modal-image').src = developer.image;
-            modal.querySelector('.developer-modal-image').alt = developer.name;
-            modal.querySelector('.developer-modal-name').textContent = developer.name;
-            modal.querySelector('.developer-modal-role').textContent = developer.role;
-            modal.querySelector('.developer-modal-bio').textContent = developer.bio;
-            
-            const skillsContainer = modal.querySelector('.developer-modal-skills');
-            skillsContainer.innerHTML = Array.isArray(developer.skills) ? 
-                developer.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('') : '';
-            
-            const contactSection = modal.querySelector('.developer-modal-section:last-child');
-            if (developer.github || developer.email) {
-                if (!contactSection || !contactSection.innerHTML.includes('Contact')) {
-                    contactSection.innerHTML = `
-                        <h3>Contact</h3>
-                        <div class="developer-modal-contact">
-                            ${developer.email ? `
-                            <div class="developer-modal-contact-item">
-                                <i class="fas fa-envelope"></i>
-                                <a href="mailto:${developer.email}">${developer.email}</a>
-                            </div>
-                            ` : ''}
-                            ${developer.github ? `
-                            <div class="developer-modal-contact-item">
-                                <i class="fab fa-github"></i>
-                                <a href="https://github.com/${developer.github}" target="_blank">GitHub Profile</a>
-                            </div>
-                            ` : ''}
-                        </div>
-                    `;
-                }
-            } else if (contactSection) {
-                contactSection.remove();
-            }
-        }
-        
-        // Show modal
-        setTimeout(() => {
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }, 10);
-    }
-
-    hideDeveloperModal() {
-        const modal = document.getElementById('developer-modal');
-        if (modal) {
-            modal.classList.remove('active');
-            setTimeout(() => {
-                if (modal.parentNode) {
-                    document.body.removeChild(modal);
-                }
-                document.body.style.overflow = '';
-            }, 300);
-        }
-        this.state.currentDeveloperModal = null;
-    }
-
-    // NEW FEATURE: Image Fullscreen
-    showImageFullscreen(imageSrc, imageAlt) {
-        event.stopPropagation();
-        
-        // Create modal
-        const modal = document.createElement('div');
-        modal.className = 'image-fullscreen-modal';
-        modal.innerHTML = `
-            <div class="image-fullscreen-content">
-                <img src="${imageSrc}" alt="${imageAlt}" class="image-fullscreen-img">
-                <button class="image-fullscreen-close" onclick="app.hideImageFullscreen()" aria-label="Close fullscreen">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-        `;
-        document.body.appendChild(modal);
-        
-        // Show modal
-        setTimeout(() => {
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }, 10);
-        
-        this.state.currentFullscreenImage = modal;
-        
-        // Close on escape key
-        const escapeHandler = (e) => {
-            if (e.key === 'Escape') {
-                this.hideImageFullscreen();
-                document.removeEventListener('keydown', escapeHandler);
-            }
-        };
-        document.addEventListener('keydown', escapeHandler);
-    }
-
-    hideImageFullscreen() {
-        const modal = this.state.currentFullscreenImage;
-        if (modal) {
-            modal.classList.remove('active');
-            setTimeout(() => {
-                if (modal.parentNode) {
-                    document.body.removeChild(modal);
-                }
-                document.body.style.overflow = '';
-            }, 300);
-        }
-        this.state.currentFullscreenImage = null;
     }
 
     toggleDarkMode() {
@@ -2169,15 +1953,10 @@ class SpaceTeamApp {
     getDevelopersManagementHTML() {
         const developersListHTML = this.state.developers.map(dev => `
             <div class="admin-list-item">
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <img src="${dev.image || 'https://images.unsplash.com/photo-1534796636910-9c1825470300?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80'}" 
-                         alt="${dev.name}" 
-                         style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--secondary);">
-                    <div>
-                        <h4 style="margin: 0; color: var(--text-primary);">${dev.name}</h4>
-                        <p style="margin: 5px 0; color: var(--text-secondary);">${dev.role}</p>
-                        <small style="color: var(--text-tertiary);">${Array.isArray(dev.skills) ? dev.skills.slice(0, 3).join(', ') : dev.skills || ''}</small>
-                    </div>
+                <div>
+                    <h4 style="margin: 0; color: var(--text-primary);">${dev.name}</h4>
+                    <p style="margin: 5px 0; color: var(--text-secondary);">${dev.role}</p>
+                    <small style="color: var(--text-tertiary);">${Array.isArray(dev.skills) ? dev.skills.slice(0, 3).join(', ') : dev.skills || ''}</small>
                 </div>
                 <div class="admin-list-actions">
                     <button class="btn btn-sm" onclick="app.editDeveloper(${dev.id})">
@@ -2431,7 +2210,7 @@ class SpaceTeamApp {
                     <form id="admin-website-form">
                         <input type="hidden" id="admin-website-id" value="${websiteToEdit?.id || ''}">
                         
-                        <div class="admin-website-form-fields">
+                        <div class="form-row">
                             <div class="form-group">
                                 <label class="form-label">Website Title *</label>
                                 <input type="text" class="form-control" id="admin-website-title" value="${websiteToEdit?.title || ''}" required>
@@ -2442,7 +2221,7 @@ class SpaceTeamApp {
                             </div>
                         </div>
                         
-                        <div class="admin-website-form-fields">
+                        <div class="form-row">
                             <div class="form-group">
                                 <label class="form-label">Screenshot URL *</label>
                                 <input type="text" class="form-control" id="admin-website-screenshot" value="${websiteToEdit?.screenshot || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'}" required>
@@ -2468,7 +2247,7 @@ class SpaceTeamApp {
                             <small style="color: var(--text-tertiary);">Separate with commas: React, Node.js, MongoDB, etc.</small>
                         </div>
                         
-                        <div class="admin-website-form-fields">
+                        <div class="form-row">
                             <div class="form-group">
                                 <label class="form-label">GitHub Repository (Optional)</label>
                                 <input type="url" class="form-control" id="admin-website-github" value="${websiteToEdit?.github || ''}">
@@ -3365,10 +3144,6 @@ document.addEventListener('DOMContentLoaded', () => {
         window.viewMessage = (id) => app.viewMessage(id);
         window.exportData = () => app.exportData();
         window.resetData = () => app.resetData();
-        window.showDeveloperModal = (id) => app.showDeveloperModal(id);
-        window.hideDeveloperModal = () => app.hideDeveloperModal();
-        window.showImageFullscreen = (src, alt) => app.showImageFullscreen(src, alt);
-        window.hideImageFullscreen = () => app.hideImageFullscreen();
         
     } catch (error) {
         console.error('Failed to initialize application:', error);
