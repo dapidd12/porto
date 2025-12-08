@@ -532,6 +532,8 @@
         <p>Initializing systems...</p>
     </div>
 
+    <!-- Developer Modal and Image Fullscreen Modal will be created dynamically -->
+
     <!-- External Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -560,7 +562,7 @@
                             }
                             
                             // Handle sections
-                            if (element.classList.contains('section')) {
+                            if (element.classList.contains('.section')) {
                                 element.classList.add('visible');
                                 lazyObserver.unobserve(element);
                             }
@@ -616,8 +618,119 @@
                     section.classList.add('visible');
                 });
             }
+            
+            // Add keyboard navigation for developer cards
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && e.target.classList.contains('developer-card')) {
+                    const developerId = e.target.getAttribute('data-developer-id');
+                    if (developerId && window.app) {
+                        window.app.showDeveloperModal(parseInt(developerId));
+                    }
+                }
+            });
         });
     })();
+    
+    // Expose global functions for onclick handlers
+    window.showAdminSection = function(section) {
+        if (window.app) window.app.showAdminSection(section);
+    };
+    
+    window.viewProjectDetails = function(id) {
+        if (window.app) window.app.viewProjectDetails(id);
+    };
+    
+    window.viewWebsiteDetails = function(id) {
+        if (window.app) window.app.viewWebsiteDetails(id);
+    };
+    
+    window.viewBlogPost = function(id) {
+        if (window.app) window.app.viewBlogPost(id);
+    };
+    
+    window.switchAdminTab = function(tabId) {
+        if (window.app) window.app.switchAdminTab(tabId);
+    };
+    
+    window.resetDeveloperForm = function() {
+        if (window.app) window.app.resetDeveloperForm();
+    };
+    
+    window.resetProjectForm = function() {
+        if (window.app) window.app.resetProjectForm();
+    };
+    
+    window.resetWebsiteForm = function() {
+        if (window.app) window.app.resetWebsiteForm();
+    };
+    
+    window.resetBlogForm = function() {
+        if (window.app) window.app.resetBlogForm();
+    };
+    
+    window.editDeveloper = function(id) {
+        if (window.app) window.app.editDeveloper(id);
+    };
+    
+    window.editProject = function(id) {
+        if (window.app) window.app.editProject(id);
+    };
+    
+    window.editWebsite = function(id) {
+        if (window.app) window.app.editWebsite(id);
+    };
+    
+    window.editBlogPost = function(id) {
+        if (window.app) window.app.editBlogPost(id);
+    };
+    
+    window.deleteDeveloper = function(id) {
+        if (window.app) window.app.deleteDeveloper(id);
+    };
+    
+    window.deleteProject = function(id) {
+        if (window.app) window.app.deleteProject(id);
+    };
+    
+    window.deleteWebsite = function(id) {
+        if (window.app) window.app.deleteWebsite(id);
+    };
+    
+    window.deleteBlogPost = function(id) {
+        if (window.app) window.app.deleteBlogPost(id);
+    };
+    
+    window.deleteMessage = function(id) {
+        if (window.app) window.app.deleteMessage(id);
+    };
+    
+    window.viewMessage = function(id) {
+        if (window.app) window.app.viewMessage(id);
+    };
+    
+    window.exportData = function() {
+        if (window.app) window.app.exportData();
+    };
+    
+    window.resetData = function() {
+        if (window.app) window.app.resetData();
+    };
+    
+    window.showDeveloperModal = function(id) {
+        if (window.app) window.app.showDeveloperModal(id);
+    };
+    
+    window.hideDeveloperModal = function() {
+        if (window.app) window.app.hideDeveloperModal();
+    };
+    
+    window.showImageFullscreen = function(src, alt) {
+        if (window.app) window.app.showImageFullscreen(src, alt);
+    };
+    
+    window.hideImageFullscreen = function() {
+        if (window.app) window.app.hideImageFullscreen();
+    };
     </script>
 </body>
 </html>
