@@ -1,5 +1,3 @@
-[file name]: app.js
-[file content begin]
 // Main Application - SpaceTeam | Dev - FIXED VERSION
 class SpaceTeamApp {
     constructor() {
@@ -37,30 +35,10 @@ class SpaceTeamApp {
                 isMobileMenuOpen: false
             };
 
-            // Bind methods to maintain context
-            this.init = this.init.bind(this);
-            this.toggleDarkMode = this.toggleDarkMode.bind(this);
-            this.toggleMobileMenu = this.toggleMobileMenu.bind(this);
-            this.closeMobileMenu = this.closeMobileMenu.bind(this);
-            this.handleContactSubmit = this.handleContactSubmit.bind(this);
-            this.handleAdminLogin = this.handleAdminLogin.bind(this);
-            this.toggleChat = this.toggleChat.bind(this);
-            this.sendChatMessage = this.sendChatMessage.bind(this);
-            this.showAdminSection = this.showAdminSection.bind(this);
-            this.switchAdminTab = this.switchAdminTab.bind(this);
-            this.handleDeveloperFormSubmit = this.handleDeveloperFormSubmit.bind(this);
-            this.handleProjectFormSubmit = this.handleProjectFormSubmit.bind(this);
-            this.handleWebsiteFormSubmit = this.handleWebsiteFormSubmit.bind(this);
-            this.handleBlogFormSubmit = this.handleBlogFormSubmit.bind(this);
-            this.handleSettingsFormSubmit = this.handleSettingsFormSubmit.bind(this);
-            this.switchLanguage = this.switchLanguage.bind(this);
-            this.updateLanguage = this.updateLanguage.bind(this);
-            this.handleNavClick = this.handleNavClick.bind(this);
-            this.handleScroll = this.handleScroll.bind(this);
-            this.initLazyLoading = this.initLazyLoading.bind(this);
-            this.safeParseJSON = this.safeParseJSON.bind(this);
-            
-            this.init();
+            console.log('SpaceTeamApp initialized with state:', {
+                darkMode: this.state.darkMode,
+                language: this.state.language
+            });
         } catch (error) {
             console.error('App constructor error:', error);
             throw error;
@@ -69,6 +47,8 @@ class SpaceTeamApp {
 
     async init() {
         try {
+            console.log('Initializing SpaceTeamApp...');
+            
             // Set current year
             const yearElement = document.getElementById('current-year');
             if (yearElement) {
@@ -82,6 +62,7 @@ class SpaceTeamApp {
                 if (themeIcon) {
                     themeIcon.className = 'fas fa-sun';
                 }
+                console.log('Dark mode applied');
             }
             
             // Apply language
@@ -106,6 +87,8 @@ class SpaceTeamApp {
             // Initialize lazy loading
             this.initLazyLoading();
             
+            console.log('SpaceTeamApp initialized successfully');
+            
         } catch (error) {
             console.error('Initialization error:', error);
             this.showNotification('Error initializing application', 'error');
@@ -113,6 +96,7 @@ class SpaceTeamApp {
     }
 
     async loadData() {
+        console.log('Loading data...');
         this.state.loadingStartTime = Date.now();
         this.showLoading();
         
@@ -126,7 +110,7 @@ class SpaceTeamApp {
             } else {
                 // Fallback to localStorage
                 this.loadFromLocalStorage();
-                this.showNotification('Using local storage mode. Set up Supabase for cloud storage.', 'warning');
+                console.warn('Using local storage mode. Set up Supabase for cloud storage.');
             }
             
             // Update UI with loaded data
@@ -136,17 +120,22 @@ class SpaceTeamApp {
             console.error('Error loading data:', error);
             this.loadFromLocalStorage();
             this.updateUI();
-            this.showNotification('Failed to load cloud data. Using local storage.', 'warning');
+            console.warn('Failed to load cloud data. Using local storage.');
         } finally {
             // Ensure minimum loading time of 1 second for good UX
             const elapsed = Date.now() - this.state.loadingStartTime;
             const remaining = Math.max(1000 - elapsed, 0);
-            setTimeout(() => this.hideLoading(), remaining);
+            setTimeout(() => {
+                this.hideLoading();
+                console.log('Loading completed');
+            }, remaining);
         }
     }
 
     async loadFromSupabase() {
         try {
+            console.log('Loading from Supabase...');
+            
             // Load developers
             const { data: developers, error: devError } = await supabaseClient
                 .from('developers')
@@ -207,7 +196,6 @@ class SpaceTeamApp {
                     settingsData = settings;
                 }
             } catch (e) {
-                // Settings table might not exist
                 console.log('Settings table not found, using defaults');
             }
             
@@ -225,6 +213,14 @@ class SpaceTeamApp {
                 ? Math.max(...this.state.messages.map(m => m.id || 0), 0) + 1
                 : 1;
             
+            console.log('Supabase data loaded successfully:', {
+                developers: this.state.developers.length,
+                projects: this.state.projects.length,
+                websites: this.state.websiteProjects.length,
+                blogPosts: this.state.blogPosts.length,
+                messages: this.state.messages.length
+            });
+            
         } catch (error) {
             console.error('Supabase loading error:', error);
             throw error;
@@ -232,6 +228,8 @@ class SpaceTeamApp {
     }
 
     loadFromLocalStorage() {
+        console.log('Loading from localStorage...');
+        
         this.state.developers = this.safeParseJSON(localStorage.getItem('spaceteam_developers')) || [];
         this.state.projects = this.safeParseJSON(localStorage.getItem('spaceteam_projects')) || [];
         this.state.websiteProjects = this.safeParseJSON(localStorage.getItem('spaceteam_websites')) || [];
@@ -255,6 +253,14 @@ class SpaceTeamApp {
         this.state.messageIdCounter = this.state.messages.length > 0
             ? Math.max(...this.state.messages.map(m => m.id || 0), 0) + 1
             : 1;
+        
+        console.log('LocalStorage data loaded:', {
+            developers: this.state.developers.length,
+            projects: this.state.projects.length,
+            websites: this.state.websiteProjects.length,
+            blogPosts: this.state.blogPosts.length,
+            messages: this.state.messages.length
+        });
     }
 
     safeParseJSON(str) {
@@ -305,6 +311,7 @@ class SpaceTeamApp {
                 result = true;
             }
             
+            console.log(`Saved to Supabase ${table}:`, data.id || data.length || 'multiple');
             return result;
         } catch (error) {
             console.error(`Error saving to ${table}:`, error);
@@ -325,6 +332,7 @@ class SpaceTeamApp {
                 .eq('id', id);
             
             if (error) throw error;
+            console.log(`Deleted from Supabase ${table}:`, id);
             return true;
         } catch (error) {
             console.error(`Error deleting from ${table}:`, error);
@@ -335,6 +343,8 @@ class SpaceTeamApp {
 
     saveToLocalStorage(table, data) {
         try {
+            console.log(`Saving to localStorage ${table}:`, data.id || data.length || 'multiple');
+            
             switch(table) {
                 case 'developers':
                     if (Array.isArray(data)) {
@@ -432,6 +442,8 @@ class SpaceTeamApp {
 
     deleteFromLocalStorage(table, id) {
         try {
+            console.log(`Deleting from localStorage ${table}:`, id);
+            
             switch(table) {
                 case 'developers':
                     const developers = this.state.developers.filter(d => d.id !== id);
@@ -471,6 +483,8 @@ class SpaceTeamApp {
     }
 
     updateUI() {
+        console.log('Updating UI...');
+        
         // Apply settings
         this.applySettings();
         
@@ -486,9 +500,13 @@ class SpaceTeamApp {
         
         // Initialize lazy loading for new images
         this.initLazyLoading();
+        
+        console.log('UI updated successfully');
     }
 
     applySettings() {
+        console.log('Applying settings...');
+        
         // Apply running text
         const runningText = this.state.settings.runningText?.[this.state.language] || 
                           CONFIG.defaults.runningText[this.state.language] || 
@@ -529,9 +547,18 @@ class SpaceTeamApp {
         if (chatToggle) {
             chatToggle.classList.toggle('hidden', !chatEnabled);
         }
+        
+        console.log('Settings applied:', {
+            siteTitle,
+            contactEmail,
+            contactPhone,
+            chatEnabled
+        });
     }
 
     async updateLanguage(lang) {
+        console.log(`Updating language to: ${lang}`);
+        
         this.state.language = lang;
         localStorage.setItem('language', lang);
         
@@ -569,6 +596,8 @@ class SpaceTeamApp {
         
         // Re-render content with new language
         this.updateUI();
+        
+        console.log('Language updated successfully');
     }
 
     switchLanguage() {
@@ -581,8 +610,12 @@ class SpaceTeamApp {
 
     renderDevelopers() {
         const container = document.getElementById('developers-container');
-        if (!container) return;
+        if (!container) {
+            console.warn('Developers container not found');
+            return;
+        }
         
+        console.log(`Rendering ${this.state.developers.length} developers`);
         container.innerHTML = '';
         
         const translations = CONFIG.translations[this.state.language] || CONFIG.translations.en;
@@ -648,8 +681,12 @@ class SpaceTeamApp {
 
     renderProjects(filter = 'all') {
         const container = document.getElementById('projects-container');
-        if (!container) return;
+        if (!container) {
+            console.warn('Projects container not found');
+            return;
+        }
         
+        console.log(`Rendering ${this.state.projects.length} projects with filter: ${filter}`);
         container.innerHTML = '';
         
         const translations = CONFIG.translations[this.state.language] || CONFIG.translations.en;
@@ -727,8 +764,12 @@ class SpaceTeamApp {
 
     renderWebsiteProjects() {
         const container = document.getElementById('websites-container');
-        if (!container) return;
+        if (!container) {
+            console.warn('Websites container not found');
+            return;
+        }
         
+        console.log(`Rendering ${this.state.websiteProjects.length} website projects`);
         container.innerHTML = '';
         
         const translations = CONFIG.translations[this.state.language] || CONFIG.translations.en;
@@ -802,8 +843,12 @@ class SpaceTeamApp {
 
     renderBlogPosts() {
         const container = document.getElementById('blog-container');
-        if (!container) return;
+        if (!container) {
+            console.warn('Blog container not found');
+            return;
+        }
         
+        console.log(`Rendering ${this.state.blogPosts.length} blog posts`);
         container.innerHTML = '';
         
         const translations = CONFIG.translations[this.state.language] || CONFIG.translations.en;
@@ -854,6 +899,8 @@ class SpaceTeamApp {
     }
 
     updateStats() {
+        console.log('Updating stats...');
+        
         const projectsCount = document.getElementById('projects-count');
         const statsProjects = document.getElementById('stats-projects');
         const statsClients = document.getElementById('stats-clients');
@@ -863,11 +910,20 @@ class SpaceTeamApp {
         if (statsProjects) statsProjects.textContent = this.state.projects.length;
         if (statsClients) statsClients.textContent = Math.floor(this.state.projects.length * 2.5);
         if (statsArticles) statsArticles.textContent = this.state.blogPosts.length;
+        
+        console.log('Stats updated:', {
+            projects: this.state.projects.length,
+            clients: Math.floor(this.state.projects.length * 2.5),
+            articles: this.state.blogPosts.length
+        });
     }
 
     initSkillsChart() {
         const ctx = document.getElementById('skillsChart');
-        if (!ctx) return;
+        if (!ctx) {
+            console.warn('Skills chart canvas not found');
+            return;
+        }
         
         // Destroy existing chart if it exists
         if (this.state.skillsChart) {
@@ -1004,6 +1060,8 @@ class SpaceTeamApp {
                 }
             });
             
+            console.log('Skills chart initialized with', labels.length, 'skills');
+            
             // Use ResizeObserver for better performance
             this.state.chartObserver = new ResizeObserver(() => {
                 if (this.state.skillsChart) {
@@ -1024,6 +1082,8 @@ class SpaceTeamApp {
     }
 
     initUI() {
+        console.log('Initializing UI...');
+        
         // Initialize navigation active state
         this.updateActiveNavOnScroll();
         
@@ -1040,16 +1100,18 @@ class SpaceTeamApp {
 
     setupEventListeners() {
         try {
+            console.log('Setting up event listeners...');
+            
             // Theme toggle
             const themeToggle = document.getElementById('theme-toggle');
             if (themeToggle) {
-                themeToggle.addEventListener('click', this.toggleDarkMode);
+                themeToggle.addEventListener('click', () => this.toggleDarkMode());
             }
             
             // Mobile menu
             const mobileMenuBtn = document.getElementById('mobile-menu-btn');
             if (mobileMenuBtn) {
-                mobileMenuBtn.addEventListener('click', this.toggleMobileMenu);
+                mobileMenuBtn.addEventListener('click', () => this.toggleMobileMenu());
             }
             
             // Navigation scroll
@@ -1060,13 +1122,13 @@ class SpaceTeamApp {
             // Language selector
             const languageSelector = document.getElementById('language-selector');
             if (languageSelector) {
-                languageSelector.addEventListener('change', this.switchLanguage);
+                languageSelector.addEventListener('change', () => this.switchLanguage());
             }
             
             // Contact form
             const contactForm = document.getElementById('contact-form');
             if (contactForm) {
-                contactForm.addEventListener('submit', this.handleContactSubmit);
+                contactForm.addEventListener('submit', (e) => this.handleContactSubmit(e));
             }
             
             // Admin login
@@ -1085,23 +1147,23 @@ class SpaceTeamApp {
             
             const loginForm = document.getElementById('login-form');
             if (loginForm) {
-                loginForm.addEventListener('submit', this.handleAdminLogin);
+                loginForm.addEventListener('submit', (e) => this.handleAdminLogin(e));
             }
             
             // Chat widget
             const chatToggle = document.getElementById('chat-toggle');
             if (chatToggle) {
-                chatToggle.addEventListener('click', this.toggleChat);
+                chatToggle.addEventListener('click', () => this.toggleChat());
             }
             
             const closeChat = document.getElementById('close-chat');
             if (closeChat) {
-                closeChat.addEventListener('click', this.toggleChat);
+                closeChat.addEventListener('click', () => this.toggleChat());
             }
             
             const sendChat = document.getElementById('send-chat');
             if (sendChat) {
-                sendChat.addEventListener('click', this.sendChatMessage);
+                sendChat.addEventListener('click', () => this.sendChatMessage());
             }
             
             const chatInput = document.getElementById('chat-input');
@@ -1112,7 +1174,7 @@ class SpaceTeamApp {
             }
             
             // Scroll effect for navbar
-            window.addEventListener('scroll', this.handleScroll);
+            window.addEventListener('scroll', () => this.handleScroll());
             
             // Close modals on outside click
             document.addEventListener('click', (e) => {
@@ -1137,6 +1199,8 @@ class SpaceTeamApp {
                     }
                 }
             });
+            
+            console.log('Event listeners set up successfully');
             
         } catch (error) {
             console.error('Error setting up event listeners:', error);
@@ -1235,6 +1299,8 @@ class SpaceTeamApp {
                 this.initSkillsChart(); // Re-initialize for proper color update
             }
         }, 100);
+        
+        console.log('Dark mode toggled:', this.state.darkMode);
     }
 
     toggleMobileMenu() {
@@ -1257,6 +1323,8 @@ class SpaceTeamApp {
         
         // Prevent body scroll when menu is open
         document.body.style.overflow = this.state.isMobileMenuOpen ? 'hidden' : '';
+        
+        console.log('Mobile menu toggled:', this.state.isMobileMenuOpen);
     }
 
     closeMobileMenu() {
@@ -1316,6 +1384,8 @@ class SpaceTeamApp {
     async handleContactSubmit(e) {
         e.preventDefault();
         
+        console.log('Handling contact form submission...');
+        
         // Reset errors
         this.clearFormErrors();
         
@@ -1326,32 +1396,34 @@ class SpaceTeamApp {
         
         // Validation
         let isValid = true;
-        const translations = CONFIG.translations[this.state.language] || CONFIG.translations.en;
         
         if (!name) {
-            this.showFormError('name-error', translations.errorNameRequired || 'Astronaut name is required');
+            this.showFormError('name-error', 'Astronaut name is required');
             isValid = false;
         }
         
         if (!email) {
-            this.showFormError('email-error', translations.errorEmailRequired || 'Email is required');
+            this.showFormError('email-error', 'Transmission address is required');
             isValid = false;
         } else if (!this.validateEmail(email)) {
-            this.showFormError('email-error', translations.errorInvalidEmail || 'Please enter a valid email address');
+            this.showFormError('email-error', 'Please enter a valid transmission address');
             isValid = false;
         }
         
         if (!subject) {
-            this.showFormError('subject-error', translations.errorSubjectRequired || 'Subject is required');
+            this.showFormError('subject-error', 'Mission type is required');
             isValid = false;
         }
         
         if (!message) {
-            this.showFormError('message-error', translations.errorMessageRequired || 'Message is required');
+            this.showFormError('message-error', 'Mission briefing is required');
             isValid = false;
         }
         
-        if (!isValid) return;
+        if (!isValid) {
+            console.log('Form validation failed');
+            return;
+        }
         
         // Create message data
         const formData = {
@@ -1380,6 +1452,7 @@ class SpaceTeamApp {
                 this.state.messages.unshift(formData);
                 this.showNotification('Transmission sent successfully! Mission control will respond soon.', 'success');
                 e.target.reset();
+                console.log('Contact form submitted successfully:', { name, email, subject });
             } else {
                 this.showNotification('Failed to save transmission. Please try again.', 'error');
             }
@@ -1474,6 +1547,8 @@ class SpaceTeamApp {
                 setTimeout(() => chatInput.focus(), 100);
             }
         }
+        
+        console.log('Chat toggled:', this.state.chatOpen);
     }
 
     async sendChatMessage() {
@@ -1482,6 +1557,8 @@ class SpaceTeamApp {
         
         const message = input.value.trim();
         if (!message) return;
+        
+        console.log('Sending chat message:', message);
         
         // Add user message
         const chatBody = document.getElementById('chat-body');
@@ -1568,6 +1645,8 @@ class SpaceTeamApp {
             botMsg.className = 'chat-message bot';
             botMsg.textContent = response;
             chatBody.appendChild(botMsg);
+            
+            console.log('Chat response sent');
         } catch (error) {
             console.error('Chat error:', error);
             loadingMsg.remove();
@@ -1609,6 +1688,8 @@ class SpaceTeamApp {
 
     async handleAdminLogin(e) {
         e.preventDefault();
+        
+        console.log('Handling admin login...');
         
         this.clearFormErrors();
         
@@ -1671,8 +1752,10 @@ class SpaceTeamApp {
                 this.hideLoginModal();
                 this.showAdminPanel();
                 this.showNotification('Mission control access granted!', 'success');
+                console.log('Admin login successful');
             } else {
                 this.showNotification('Invalid access code or security key', 'error');
+                console.log('Admin login failed');
             }
         } catch (error) {
             console.error('Login error:', error);
@@ -1691,6 +1774,7 @@ class SpaceTeamApp {
         if (isAdminLoggedIn) {
             this.state.isAdmin = true;
             this.showAdminPanel();
+            console.log('Admin session restored');
         }
     }
 
@@ -1709,6 +1793,8 @@ class SpaceTeamApp {
         
         this.loadAdminDashboard();
         this.setupAdminEventListeners();
+        
+        console.log('Admin panel shown');
     }
 
     hideAdminPanel() {
@@ -1733,6 +1819,7 @@ class SpaceTeamApp {
         }
         
         this.showNotification('Logged out from mission control', 'success');
+        console.log('Admin panel hidden');
     }
 
     setupAdminEventListeners() {
@@ -1844,9 +1931,13 @@ class SpaceTeamApp {
                 btn.classList.add('active');
             }
         });
+        
+        console.log('Admin dashboard loaded');
     }
 
     showAdminSection(section) {
+        console.log(`Showing admin section: ${section}`);
+        
         this.state.currentAdminSection = section;
         this.state.editingId = null; // Reset editing state
         
@@ -1892,6 +1983,8 @@ class SpaceTeamApp {
     }
 
     setupAdminSectionEventListeners(section) {
+        console.log(`Setting up event listeners for section: ${section}`);
+        
         // Tab switching
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -1904,27 +1997,27 @@ class SpaceTeamApp {
         if (section === 'developers') {
             const form = document.getElementById('admin-developer-form');
             if (form) {
-                form.addEventListener('submit', this.handleDeveloperFormSubmit);
+                form.addEventListener('submit', (e) => this.handleDeveloperFormSubmit(e));
             }
         } else if (section === 'projects') {
             const form = document.getElementById('admin-project-form');
             if (form) {
-                form.addEventListener('submit', this.handleProjectFormSubmit);
+                form.addEventListener('submit', (e) => this.handleProjectFormSubmit(e));
             }
         } else if (section === 'websites') {
             const form = document.getElementById('admin-website-form');
             if (form) {
-                form.addEventListener('submit', this.handleWebsiteFormSubmit);
+                form.addEventListener('submit', (e) => this.handleWebsiteFormSubmit(e));
             }
         } else if (section === 'blog') {
             const form = document.getElementById('admin-blog-form');
             if (form) {
-                form.addEventListener('submit', this.handleBlogFormSubmit);
+                form.addEventListener('submit', (e) => this.handleBlogFormSubmit(e));
             }
         } else if (section === 'settings') {
             const form = document.getElementById('admin-settings-form');
             if (form) {
-                form.addEventListener('submit', this.handleSettingsFormSubmit);
+                form.addEventListener('submit', (e) => this.handleSettingsFormSubmit(e));
             }
         }
     }
@@ -1951,6 +2044,8 @@ class SpaceTeamApp {
         if (tabBtn) {
             tabBtn.classList.add('active');
         }
+        
+        console.log(`Switched to tab: ${tabId}`);
     }
 
     getDevelopersManagementHTML() {
@@ -2521,6 +2616,8 @@ class SpaceTeamApp {
     async handleDeveloperFormSubmit(e) {
         e.preventDefault();
         
+        console.log('Handling developer form submit...');
+        
         const nameInput = document.getElementById('admin-dev-name');
         const roleInput = document.getElementById('admin-dev-role');
         const imageInput = document.getElementById('admin-dev-image');
@@ -2532,39 +2629,14 @@ class SpaceTeamApp {
             return;
         }
         
-        // Get translations for error messages
-        const translations = CONFIG.translations[this.state.language] || CONFIG.translations.en;
-        
-        // Validation
-        if (!nameInput.value.trim()) {
-            this.showNotification(translations.errorNameRequired || 'Astronaut name is required', 'error');
-            return;
-        }
-        
-        if (!roleInput.value.trim()) {
-            this.showNotification(translations.errorRoleRequired || 'Mission role is required', 'error');
-            return;
-        }
-        
-        if (!bioInput.value.trim()) {
-            this.showNotification(translations.errorBioRequired || 'Mission bio is required', 'error');
-            return;
-        }
-        
-        const skills = skillsInput.value.split(',').map(s => s.trim()).filter(s => s);
-        if (skills.length === 0) {
-            this.showNotification(translations.errorSkillsRequired || 'Please enter at least one skill', 'error');
-            return;
-        }
-        
         const developerData = {
             id: this.state.editingId || this.state.developerIdCounter++,
             name: nameInput.value.trim(),
             role: roleInput.value.trim(),
             image: imageInput.value.trim(),
-            email: document.getElementById('admin-dev-email')?.value.trim() || null,
-            github: document.getElementById('admin-dev-github')?.value.trim() || null,
-            skills: skills,
+            email: document.getElementById('admin-dev-email')?.value.trim() || '',
+            github: document.getElementById('admin-dev-github')?.value.trim() || '',
+            skills: skillsInput.value.split(',').map(s => s.trim()).filter(s => s),
             bio: bioInput.value.trim(),
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
@@ -2589,7 +2661,7 @@ class SpaceTeamApp {
             }
         } catch (error) {
             console.error('Error saving crew member:', error);
-            this.showNotification('Error saving crew member: ' + error.message, 'error');
+            this.showNotification('Error saving crew member', 'error');
         } finally {
             if (submitBtn) {
                 submitBtn.classList.remove('loading');
@@ -2600,6 +2672,8 @@ class SpaceTeamApp {
 
     async handleProjectFormSubmit(e) {
         e.preventDefault();
+        
+        console.log('Handling project form submit...');
         
         const titleInput = document.getElementById('admin-project-title');
         const typeInput = document.getElementById('admin-project-type');
@@ -2612,33 +2686,13 @@ class SpaceTeamApp {
             return;
         }
         
-        // Get translations for error messages
-        const translations = CONFIG.translations[this.state.language] || CONFIG.translations.en;
-        
-        // Validation
-        if (!titleInput.value.trim()) {
-            this.showNotification(translations.errorTitleRequired || 'Mission name is required', 'error');
-            return;
-        }
-        
-        if (!descriptionInput.value.trim()) {
-            this.showNotification(translations.errorDescriptionRequired || 'Mission report is required', 'error');
-            return;
-        }
-        
-        const tech = techInput.value.split(',').map(t => t.trim()).filter(t => t);
-        if (tech.length === 0) {
-            this.showNotification(translations.errorAtLeastOneTech || 'Please enter at least one technology', 'error');
-            return;
-        }
-        
         const projectData = {
             id: this.state.editingId || this.state.projectIdCounter++,
             title: titleInput.value.trim(),
             type: typeInput.value,
             image: imageInput.value.trim(),
-            link: document.getElementById('admin-project-link')?.value.trim() || null,
-            tech: tech,
+            link: document.getElementById('admin-project-link')?.value.trim() || '',
+            tech: techInput.value.split(',').map(t => t.trim()).filter(t => t),
             description: descriptionInput.value.trim(),
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
@@ -2663,7 +2717,7 @@ class SpaceTeamApp {
             }
         } catch (error) {
             console.error('Error saving mission:', error);
-            this.showNotification('Error saving mission: ' + error.message, 'error');
+            this.showNotification('Error saving mission', 'error');
         } finally {
             if (submitBtn) {
                 submitBtn.classList.remove('loading');
@@ -2674,6 +2728,8 @@ class SpaceTeamApp {
 
     async handleWebsiteFormSubmit(e) {
         e.preventDefault();
+        
+        console.log('Handling website form submit...');
         
         const titleInput = document.getElementById('admin-website-title');
         const urlInput = document.getElementById('admin-website-url');
@@ -2686,35 +2742,6 @@ class SpaceTeamApp {
             return;
         }
         
-        // Get translations for error messages
-        const translations = CONFIG.translations[this.state.language] || CONFIG.translations.en;
-        
-        // Validasi URL
-        try {
-            new URL(urlInput.value.trim());
-        } catch (error) {
-            this.showNotification(translations.errorInvalidUrl || 'Please enter a valid URL', 'error');
-            return;
-        }
-        
-        // Validasi technologies
-        const technologies = technologiesInput.value.split(',').map(t => t.trim()).filter(t => t);
-        if (technologies.length === 0) {
-            this.showNotification(translations.errorAtLeastOneTech || 'Please enter at least one technology', 'error');
-            return;
-        }
-        
-        // Validasi required fields
-        if (!titleInput.value.trim()) {
-            this.showNotification(translations.errorTitleRequired || 'Website title is required', 'error');
-            return;
-        }
-        
-        if (!descriptionInput.value.trim()) {
-            this.showNotification(translations.errorDescriptionRequired || 'Description is required', 'error');
-            return;
-        }
-        
         const websiteData = {
             id: this.state.editingId || this.state.websiteIdCounter++,
             title: titleInput.value.trim(),
@@ -2722,7 +2749,7 @@ class SpaceTeamApp {
             screenshot: screenshotInput.value.trim(),
             status: document.getElementById('admin-website-status')?.value || 'live',
             description: descriptionInput.value.trim(),
-            technologies: technologies,
+            technologies: technologiesInput.value.split(',').map(t => t.trim()).filter(t => t),
             github: document.getElementById('admin-website-github')?.value.trim() || '',
             icon: document.getElementById('admin-website-icon')?.value.trim() || 'fas fa-globe',
             features: document.getElementById('admin-website-features')?.value.split(',').map(f => f.trim()).filter(f => f) || [],
@@ -2750,7 +2777,7 @@ class SpaceTeamApp {
             }
         } catch (error) {
             console.error('Error saving website:', error);
-            this.showNotification('Error saving website: ' + error.message, 'error');
+            this.showNotification('Error saving website', 'error');
         } finally {
             if (submitBtn) {
                 submitBtn.classList.remove('loading');
@@ -2762,6 +2789,8 @@ class SpaceTeamApp {
     async handleBlogFormSubmit(e) {
         e.preventDefault();
         
+        console.log('Handling blog form submit...');
+        
         const titleInput = document.getElementById('admin-blog-title');
         const categoryInput = document.getElementById('admin-blog-category');
         const authorInput = document.getElementById('admin-blog-author');
@@ -2771,30 +2800,6 @@ class SpaceTeamApp {
         
         if (!titleInput || !categoryInput || !authorInput || !imageInput || !excerptInput || !contentInput) {
             this.showNotification('Form fields missing', 'error');
-            return;
-        }
-        
-        // Get translations for error messages
-        const translations = CONFIG.translations[this.state.language] || CONFIG.translations.en;
-        
-        // Validation
-        if (!titleInput.value.trim()) {
-            this.showNotification(translations.errorTitleRequired || 'Briefing title is required', 'error');
-            return;
-        }
-        
-        if (!excerptInput.value.trim()) {
-            this.showNotification(translations.errorDescriptionRequired || 'Briefing summary is required', 'error');
-            return;
-        }
-        
-        if (!contentInput.value.trim()) {
-            this.showNotification(translations.errorMessageRequired || 'Full briefing is required', 'error');
-            return;
-        }
-        
-        if (excerptInput.value.length > 200) {
-            this.showNotification(translations.errorExcerptTooLong || 'Briefing summary should be 200 characters or less', 'error');
             return;
         }
         
@@ -2829,7 +2834,7 @@ class SpaceTeamApp {
             }
         } catch (error) {
             console.error('Error saving briefing:', error);
-            this.showNotification('Error saving briefing: ' + error.message, 'error');
+            this.showNotification('Error saving briefing', 'error');
         } finally {
             if (submitBtn) {
                 submitBtn.classList.remove('loading');
@@ -2840,6 +2845,8 @@ class SpaceTeamApp {
 
     async handleSettingsFormSubmit(e) {
         e.preventDefault();
+        
+        console.log('Handling settings form submit...');
         
         const titleInputEn = document.getElementById('admin-settings-title-en');
         const titleInputId = document.getElementById('admin-settings-title-id');
@@ -2905,24 +2912,28 @@ class SpaceTeamApp {
 
     // Edit methods
     editDeveloper(id) {
+        console.log(`Editing developer: ${id}`);
         this.state.editingId = id;
         this.showAdminSection('developers');
         this.switchAdminTab('add-developer');
     }
 
     editProject(id) {
+        console.log(`Editing project: ${id}`);
         this.state.editingId = id;
         this.showAdminSection('projects');
         this.switchAdminTab('add-project');
     }
 
     editWebsite(id) {
+        console.log(`Editing website: ${id}`);
         this.state.editingId = id;
         this.showAdminSection('websites');
         this.switchAdminTab('add-website');
     }
 
     editBlogPost(id) {
+        console.log(`Editing blog post: ${id}`);
         this.state.editingId = id;
         this.showAdminSection('blog');
         this.switchAdminTab('add-blog');
@@ -2931,6 +2942,8 @@ class SpaceTeamApp {
     // Delete methods - FIXED
     async deleteDeveloper(id) {
         if (!confirm('Are you sure you want to remove this crew member from the mission?')) return;
+        
+        console.log(`Deleting developer: ${id}`);
         
         try {
             const deleted = await this.deleteFromSupabase('developers', id);
@@ -2944,12 +2957,14 @@ class SpaceTeamApp {
             }
         } catch (error) {
             console.error('Error removing crew member:', error);
-            this.showNotification('Error removing crew member: ' + error.message, 'error');
+            this.showNotification('Error removing crew member', 'error');
         }
     }
 
     async deleteProject(id) {
         if (!confirm('Are you sure you want to delete this mission from the log?')) return;
+        
+        console.log(`Deleting project: ${id}`);
         
         try {
             const deleted = await this.deleteFromSupabase('projects', id);
@@ -2963,12 +2978,14 @@ class SpaceTeamApp {
             }
         } catch (error) {
             console.error('Error deleting mission:', error);
-            this.showNotification('Error deleting mission: ' + error.message, 'error');
+            this.showNotification('Error deleting mission', 'error');
         }
     }
 
     async deleteWebsite(id) {
         if (!confirm('Are you sure you want to delete this website project?')) return;
+        
+        console.log(`Deleting website: ${id}`);
         
         try {
             const deleted = await this.deleteFromSupabase('website_projects', id);
@@ -2982,12 +2999,14 @@ class SpaceTeamApp {
             }
         } catch (error) {
             console.error('Error deleting website:', error);
-            this.showNotification('Error deleting website: ' + error.message, 'error');
+            this.showNotification('Error deleting website', 'error');
         }
     }
 
     async deleteBlogPost(id) {
         if (!confirm('Are you sure you want to delete this mission briefing?')) return;
+        
+        console.log(`Deleting blog post: ${id}`);
         
         try {
             const deleted = await this.deleteFromSupabase('blog_posts', id);
@@ -3001,12 +3020,14 @@ class SpaceTeamApp {
             }
         } catch (error) {
             console.error('Error deleting briefing:', error);
-            this.showNotification('Error deleting briefing: ' + error.message, 'error');
+            this.showNotification('Error deleting briefing', 'error');
         }
     }
 
     async deleteMessage(id) {
         if (!confirm('Are you sure you want to delete this transmission?')) return;
+        
+        console.log(`Deleting message: ${id}`);
         
         try {
             const deleted = await this.deleteFromSupabase('messages', id);
@@ -3020,7 +3041,7 @@ class SpaceTeamApp {
             }
         } catch (error) {
             console.error('Error deleting transmission:', error);
-            this.showNotification('Error deleting transmission: ' + error.message, 'error');
+            this.showNotification('Error deleting transmission', 'error');
         }
     }
 
@@ -3109,6 +3130,7 @@ class SpaceTeamApp {
         document.body.removeChild(linkElement);
         
         this.showNotification('Mission data backed up successfully!', 'success');
+        console.log('Data exported');
     }
 
     resetData() {
@@ -3119,6 +3141,8 @@ class SpaceTeamApp {
         if (!confirm('Are you absolutely sure? All mission data will be permanently deleted.')) {
             return;
         }
+        
+        console.log('Resetting all data...');
         
         // Reset all data
         this.state.developers = [];
@@ -3159,9 +3183,13 @@ class SpaceTeamApp {
         if (this.state.isAdmin) {
             this.loadAdminDashboard();
         }
+        
+        console.log('All data reset complete');
     }
 
     showNotification(message, type = 'info') {
+        console.log(`Notification [${type}]: ${message}`);
+        
         const container = document.getElementById('notification-container');
         if (!container) return;
         
@@ -3220,8 +3248,14 @@ class SpaceTeamApp {
 let app;
 document.addEventListener('DOMContentLoaded', () => {
     try {
+        console.log('DOM Content Loaded, initializing SpaceTeamApp...');
         app = new SpaceTeamApp();
         window.app = app;
+        
+        // Initialize the app
+        app.init().catch(error => {
+            console.error('Failed to initialize app:', error);
+        });
         
         // Expose methods for inline onclick handlers
         window.showAdminSection = (section) => app.showAdminSection(section);
@@ -3246,6 +3280,8 @@ document.addEventListener('DOMContentLoaded', () => {
         window.exportData = () => app.exportData();
         window.resetData = () => app.resetData();
         
+        console.log('SpaceTeamApp initialized and exposed globally');
+        
     } catch (error) {
         console.error('Failed to initialize application:', error);
         // Show error message to user
@@ -3255,4 +3291,3 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(errorDiv);
     }
 });
-[file content end]
