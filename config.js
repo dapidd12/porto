@@ -1,5 +1,3 @@
-[file name]: config.js
-[file content begin]
 // Configuration for SpaceTeam | Dev - FIXED VERSION
 const CONFIG = {
     // Supabase Configuration - UPDATE WITH YOUR CREDENTIALS
@@ -167,22 +165,7 @@ const CONFIG = {
             notificationSuccess: 'Success',
             notificationError: 'Error',
             notificationWarning: 'Warning',
-            notificationInfo: 'Info',
-            
-            // Error Messages
-            errorInvalidUrl: 'Please enter a valid URL',
-            errorAtLeastOneTech: 'Please enter at least one technology',
-            errorNameRequired: 'Astronaut name is required',
-            errorRoleRequired: 'Mission role is required',
-            errorBioRequired: 'Mission bio is required',
-            errorSkillsRequired: 'Please enter at least one skill',
-            errorTitleRequired: 'Mission name is required',
-            errorDescriptionRequired: 'Mission report is required',
-            errorExcerptTooLong: 'Briefing summary should be 200 characters or less',
-            errorEmailRequired: 'Email is required',
-            errorInvalidEmail: 'Please enter a valid email address',
-            errorSubjectRequired: 'Subject is required',
-            errorMessageRequired: 'Message is required'
+            notificationInfo: 'Info'
         },
         
         id: {
@@ -315,22 +298,7 @@ const CONFIG = {
             notificationSuccess: 'Sukses',
             notificationError: 'Error',
             notificationWarning: 'Peringatan',
-            notificationInfo: 'Info',
-            
-            // Error Messages
-            errorInvalidUrl: 'Harap masukkan URL yang valid',
-            errorAtLeastOneTech: 'Harap masukkan setidaknya satu teknologi',
-            errorNameRequired: 'Nama astronot diperlukan',
-            errorRoleRequired: 'Peran misi diperlukan',
-            errorBioRequired: 'Bio misi diperlukan',
-            errorSkillsRequired: 'Harap masukkan setidaknya satu keahlian',
-            errorTitleRequired: 'Nama misi diperlukan',
-            errorDescriptionRequired: 'Laporan misi diperlukan',
-            errorExcerptTooLong: 'Ringkasan pengarahan harus 200 karakter atau kurang',
-            errorEmailRequired: 'Email diperlukan',
-            errorInvalidEmail: 'Harap masukkan alamat email yang valid',
-            errorSubjectRequired: 'Subjek diperlukan',
-            errorMessageRequired: 'Pesan diperlukan'
+            notificationInfo: 'Info'
         }
     }
 };
@@ -370,4 +338,3 @@ window.addEventListener('unhandledrejection', function(e) {
     console.error('Unhandled promise rejection:', e.reason);
     // You can add error reporting here
 });
-[file content end]
