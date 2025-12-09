@@ -1,6 +1,4 @@
-[file name]: config.js
-[file content begin]
-// Configuration for SpaceTeam | Dev - ENHANCED VERSION
+// Configuration for SpaceTeam | Dev - FIXED VERSION
 const CONFIG = {
     // Supabase Configuration - UPDATE WITH YOUR CREDENTIALS
     supabaseUrl: 'https://ktvfoxucvcggekbhabix.supabase.co',
@@ -14,7 +12,7 @@ const CONFIG = {
     geminiApiKey: '', // Kosongkan atau isi dengan API key Anda
     
     // AI System Prompt
-    aiSystemPrompt: "You are the SpaceTeam AI assistant. Provide helpful responses about web development, projects, services, and our team members. Keep responses professional and space-themed.",
+    aiSystemPrompt: "You are the SpaceTeam AI assistant. Provide helpful responses about web development, projects, and services. Keep responses professional and space-themed.",
     
     // Default language
     defaultLanguage: 'id', // 'id' for Indonesian, 'en' for English
@@ -28,14 +26,14 @@ const CONFIG = {
         contactEmail: 'mission@spaceteam.dev',
         contactPhone: '+62 821-3830-5820',
         runningText: {
-            en: '🚀 SpaceTeam | Dev • 💻 Full-Stack Development • 🎨 UI/UX Design • 📱 Mobile Applications • 🌌 Cutting-edge Technology • 🔧 Cloud Systems • 🤖 AI Integration • 💬 Developer Comments • 🌐 Portfolio Websites',
-            id: '🚀 SpaceTeam | Dev • 💻 Pengembangan Full-Stack • 🎨 Desain UI/UX • 📱 Aplikasi Mobile • 🌌 Teknologi Terkini • 🔧 Sistem Cloud • 🤖 Integrasi AI • 💬 Komentar Developer • 🌐 Website Portofolio'
+            en: '🚀 SpaceTeam | Dev • 💻 Full-Stack Development • 🎨 UI/UX Design • 📱 Mobile Applications • 🌌 Cutting-edge Technology • 🔧 Cloud Systems • 🤖 AI Integration',
+            id: '🚀 SpaceTeam | Dev • 💻 Pengembangan Full-Stack • 🎨 Desain UI/UX • 📱 Aplikasi Mobile • 🌌 Teknologi Terkini • 🔧 Sistem Cloud • 🤖 Integrasi AI'
         },
         chatEnabled: true,
         darkMode: false
     },
     
-    // Language translations - UPDATED WITH NEW FEATURES
+    // Language translations
     translations: {
         en: {
             // Navigation
@@ -64,8 +62,6 @@ const CONFIG = {
             sectionTeamSubtitle: 'Meet our elite team of space engineers, each specialized in different tech galaxies.',
             sectionSkills: 'Tech Galaxy Map',
             sectionSkillsSubtitle: 'Our expertise spans across multiple technology constellations',
-            btnViewDetails: 'View Details',
-            btnAddComment: 'Add Comment',
             
             // Projects Section
             sectionProjects: 'Mission Log',
@@ -109,9 +105,6 @@ const CONFIG = {
             formSecurityKey: 'Security Key *',
             btnLaunchTransmission: 'Launch Transmission',
             btnAccessControl: 'Access Control',
-            formCommentName: 'Your Name *',
-            formCommentMessage: 'Your Comment *',
-            btnPostComment: 'Post Comment',
             
             // Stats Section
             statCompleted: 'Missions Completed',
@@ -136,7 +129,7 @@ const CONFIG = {
             footerCopyright: 'All systems operational.',
             
             // Chat
-            chatGreeting: 'Greetings, astronaut! I\'m your SpaceTeam AI assistant. How can I assist with your mission today? You can ask about our services, mission logs, team members, or request a briefing.',
+            chatGreeting: 'Greetings, astronaut! I\'m your SpaceTeam AI assistant. How can I assist with your mission today? You can ask about our services, mission logs, or request a briefing.',
             chatPlaceholder: 'Type your transmission...',
             chatSend: 'Transmit',
             
@@ -168,30 +161,11 @@ const CONFIG = {
             emptyWebsites: 'No Websites Deployed',
             emptyWebsitesText: 'No website projects have been deployed yet.',
             
-            // Developer Comments
-            developerComments: 'Comments',
-            noComments: 'No comments yet. Be the first to comment!',
-            addComment: 'Add Comment',
-            
-            // Social Media Labels
-            socialGithub: 'GitHub',
-            socialInstagram: 'Instagram',
-            socialTwitter: 'Twitter/X',
-            socialLinkedin: 'LinkedIn',
-            socialWhatsapp: 'WhatsApp',
-            socialTelegram: 'Telegram',
-            socialFacebook: 'Facebook',
-            socialWebsite: 'Website/Portfolio',
-            
             // Notifications
             notificationSuccess: 'Success',
             notificationError: 'Error',
             notificationWarning: 'Warning',
-            notificationInfo: 'Info',
-            commentPosted: 'Comment posted successfully!',
-            commentError: 'Error posting comment',
-            developerUpdated: 'Developer updated successfully!',
-            developerAdded: 'Developer added successfully!'
+            notificationInfo: 'Info'
         },
         
         id: {
@@ -221,8 +195,6 @@ const CONFIG = {
             sectionTeamSubtitle: 'Temukan tim elit insinyur antariksa kami, masing-masing ahli di galaksi teknologi yang berbeda.',
             sectionSkills: 'Peta Galaksi Teknologi',
             sectionSkillsSubtitle: 'Keahlian kami mencakup berbagai konstelasi teknologi',
-            btnViewDetails: 'Lihat Detail',
-            btnAddComment: 'Tambah Komentar',
             
             // Projects Section
             sectionProjects: 'Log Misi',
@@ -266,9 +238,6 @@ const CONFIG = {
             formSecurityKey: 'Kunci Keamanan *',
             btnLaunchTransmission: 'Luncurkan Transmisi',
             btnAccessControl: 'Akses Kontrol',
-            formCommentName: 'Nama Anda *',
-            formCommentMessage: 'Komentar Anda *',
-            btnPostComment: 'Kirim Komentar',
             
             // Stats Section
             statCompleted: 'Misi Selesai',
@@ -293,7 +262,7 @@ const CONFIG = {
             footerCopyright: 'Semua sistem beroperasi.',
             
             // Chat
-            chatGreeting: 'Salam, astronot! Saya adalah asisten AI SpaceTeam Anda. Bagaimana saya bisa membantu misi Anda hari ini? Anda dapat bertanya tentang layanan kami, log misi, anggota tim, atau meminta pengarahan.',
+            chatGreeting: 'Salam, astronot! Saya adalah asisten AI SpaceTeam Anda. Bagaimana saya bisa membantu misi Anda hari ini? Anda dapat bertanya tentang layanan kami, log misi, atau meminta pengarahan.',
             chatPlaceholder: 'Ketik transmisi Anda...',
             chatSend: 'Kirim',
             
@@ -325,30 +294,11 @@ const CONFIG = {
             emptyWebsites: 'Belum Ada Website',
             emptyWebsitesText: 'Belum ada proyek website yang diluncurkan.',
             
-            // Developer Comments
-            developerComments: 'Komentar',
-            noComments: 'Belum ada komentar. Jadilah yang pertama berkomentar!',
-            addComment: 'Tambah Komentar',
-            
-            // Social Media Labels
-            socialGithub: 'GitHub',
-            socialInstagram: 'Instagram',
-            socialTwitter: 'Twitter/X',
-            socialLinkedin: 'LinkedIn',
-            socialWhatsapp: 'WhatsApp',
-            socialTelegram: 'Telegram',
-            socialFacebook: 'Facebook',
-            socialWebsite: 'Website/Portofolio',
-            
             // Notifications
             notificationSuccess: 'Sukses',
             notificationError: 'Error',
             notificationWarning: 'Peringatan',
-            notificationInfo: 'Info',
-            commentPosted: 'Komentar berhasil dikirim!',
-            commentError: 'Gagal mengirim komentar',
-            developerUpdated: 'Developer berhasil diperbarui!',
-            developerAdded: 'Developer berhasil ditambahkan!'
+            notificationInfo: 'Info'
         }
     }
 };
@@ -388,4 +338,3 @@ window.addEventListener('unhandledrejection', function(e) {
     console.error('Unhandled promise rejection:', e.reason);
     // You can add error reporting here
 });
-[file content end]
