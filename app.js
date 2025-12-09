@@ -1,3 +1,5 @@
+[file name]: app.js
+[file content begin]
 // Main Application - SpaceTeam | Dev - ENHANCED VERSION
 class SpaceTeamApp {
     constructor() {
@@ -23,17 +25,19 @@ class SpaceTeamApp {
                 settings: {},
                 messages: [],
                 chatMessages: [],
+                developerComments: {},
                 skillsChart: null,
                 projectIdCounter: 1,
                 developerIdCounter: 1,
                 websiteIdCounter: 1,
                 blogIdCounter: 1,
                 messageIdCounter: 1,
+                commentIdCounter: 1,
                 resizeObserver: null,
                 chartObserver: null,
                 loadingStartTime: null,
                 isMobileMenuOpen: false,
-                fullscreenImage: null // For fullscreen image view
+                currentDeveloperDetail: null
             };
 
             // Bind methods to maintain context
@@ -58,8 +62,11 @@ class SpaceTeamApp {
             this.handleScroll = this.handleScroll.bind(this);
             this.initLazyLoading = this.initLazyLoading.bind(this);
             this.safeParseJSON = this.safeParseJSON.bind(this);
-            this.showFullscreenImage = this.showFullscreenImage.bind(this);
-            this.closeFullscreenImage = this.closeFullscreenImage.bind(this);
+            this.showDeveloperDetail = this.showDeveloperDetail.bind(this);
+            this.hideDeveloperDetail = this.hideDeveloperDetail.bind(this);
+            this.addDeveloperComment = this.addDeveloperComment.bind(this);
+            this.loadDeveloperComments = this.loadDeveloperComments.bind(this);
+            this.saveDeveloperComment = this.saveDeveloperComment.bind(this);
             
             this.init();
         } catch (error) {
@@ -130,12 +137,16 @@ class SpaceTeamApp {
                 this.showNotification('Using local storage mode. Set up Supabase for cloud storage.', 'warning');
             }
             
+            // Load developer comments
+            this.loadDeveloperComments();
+            
             // Update UI with loaded data
             this.updateUI();
             
         } catch (error) {
             console.error('Error loading data:', error);
             this.loadFromLocalStorage();
+            this.loadDeveloperComments();
             this.updateUI();
             this.showNotification('Failed to load cloud data. Using local storage.', 'warning');
         } finally {
@@ -256,6 +267,20 @@ class SpaceTeamApp {
         this.state.messageIdCounter = this.state.messages.length > 0
             ? Math.max(...this.state.messages.map(m => m.id || 0), 0) + 1
             : 1;
+    }
+
+    loadDeveloperComments() {
+        const comments = this.safeParseJSON(localStorage.getItem('spaceteam_comments')) || {};
+        this.state.developerComments = comments;
+        
+        // Find max comment ID
+        let maxId = 1;
+        Object.values(comments).forEach(commentList => {
+            commentList.forEach(comment => {
+                if (comment.id > maxId) maxId = comment.id;
+            });
+        });
+        this.state.commentIdCounter = maxId + 1;
     }
 
     safeParseJSON(str) {
@@ -471,6 +496,43 @@ class SpaceTeamApp {
         }
     }
 
+    async saveDeveloperComment(developerId, comment) {
+        try {
+            if (!this.state.developerComments[developerId]) {
+                this.state.developerComments[developerId] = [];
+            }
+            
+            comment.id = this.state.commentIdCounter++;
+            comment.created_at = new Date().toISOString();
+            
+            this.state.developerComments[developerId].push(comment);
+            
+            // Save to localStorage
+            localStorage.setItem('spaceteam_comments', JSON.stringify(this.state.developerComments));
+            
+            // Try to save to Supabase if available
+            if (window.supabaseClient && CONFIG.supabaseUrl !== 'https://your-project.supabase.co') {
+                try {
+                    const { error } = await supabaseClient
+                        .from('developer_comments')
+                        .upsert([{
+                            developer_id: developerId,
+                            comments: this.state.developerComments[developerId]
+                        }], { onConflict: 'developer_id' });
+                    
+                    if (error) throw error;
+                } catch (supabaseError) {
+                    console.warn('Failed to save comments to Supabase:', supabaseError);
+                }
+            }
+            
+            return true;
+        } catch (error) {
+            console.error('Error saving comment:', error);
+            return false;
+        }
+    }
+
     updateUI() {
         // Apply settings
         this.applySettings();
@@ -487,9 +549,6 @@ class SpaceTeamApp {
         
         // Initialize lazy loading for new images
         this.initLazyLoading();
-        
-        // Setup image click handlers for fullscreen view
-        this.setupImageClickHandlers();
     }
 
     applySettings() {
@@ -617,15 +676,44 @@ class SpaceTeamApp {
                 `<span class="skill-tag">${skill}</span>`
             ).join('');
             
+            // Parse social media links
+            const socialMedia = dev.social_media ? (typeof dev.social_media === 'string' ? JSON.parse(dev.social_media) : dev.social_media) : {};
+            
+            const socialIcons = {
+                github: 'fab fa-github',
+                instagram: 'fab fa-instagram',
+                twitter: 'fab fa-twitter',
+                linkedin: 'fab fa-linkedin',
+                whatsapp: 'fab fa-whatsapp',
+                telegram: 'fab fa-telegram',
+                facebook: 'fab fa-facebook',
+                website: 'fas fa-globe'
+            };
+            
+            const socialLinksHTML = Object.entries(socialMedia)
+                .filter(([_, url]) => url && url.trim())
+                .map(([platform, url]) => {
+                    let finalUrl = url;
+                    if (platform === 'whatsapp') {
+                        finalUrl = `https://wa.me/${url.replace(/\D/g, '')}`;
+                    } else if (platform === 'telegram') {
+                        finalUrl = `https://t.me/${url.replace('@', '')}`;
+                    }
+                    return `<a href="${finalUrl}" target="_blank" class="social-link" aria-label="${platform}">
+                        <i class="${socialIcons[platform] || 'fas fa-link'}"></i>
+                    </a>`;
+                }).join('');
+            
+            // Get comments for this developer
+            const comments = this.state.developerComments[dev.id] || [];
+            const commentCount = comments.length;
+            
             const developerHTML = `
                 <div class="developer-card animate__animated animate__fadeInUp" style="animation-delay: ${index * 100}ms">
-                    <div class="developer-header">
+                    <div class="developer-header" onclick="app.showDeveloperDetail(${dev.id})" style="cursor: pointer;">
                         <img src="${dev.image || 'https://images.unsplash.com/photo-1534796636910-9c1825470300?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" 
                              alt="${dev.name}" 
-                             class="developer-image clickable-image"
-                             data-image="${dev.image || 'https://images.unsplash.com/photo-1534796636910-9c1825470300?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}"
-                             data-title="${dev.name}"
-                             data-description="${dev.role}"
+                             class="developer-image"
                              loading="lazy">
                         <div class="developer-overlay">
                             <h3 class="developer-name">${dev.name}</h3>
@@ -637,13 +725,22 @@ class SpaceTeamApp {
                             ${skillsHTML}
                         </div>
                         <p class="developer-bio">${dev.bio}</p>
-                        <div style="display: flex; gap: 10px; margin-top: 20px;">
-                            ${dev.email ? `<a href="mailto:${dev.email}" class="btn btn-sm btn-outline">
-                                <i class="fas fa-satellite"></i> Contact
-                            </a>` : ''}
-                            ${dev.github ? `<a href="https://github.com/${dev.github}" target="_blank" class="btn btn-sm btn-secondary">
-                                <i class="fab fa-github"></i> GitHub
-                            </a>` : ''}
+                        
+                        ${socialLinksHTML ? `
+                            <div class="developer-social" style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                                ${socialLinksHTML}
+                            </div>
+                        ` : ''}
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                            <button class="btn btn-sm btn-outline" onclick="app.showDeveloperDetail(${dev.id})">
+                                <i class="fas fa-user-astronaut"></i> ${translations.btnViewDetails || 'View Details'}
+                            </button>
+                            ${commentCount > 0 ? `
+                                <span class="comment-badge">
+                                    <i class="fas fa-comment"></i> ${commentCount}
+                                </span>
+                            ` : ''}
                         </div>
                     </div>
                 </div>
@@ -704,10 +801,7 @@ class SpaceTeamApp {
                 <div class="project-card animate__animated animate__fadeInUp" style="animation-delay: ${index * 100}ms">
                     <img src="${project.image || 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" 
                          alt="${project.title}" 
-                         class="project-image clickable-image"
-                         data-image="${project.image || 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}"
-                         data-title="${project.title}"
-                         data-description="${project.description}"
+                         class="project-image"
                          loading="lazy">
                     <div class="project-content">
                         <h3 class="project-title">${project.title}</h3>
@@ -768,15 +862,28 @@ class SpaceTeamApp {
                 'development': translations.websiteStatusDev || '👨‍💻 Development'
             };
             
+            // Parse developer websites if available
+            const devWebsites = website.dev_websites ? (typeof website.dev_websites === 'string' ? JSON.parse(website.dev_websites) : website.dev_websites) : [];
+            
+            const devWebsitesHTML = devWebsites.length > 0 ? `
+                <div class="developer-websites" style="margin-top: 15px; padding: 10px; background: rgba(100, 255, 218, 0.05); border-radius: var(--radius);">
+                    <p style="font-size: 0.875rem; color: var(--text-tertiary); margin-bottom: 5px;"><strong>Developer Portfolios:</strong></p>
+                    <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+                        ${devWebsites.map(devSite => `
+                            <a href="${devSite.url}" target="_blank" class="btn btn-xs btn-outline" style="font-size: 0.75rem; padding: 2px 8px;">
+                                ${devSite.title || 'Portfolio'}
+                            </a>
+                        `).join('')}
+                    </div>
+                </div>
+            ` : '';
+            
             const websiteHTML = `
                 <div class="website-card animate__animated animate__fadeInUp" style="animation-delay: ${index * 100}ms">
                     <div class="website-preview">
                         <img src="${website.screenshot || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" 
                              alt="${website.title}" 
-                             class="website-image clickable-image"
-                             data-image="${website.screenshot || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}"
-                             data-title="${website.title}"
-                             data-description="${website.description}"
+                             class="website-image"
                              loading="lazy">
                         <div class="website-status ${website.status || 'live'}">
                             <span>${statusText[website.status] || statusText.live}</span>
@@ -785,6 +892,8 @@ class SpaceTeamApp {
                     <div class="website-content">
                         <h3 class="website-title">${website.title}</h3>
                         <p class="website-description">${website.description}</p>
+                        
+                        ${devWebsitesHTML}
                         
                         <div class="website-meta">
                             <span><i class="fas fa-calendar-alt"></i> ${new Date(website.created_at).toLocaleDateString()}</span>
@@ -846,10 +955,7 @@ class SpaceTeamApp {
                 <div class="blog-card animate__animated animate__fadeInUp" style="animation-delay: ${index * 100}ms">
                     <img src="${post.image || 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" 
                          alt="${post.title}" 
-                         class="blog-image clickable-image"
-                         data-image="${post.image || 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}"
-                         data-title="${post.title}"
-                         data-description="${post.category || 'Mission Briefing'}"
+                         class="blog-image"
                          loading="lazy">
                     <div class="blog-content">
                         <span class="blog-category">${post.category || 'Mission Briefing'}</span>
@@ -1134,7 +1240,6 @@ class SpaceTeamApp {
             document.addEventListener('click', (e) => {
                 if (e.target.classList.contains('modal')) {
                     this.hideLoginModal();
-                    this.closeFullscreenImage();
                 }
                 
                 // Close mobile menu when clicking outside
@@ -1142,6 +1247,14 @@ class SpaceTeamApp {
                     !e.target.closest('.nav-links') && 
                     !e.target.closest('#mobile-menu-btn')) {
                     this.closeMobileMenu();
+                }
+                
+                // Close developer detail when clicking outside
+                const developerDetail = document.getElementById('developer-detail-modal');
+                if (developerDetail && !developerDetail.classList.contains('hidden') && 
+                    !e.target.closest('#developer-detail-modal') && 
+                    !e.target.closest('.developer-card')) {
+                    this.hideDeveloperDetail();
                 }
             });
             
@@ -1152,153 +1265,12 @@ class SpaceTeamApp {
                     if (this.state.isMobileMenuOpen) {
                         this.closeMobileMenu();
                     }
-                    this.closeFullscreenImage();
+                    this.hideDeveloperDetail();
                 }
             });
             
         } catch (error) {
             console.error('Error setting up event listeners:', error);
-        }
-    }
-
-    setupImageClickHandlers() {
-        // Delegate click events for images
-        document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('clickable-image')) {
-                const img = e.target;
-                this.showFullscreenImage(
-                    img.dataset.image || img.src,
-                    img.dataset.title || img.alt,
-                    img.dataset.description || ''
-                );
-            }
-        });
-    }
-
-    showFullscreenImage(src, title, description) {
-        // Create fullscreen image overlay
-        const overlay = document.createElement('div');
-        overlay.className = 'fullscreen-image-overlay';
-        overlay.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(2, 12, 27, 0.95);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            padding: var(--space-xl);
-            cursor: pointer;
-        `;
-        
-        if (!document.body.classList.contains('dark-theme')) {
-            overlay.style.background = 'rgba(0, 0, 0, 0.95)';
-        }
-        
-        const imageContainer = document.createElement('div');
-        imageContainer.style.cssText = `
-            position: relative;
-            max-width: 90%;
-            max-height: 80%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        `;
-        
-        const img = document.createElement('img');
-        img.src = src;
-        img.alt = title;
-        img.style.cssText = `
-            max-width: 100%;
-            max-height: 70vh;
-            object-fit: contain;
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-xl);
-            cursor: default;
-        `;
-        
-        const closeBtn = document.createElement('button');
-        closeBtn.innerHTML = '<i class="fas fa-times"></i>';
-        closeBtn.style.cssText = `
-            position: absolute;
-            top: -20px;
-            right: -20px;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--danger);
-            color: white;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-            z-index: 2001;
-        `;
-        closeBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.closeFullscreenImage();
-        });
-        
-        const infoPanel = document.createElement('div');
-        infoPanel.style.cssText = `
-            background: var(--bg-surface);
-            color: var(--text-primary);
-            padding: var(--space-lg);
-            border-radius: var(--radius);
-            margin-top: var(--space-lg);
-            max-width: 600px;
-            text-align: center;
-            border: 1px solid rgba(100, 255, 218, 0.2);
-        `;
-        
-        const titleElement = document.createElement('h3');
-        titleElement.textContent = title;
-        titleElement.style.cssText = `
-            margin: 0 0 var(--space-sm) 0;
-            color: var(--text-primary);
-        `;
-        
-        const descElement = document.createElement('p');
-        descElement.textContent = description;
-        descElement.style.cssText = `
-            margin: 0;
-            color: var(--text-secondary);
-            font-size: 0.9375rem;
-        `;
-        
-        infoPanel.appendChild(titleElement);
-        if (description) {
-            infoPanel.appendChild(descElement);
-        }
-        
-        imageContainer.appendChild(img);
-        imageContainer.appendChild(closeBtn);
-        overlay.appendChild(imageContainer);
-        overlay.appendChild(infoPanel);
-        
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) {
-                this.closeFullscreenImage();
-            }
-        });
-        
-        document.body.appendChild(overlay);
-        document.body.style.overflow = 'hidden';
-        
-        this.state.fullscreenImage = overlay;
-    }
-
-    closeFullscreenImage() {
-        if (this.state.fullscreenImage) {
-            document.body.removeChild(this.state.fullscreenImage);
-            document.body.style.overflow = '';
-            this.state.fullscreenImage = null;
         }
     }
 
@@ -2064,6 +2036,52 @@ class SpaceTeamApp {
             if (form) {
                 form.addEventListener('submit', this.handleDeveloperFormSubmit);
             }
+            
+            // Add social media field toggle
+            const addSocialBtn = document.getElementById('add-social-media');
+            if (addSocialBtn) {
+                addSocialBtn.addEventListener('click', () => {
+                    const container = document.getElementById('social-media-container');
+                    if (container) {
+                        const newField = document.createElement('div');
+                        newField.className = 'form-row';
+                        newField.innerHTML = `
+                            <div class="form-group">
+                                <select class="form-control social-platform" style="margin-bottom: 5px;">
+                                    <option value="">Select Platform</option>
+                                    <option value="github">GitHub</option>
+                                    <option value="instagram">Instagram</option>
+                                    <option value="twitter">Twitter/X</option>
+                                    <option value="linkedin">LinkedIn</option>
+                                    <option value="whatsapp">WhatsApp</option>
+                                    <option value="telegram">Telegram</option>
+                                    <option value="facebook">Facebook</option>
+                                    <option value="website">Website/Portfolio</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <input type="text" class="form-control social-url" placeholder="URL or username">
+                                <button type="button" class="btn btn-sm btn-danger remove-social" style="margin-top: 5px;">
+                                    <i class="fas fa-times"></i> Remove
+                                </button>
+                            </div>
+                        `;
+                        
+                        newField.querySelector('.remove-social').addEventListener('click', function() {
+                            newField.remove();
+                        });
+                        
+                        container.appendChild(newField);
+                    }
+                });
+            }
+            
+            // Initialize existing social media fields
+            document.querySelectorAll('.remove-social').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    this.closest('.form-row').remove();
+                });
+            });
         } else if (section === 'projects') {
             const form = document.getElementById('admin-project-form');
             if (form) {
@@ -2073,6 +2091,35 @@ class SpaceTeamApp {
             const form = document.getElementById('admin-website-form');
             if (form) {
                 form.addEventListener('submit', this.handleWebsiteFormSubmit);
+                
+                // Add developer website field
+                const addDevWebsiteBtn = document.getElementById('add-dev-website');
+                if (addDevWebsiteBtn) {
+                    addDevWebsiteBtn.addEventListener('click', () => {
+                        const container = document.getElementById('dev-websites-container');
+                        if (container) {
+                            const newField = document.createElement('div');
+                            newField.className = 'form-row';
+                            newField.innerHTML = `
+                                <div class="form-group">
+                                    <input type="text" class="form-control dev-website-title" placeholder="Title (e.g., Portfolio)">
+                                </div>
+                                <div class="form-group">
+                                    <input type="url" class="form-control dev-website-url" placeholder="URL">
+                                    <button type="button" class="btn btn-sm btn-danger remove-dev-website" style="margin-top: 5px;">
+                                        <i class="fas fa-times"></i> Remove
+                                    </button>
+                                </div>
+                            `;
+                            
+                            newField.querySelector('.remove-dev-website').addEventListener('click', function() {
+                                newField.remove();
+                            });
+                            
+                            container.appendChild(newField);
+                        }
+                    });
+                }
             }
         } else if (section === 'blog') {
             const form = document.getElementById('admin-blog-form');
@@ -2117,7 +2164,7 @@ class SpaceTeamApp {
                 <div style="display: flex; align-items: center; gap: 15px;">
                     <img src="${dev.image || 'https://images.unsplash.com/photo-1534796636910-9c1825470300?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80'}" 
                          alt="${dev.name}" 
-                         style="width: 60px; height: 60px; object-fit: cover; border-radius: var(--radius);">
+                         style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%;">
                     <div>
                         <h4 style="margin: 0; color: var(--text-primary);">${dev.name}</h4>
                         <p style="margin: 5px 0; color: var(--text-secondary);">${dev.role}</p>
@@ -2137,6 +2184,36 @@ class SpaceTeamApp {
         
         const developerToEdit = this.state.editingId ? 
             this.state.developers.find(d => d.id === this.state.editingId) : null;
+        
+        // Parse existing social media
+        const existingSocialMedia = developerToEdit?.social_media ? 
+            (typeof developerToEdit.social_media === 'string' ? 
+                JSON.parse(developerToEdit.social_media) : developerToEdit.social_media) : {};
+        
+        const socialMediaFieldsHTML = Object.entries(existingSocialMedia)
+            .map(([platform, url]) => `
+                <div class="form-row">
+                    <div class="form-group">
+                        <select class="form-control social-platform" style="margin-bottom: 5px;">
+                            <option value="">Select Platform</option>
+                            <option value="github" ${platform === 'github' ? 'selected' : ''}>GitHub</option>
+                            <option value="instagram" ${platform === 'instagram' ? 'selected' : ''}>Instagram</option>
+                            <option value="twitter" ${platform === 'twitter' ? 'selected' : ''}>Twitter/X</option>
+                            <option value="linkedin" ${platform === 'linkedin' ? 'selected' : ''}>LinkedIn</option>
+                            <option value="whatsapp" ${platform === 'whatsapp' ? 'selected' : ''}>WhatsApp</option>
+                            <option value="telegram" ${platform === 'telegram' ? 'selected' : ''}>Telegram</option>
+                            <option value="facebook" ${platform === 'facebook' ? 'selected' : ''}>Facebook</option>
+                            <option value="website" ${platform === 'website' ? 'selected' : ''}>Website/Portfolio</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control social-url" value="${url}" placeholder="URL or username">
+                        <button type="button" class="btn btn-sm btn-danger remove-social" style="margin-top: 5px;">
+                            <i class="fas fa-times"></i> Remove
+                        </button>
+                    </div>
+                </div>
+            `).join('');
         
         return `
             <div class="admin-section">
@@ -2190,19 +2267,35 @@ class SpaceTeamApp {
                         </div>
                         <div class="form-row">
                             <div class="form-group">
-                                <label class="form-label">GitHub Callsign</label>
-                                <input type="text" class="form-control" id="admin-dev-github" value="${developerToEdit?.github || ''}">
-                            </div>
-                            <div class="form-group">
                                 <label class="form-label">Specializations (comma separated) *</label>
                                 <input type="text" class="form-control" id="admin-dev-skills" value="${Array.isArray(developerToEdit?.skills) ? developerToEdit.skills.join(', ') : developerToEdit?.skills || ''}" required>
                                 <small style="color: var(--text-tertiary);">Example: React, Node.js, Python, AWS, Space-Tech</small>
                             </div>
+                            <div class="form-group">
+                                <label class="form-label">Experience (years)</label>
+                                <input type="number" class="form-control" id="admin-dev-experience" value="${developerToEdit?.experience || '1'}" min="1">
+                            </div>
                         </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Social Media Links</label>
+                            <div id="social-media-container">
+                                ${socialMediaFieldsHTML}
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline" id="add-social-media" style="margin-top: 10px;">
+                                <i class="fas fa-plus"></i> Add Social Media
+                            </button>
+                            <small style="color: var(--text-tertiary); display: block; margin-top: 5px;">
+                                For WhatsApp: enter phone number (e.g., 628123456789)<br>
+                                For Telegram: enter username without @ (e.g., username)
+                            </small>
+                        </div>
+                        
                         <div class="form-group">
                             <label class="form-label">Mission Bio *</label>
                             <textarea class="form-control" id="admin-dev-bio" rows="4" required>${developerToEdit?.bio || ''}</textarea>
                         </div>
+                        
                         <div style="display: flex; gap: 15px; margin-top: 20px;">
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save"></i> ${this.state.editingId ? 'Update Crew Member' : 'Assign to Mission'}
@@ -2210,11 +2303,6 @@ class SpaceTeamApp {
                             <button type="button" class="btn btn-outline" onclick="app.resetDeveloperForm()">
                                 <i class="fas fa-times"></i> Cancel
                             </button>
-                            ${developerToEdit ? `
-                                <button type="button" class="btn btn-secondary" onclick="app.previewImage('admin-dev-image')">
-                                    <i class="fas fa-eye"></i> Preview Image
-                                </button>
-                            ` : ''}
                         </div>
                     </form>
                 </div>
@@ -2225,19 +2313,14 @@ class SpaceTeamApp {
     getProjectsManagementHTML() {
         const projectsListHTML = this.state.projects.map(project => `
             <div class="admin-list-item">
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <img src="${project.image || 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80'}" 
-                         alt="${project.title}" 
-                         style="width: 60px; height: 40px; object-fit: cover; border-radius: var(--radius);">
-                    <div>
-                        <h4 style="margin: 0; color: var(--text-primary);">${project.title}</h4>
-                        <p style="margin: 5px 0; color: var(--text-secondary);">
-                            ${project.type === 'web' ? 'Web Systems' : 
-                              project.type === 'mobile' ? 'Mobile App' : 
-                              'UI/UX Design'}
-                        </p>
-                        <small style="color: var(--text-tertiary);">${Array.isArray(project.tech) ? project.tech.slice(0, 3).join(', ') : project.tech || ''}</small>
-                    </div>
+                <div>
+                    <h4 style="margin: 0; color: var(--text-primary);">${project.title}</h4>
+                    <p style="margin: 5px 0; color: var(--text-secondary);">
+                        ${project.type === 'web' ? 'Web Systems' : 
+                          project.type === 'mobile' ? 'Mobile App' : 
+                          'UI/UX Design'}
+                    </p>
+                    <small style="color: var(--text-tertiary);">${Array.isArray(project.tech) ? project.tech.slice(0, 3).join(', ') : project.tech || ''}</small>
                 </div>
                 <div class="admin-list-actions">
                     <button class="btn btn-sm" onclick="app.editProject(${project.id})">
@@ -2322,11 +2405,6 @@ class SpaceTeamApp {
                             <button type="button" class="btn btn-outline" onclick="app.resetProjectForm()">
                                 <i class="fas fa-times"></i> Cancel
                             </button>
-                            ${projectToEdit ? `
-                                <button type="button" class="btn btn-secondary" onclick="app.previewImage('admin-project-image')">
-                                    <i class="fas fa-eye"></i> Preview Image
-                                </button>
-                            ` : ''}
                         </div>
                     </form>
                 </div>
@@ -2360,6 +2438,26 @@ class SpaceTeamApp {
         
         const websiteToEdit = this.state.editingId ? 
             this.state.websiteProjects.find(w => w.id === this.state.editingId) : null;
+        
+        // Parse existing developer websites
+        const existingDevWebsites = websiteToEdit?.dev_websites ? 
+            (typeof websiteToEdit.dev_websites === 'string' ? 
+                JSON.parse(websiteToEdit.dev_websites) : websiteToEdit.dev_websites) : [];
+        
+        const devWebsitesFieldsHTML = existingDevWebsites
+            .map(devSite => `
+                <div class="form-row">
+                    <div class="form-group">
+                        <input type="text" class="form-control dev-website-title" value="${devSite.title || ''}" placeholder="Title (e.g., Portfolio)">
+                    </div>
+                    <div class="form-group">
+                        <input type="url" class="form-control dev-website-url" value="${devSite.url || ''}" placeholder="URL">
+                        <button type="button" class="btn btn-sm btn-danger remove-dev-website" style="margin-top: 5px;">
+                            <i class="fas fa-times"></i> Remove
+                        </button>
+                    </div>
+                </div>
+            `).join('');
         
         return `
             <div class="admin-section">
@@ -2428,6 +2526,19 @@ class SpaceTeamApp {
                             <small style="color: var(--text-tertiary);">Separate with commas: React, Node.js, MongoDB, etc.</small>
                         </div>
                         
+                        <div class="form-group">
+                            <label class="form-label">Developer Portfolios (Optional)</label>
+                            <div id="dev-websites-container">
+                                ${devWebsitesFieldsHTML}
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline" id="add-dev-website" style="margin-top: 10px;">
+                                <i class="fas fa-plus"></i> Add Developer Website
+                            </button>
+                            <small style="color: var(--text-tertiary); display: block; margin-top: 5px;">
+                                Add links to developer portfolios related to this project
+                            </small>
+                        </div>
+                        
                         <div class="form-row">
                             <div class="form-group">
                                 <label class="form-label">GitHub Repository (Optional)</label>
@@ -2453,11 +2564,6 @@ class SpaceTeamApp {
                             <button type="button" class="btn btn-outline" onclick="app.resetWebsiteForm()">
                                 <i class="fas fa-times"></i> Cancel
                             </button>
-                            ${websiteToEdit ? `
-                                <button type="button" class="btn btn-secondary" onclick="app.previewImage('admin-website-screenshot')">
-                                    <i class="fas fa-eye"></i> Preview Image
-                                </button>
-                            ` : ''}
                         </div>
                     </form>
                 </div>
@@ -2468,17 +2574,12 @@ class SpaceTeamApp {
     getBlogManagementHTML() {
         const blogListHTML = this.state.blogPosts.map(post => `
             <div class="admin-list-item">
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <img src="${post.image || 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80'}" 
-                         alt="${post.title}" 
-                         style="width: 60px; height: 40px; object-fit: cover; border-radius: var(--radius);">
-                    <div>
-                        <h4 style="margin: 0; color: var(--text-primary);">${post.title}</h4>
-                        <p style="margin: 5px 0; color: var(--text-secondary);">
-                            ${post.category || 'Mission Briefing'} • By ${post.author || 'Mission Control'}
-                        </p>
-                        <small style="color: var(--text-tertiary);">${new Date(post.created_at).toLocaleDateString()}</small>
-                    </div>
+                <div>
+                    <h4 style="margin: 0; color: var(--text-primary);">${post.title}</h4>
+                    <p style="margin: 5px 0; color: var(--text-secondary);">
+                        ${post.category || 'Mission Briefing'} • By ${post.author || 'Mission Control'}
+                    </p>
+                    <small style="color: var(--text-tertiary);">${new Date(post.created_at).toLocaleDateString()}</small>
                 </div>
                 <div class="admin-list-actions">
                     <button class="btn btn-sm" onclick="app.editBlogPost(${post.id})">
@@ -2560,11 +2661,6 @@ class SpaceTeamApp {
                             <button type="button" class="btn btn-outline" onclick="app.resetBlogForm()">
                                 <i class="fas fa-times"></i> Cancel
                             </button>
-                            ${postToEdit ? `
-                                <button type="button" class="btn btn-secondary" onclick="app.previewImage('admin-blog-image')">
-                                    <i class="fas fa-eye"></i> Preview Image
-                                </button>
-                            ` : ''}
                         </div>
                     </form>
                 </div>
@@ -2725,14 +2821,25 @@ class SpaceTeamApp {
             return;
         }
         
+        // Collect social media data
+        const socialMedia = {};
+        document.querySelectorAll('#social-media-container .form-row').forEach(row => {
+            const platform = row.querySelector('.social-platform')?.value;
+            const url = row.querySelector('.social-url')?.value;
+            if (platform && url && url.trim()) {
+                socialMedia[platform] = url.trim();
+            }
+        });
+        
         const developerData = {
             id: this.state.editingId || this.state.developerIdCounter++,
             name: nameInput.value.trim(),
             role: roleInput.value.trim(),
             image: imageInput.value.trim(),
             email: document.getElementById('admin-dev-email')?.value.trim() || '',
-            github: document.getElementById('admin-dev-github')?.value.trim() || '',
             skills: skillsInput.value.split(',').map(s => s.trim()).filter(s => s),
+            experience: parseInt(document.getElementById('admin-dev-experience')?.value || '1'),
+            social_media: Object.keys(socialMedia).length > 0 ? socialMedia : null,
             bio: bioInput.value.trim(),
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
@@ -2834,6 +2941,16 @@ class SpaceTeamApp {
             return;
         }
         
+        // Collect developer websites
+        const devWebsites = [];
+        document.querySelectorAll('#dev-websites-container .form-row').forEach(row => {
+            const title = row.querySelector('.dev-website-title')?.value.trim();
+            const url = row.querySelector('.dev-website-url')?.value.trim();
+            if (title && url) {
+                devWebsites.push({ title, url });
+            }
+        });
+        
         const websiteData = {
             id: this.state.editingId || this.state.websiteIdCounter++,
             title: titleInput.value.trim(),
@@ -2842,6 +2959,7 @@ class SpaceTeamApp {
             status: document.getElementById('admin-website-status')?.value || 'live',
             description: descriptionInput.value.trim(),
             technologies: technologiesInput.value.split(',').map(t => t.trim()).filter(t => t),
+            dev_websites: devWebsites.length > 0 ? devWebsites : null,
             github: document.getElementById('admin-website-github')?.value.trim() || '',
             icon: document.getElementById('admin-website-icon')?.value.trim() || 'fas fa-globe',
             features: document.getElementById('admin-website-features')?.value.split(',').map(f => f.trim()).filter(f => f) || [],
@@ -2998,7 +3116,7 @@ class SpaceTeamApp {
         }
     }
 
-    // Edit methods - FIXED
+    // Edit methods
     editDeveloper(id) {
         this.state.editingId = id;
         this.showAdminSection('developers');
@@ -3023,14 +3141,6 @@ class SpaceTeamApp {
         this.switchAdminTab('add-blog');
     }
 
-    // Preview image method
-    previewImage(inputId) {
-        const input = document.getElementById(inputId);
-        if (input && input.value) {
-            this.showFullscreenImage(input.value, 'Image Preview', '');
-        }
-    }
-
     // Delete methods - FIXED
     async deleteDeveloper(id) {
         if (!confirm('Are you sure you want to remove this crew member from the mission?')) return;
@@ -3039,6 +3149,10 @@ class SpaceTeamApp {
             const deleted = await this.deleteFromSupabase('developers', id);
             
             if (deleted) {
+                // Also delete comments for this developer
+                delete this.state.developerComments[id];
+                localStorage.setItem('spaceteam_comments', JSON.stringify(this.state.developerComments));
+                
                 this.showNotification('Crew member removed successfully!', 'success');
                 await this.loadData();
                 this.showAdminSection('developers');
@@ -3127,7 +3241,7 @@ class SpaceTeamApp {
         }
     }
 
-    // View methods - ENHANCED
+    // View methods
     viewMessage(id) {
         const message = this.state.messages.find(m => m.id === id);
         if (message) {
@@ -3135,55 +3249,7 @@ class SpaceTeamApp {
             message.read = true;
             this.saveToSupabase('messages', message).catch(console.error);
             
-            // Create modal for better viewing
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.style.display = 'flex';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2>Transmission Details</h2>
-                        <button class="modal-close" onclick="this.parentElement.parentElement.remove()">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                    <div style="padding: var(--space-lg);">
-                        <div style="margin-bottom: var(--space-lg);">
-                            <h3 style="color: var(--text-primary); margin-bottom: var(--space-sm);">${message.name}</h3>
-                            <p style="color: var(--text-secondary); margin-bottom: var(--space-xs);">${message.email}</p>
-                            <p style="color: var(--text-tertiary); font-size: 0.875rem;">${new Date(message.created_at).toLocaleString()}</p>
-                        </div>
-                        
-                        <div style="margin-bottom: var(--space-lg);">
-                            <h4 style="color: var(--secondary); margin-bottom: var(--space-sm);">Mission Type</h4>
-                            <p style="color: var(--text-primary);">${message.subject}</p>
-                        </div>
-                        
-                        <div>
-                            <h4 style="color: var(--secondary); margin-bottom: var(--space-sm);">Transmission</h4>
-                            <div style="background: rgba(100, 255, 218, 0.05); padding: var(--space-lg); border-radius: var(--radius); border: 1px solid rgba(100, 255, 218, 0.1);">
-                                <p style="color: var(--text-primary); line-height: 1.6; white-space: pre-wrap;">${message.message}</p>
-                            </div>
-                        </div>
-                        
-                        <div style="display: flex; gap: 15px; margin-top: 30px;">
-                            <button class="btn btn-primary" onclick="this.parentElement.parentElement.querySelector('.modal-close').click()">
-                                <i class="fas fa-check"></i> Close
-                            </button>
-                            <button class="btn btn-danger" onclick="app.deleteMessage(${message.id}); this.parentElement.parentElement.querySelector('.modal-close').click()">
-                                <i class="fas fa-trash"></i> Delete
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.remove();
-                }
-            });
+            alert(`Transmission Details:\n\nFrom: ${message.name} (${message.email})\nMission Type: ${message.subject}\nTransmission Time: ${new Date(message.created_at).toLocaleString()}\n\nTransmission:\n${message.message}`);
         }
     }
 
@@ -3196,248 +3262,213 @@ class SpaceTeamApp {
                 'design': 'UI/UX Design'
             };
             
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.style.display = 'flex';
-            modal.innerHTML = `
-                <div class="modal-content" style="max-width: 600px;">
-                    <div class="modal-header">
-                        <h2>Mission Details</h2>
-                        <button class="modal-close" onclick="this.parentElement.parentElement.remove()">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                    <div style="padding: var(--space-lg);">
-                        <img src="${project.image || 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'}" 
-                             alt="${project.title}" 
-                             style="width: 100%; height: 200px; object-fit: cover; border-radius: var(--radius); margin-bottom: var(--space-lg); cursor: pointer;"
-                             class="clickable-image"
-                             data-image="${project.image || 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'}"
-                             data-title="${project.title}"
-                             data-description="${project.description}">
-                        
-                        <div style="margin-bottom: var(--space-lg);">
-                            <h3 style="color: var(--text-primary); margin-bottom: var(--space-sm);">${project.title}</h3>
-                            <div style="display: flex; gap: 10px; margin-bottom: var(--space-md);">
-                                <span class="project-category">${typeMap[project.type] || project.type}</span>
-                                ${project.link ? `<a href="${project.link}" target="_blank" class="btn btn-sm btn-primary">
-                                    <i class="fas fa-external-link-alt"></i> Launch Mission
-                                </a>` : ''}
-                            </div>
-                        </div>
-                        
-                        <div style="margin-bottom: var(--space-lg);">
-                            <h4 style="color: var(--secondary); margin-bottom: var(--space-sm);">Mission Report</h4>
-                            <p style="color: var(--text-primary); line-height: 1.6;">${project.description}</p>
-                        </div>
-                        
-                        <div style="margin-bottom: var(--space-lg);">
-                            <h4 style="color: var(--secondary); margin-bottom: var(--space-sm);">Technologies</h4>
-                            <div class="project-tech">
-                                ${Array.isArray(project.tech) ? project.tech.map(tech => 
-                                    `<span class="tech-tag">${tech}</span>`
-                                ).join('') : ''}
-                            </div>
-                        </div>
-                        
-                        <button class="btn btn-primary" onclick="this.parentElement.parentElement.querySelector('.modal-close').click()" style="width: 100%;">
-                            <i class="fas fa-check"></i> Close
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.remove();
-                }
-            });
-            
-            // Setup image click inside modal
-            setTimeout(() => {
-                modal.querySelector('.clickable-image')?.addEventListener('click', (e) => {
-                    const img = e.target;
-                    this.showFullscreenImage(
-                        img.dataset.image || img.src,
-                        img.dataset.title || img.alt,
-                        img.dataset.description || ''
-                    );
-                });
-            }, 100);
+            alert(`Mission Details:\n\nMission Name: ${project.title}\nMission Type: ${typeMap[project.type] || project.type}\nMission Report: ${project.description}\nTechnologies: ${Array.isArray(project.tech) ? project.tech.join(', ') : project.tech || 'Not specified'}\n${project.link ? `Mission Link: ${project.link}` : ''}`);
         }
     }
 
     viewWebsiteDetails(id) {
         const website = this.state.websiteProjects.find(w => w.id === id);
         if (website) {
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.style.display = 'flex';
-            modal.innerHTML = `
-                <div class="modal-content" style="max-width: 600px;">
-                    <div class="modal-header">
-                        <h2>Website Details</h2>
-                        <button class="modal-close" onclick="this.parentElement.parentElement.remove()">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                    <div style="padding: var(--space-lg);">
-                        <img src="${website.screenshot || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'}" 
-                             alt="${website.title}" 
-                             style="width: 100%; height: 200px; object-fit: cover; border-radius: var(--radius); margin-bottom: var(--space-lg); cursor: pointer;"
-                             class="clickable-image"
-                             data-image="${website.screenshot || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'}"
-                             data-title="${website.title}"
-                             data-description="${website.description}">
-                        
-                        <div style="margin-bottom: var(--space-lg);">
-                            <h3 style="color: var(--text-primary); margin-bottom: var(--space-sm);">${website.title}</h3>
-                            <div style="display: flex; gap: 10px; margin-bottom: var(--space-md); flex-wrap: wrap;">
-                                <span class="website-status ${website.status || 'live'}">
-                                    ${website.status === 'live' ? '🚀 Live' : 
-                                      website.status === 'maintenance' ? '🚧 Maintenance' : 
-                                      '👨‍💻 Development'}
-                                </span>
-                                <a href="${website.url}" target="_blank" class="btn btn-sm btn-primary">
-                                    <i class="fas fa-external-link-alt"></i> Visit Site
-                                </a>
-                                ${website.github ? `<a href="${website.github}" target="_blank" class="btn btn-sm btn-secondary">
-                                    <i class="fab fa-github"></i> GitHub
-                                </a>` : ''}
-                            </div>
-                        </div>
-                        
-                        <div style="margin-bottom: var(--space-lg);">
-                            <h4 style="color: var(--secondary); margin-bottom: var(--space-sm);">Description</h4>
-                            <p style="color: var(--text-primary); line-height: 1.6;">${website.description}</p>
-                        </div>
-                        
-                        <div style="margin-bottom: var(--space-lg);">
-                            <h4 style="color: var(--secondary); margin-bottom: var(--space-sm);">Technologies</h4>
-                            <div class="website-tech">
-                                ${Array.isArray(website.technologies) ? website.technologies.map(tech => 
-                                    `<span class="tech-tag">${tech}</span>`
-                                ).join('') : ''}
-                            </div>
-                        </div>
-                        
-                        ${website.features && website.features.length > 0 ? `
-                            <div style="margin-bottom: var(--space-lg);">
-                                <h4 style="color: var(--secondary); margin-bottom: var(--space-sm);">Features</h4>
-                                <ul style="color: var(--text-primary); padding-left: 20px;">
-                                    ${Array.isArray(website.features) ? website.features.map(feature => 
-                                        `<li>${feature}</li>`
-                                    ).join('') : ''}
-                                </ul>
-                            </div>
-                        ` : ''}
-                        
-                        <div style="display: flex; gap: 15px; margin-top: 30px;">
-                            <button class="btn btn-primary" onclick="this.parentElement.parentElement.querySelector('.modal-close').click()">
-                                <i class="fas fa-check"></i> Close
-                            </button>
-                            <a href="${website.url}" target="_blank" class="btn btn-secondary">
-                                <i class="fas fa-external-link-alt"></i> Open Website
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            `;
+            let devWebsitesText = '';
+            if (website.dev_websites) {
+                const devWebsites = typeof website.dev_websites === 'string' ? JSON.parse(website.dev_websites) : website.dev_websites;
+                devWebsitesText = '\nDeveloper Portfolios:\n' + devWebsites.map(site => `- ${site.title}: ${site.url}`).join('\n');
+            }
             
-            document.body.appendChild(modal);
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.remove();
-                }
-            });
-            
-            // Setup image click inside modal
-            setTimeout(() => {
-                modal.querySelector('.clickable-image')?.addEventListener('click', (e) => {
-                    const img = e.target;
-                    this.showFullscreenImage(
-                        img.dataset.image || img.src,
-                        img.dataset.title || img.alt,
-                        img.dataset.description || ''
-                    );
-                });
-            }, 100);
+            alert(`Website Details:\n\nTitle: ${website.title}\nURL: ${website.url}\nStatus: ${website.status}\nDescription: ${website.description}\nTechnologies: ${Array.isArray(website.technologies) ? website.technologies.join(', ') : website.technologies || 'Not specified'}${devWebsitesText}\n${website.github ? `\nGitHub: ${website.github}` : ''}`);
         }
     }
 
     viewBlogPost(id) {
         const post = this.state.blogPosts.find(p => p.id === id);
         if (post) {
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.style.display = 'flex';
-            modal.innerHTML = `
-                <div class="modal-content" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
+            alert(`Mission Briefing:\n\nTitle: ${post.title}\nAuthor: ${post.author}\nBriefing Type: ${post.category}\nTransmission Date: ${new Date(post.created_at).toLocaleDateString()}\n\n${post.content || post.excerpt}`);
+        }
+    }
+
+    // Developer detail modal
+    showDeveloperDetail(id) {
+        const developer = this.state.developers.find(d => d.id === id);
+        if (!developer) return;
+        
+        this.state.currentDeveloperDetail = developer;
+        
+        const translations = CONFIG.translations[this.state.language] || CONFIG.translations.en;
+        const comments = this.state.developerComments[id] || [];
+        const socialMedia = developer.social_media ? (typeof developer.social_media === 'string' ? JSON.parse(developer.social_media) : developer.social_media) : {};
+        
+        const socialIcons = {
+            github: { icon: 'fab fa-github', label: 'GitHub' },
+            instagram: { icon: 'fab fa-instagram', label: 'Instagram' },
+            twitter: { icon: 'fab fa-twitter', label: 'Twitter/X' },
+            linkedin: { icon: 'fab fa-linkedin', label: 'LinkedIn' },
+            whatsapp: { icon: 'fab fa-whatsapp', label: 'WhatsApp' },
+            telegram: { icon: 'fab fa-telegram', label: 'Telegram' },
+            facebook: { icon: 'fab fa-facebook', label: 'Facebook' },
+            website: { icon: 'fas fa-globe', label: 'Website' }
+        };
+        
+        const socialLinksHTML = Object.entries(socialMedia)
+            .filter(([_, url]) => url && url.trim())
+            .map(([platform, url]) => {
+                let finalUrl = url;
+                if (platform === 'whatsapp') {
+                    finalUrl = `https://wa.me/${url.replace(/\D/g, '')}`;
+                } else if (platform === 'telegram') {
+                    finalUrl = `https://t.me/${url.replace('@', '')}`;
+                }
+                const platformInfo = socialIcons[platform] || { icon: 'fas fa-link', label: platform };
+                return `<a href="${finalUrl}" target="_blank" class="btn btn-sm btn-outline">
+                    <i class="${platformInfo.icon}"></i> ${platformInfo.label}
+                </a>`;
+            }).join('');
+        
+        const skills = Array.isArray(developer.skills) ? developer.skills : 
+                      typeof developer.skills === 'string' ? developer.skills.split(',').map(s => s.trim()) : [];
+        
+        const skillsHTML = skills.map(skill => 
+            `<span class="skill-tag">${skill}</span>`
+        ).join('');
+        
+        const commentsHTML = comments.length > 0 ? comments.map(comment => `
+            <div class="comment-item" style="padding: 10px; border-bottom: 1px solid rgba(100, 255, 218, 0.1);">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <strong style="color: var(--text-primary);">${comment.name || 'Anonymous'}</strong>
+                    <small style="color: var(--text-tertiary);">${new Date(comment.created_at).toLocaleDateString()}</small>
+                </div>
+                <p style="color: var(--text-secondary); margin: 0; font-size: 0.9rem;">${comment.message}</p>
+            </div>
+        `).join('') : '<p style="color: var(--text-tertiary); text-align: center; padding: 20px;">No comments yet</p>';
+        
+        const modalHTML = `
+            <div class="modal" id="developer-detail-modal">
+                <div class="modal-content" style="max-width: 800px;">
                     <div class="modal-header">
-                        <h2>Mission Briefing</h2>
-                        <button class="modal-close" onclick="this.parentElement.parentElement.remove()">
+                        <h2 style="margin: 0;">${developer.name}</h2>
+                        <button class="modal-close" onclick="app.hideDeveloperDetail()" aria-label="Close">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
-                    <div style="padding: var(--space-lg);">
-                        <img src="${post.image || 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'}" 
-                             alt="${post.title}" 
-                             style="width: 100%; height: 300px; object-fit: cover; border-radius: var(--radius); margin-bottom: var(--space-lg); cursor: pointer;"
-                             class="clickable-image"
-                             data-image="${post.image || 'https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'}"
-                             data-title="${post.title}"
-                             data-description="${post.category || 'Mission Briefing'}">
-                        
-                        <div style="margin-bottom: var(--space-lg);">
-                            <span class="blog-category">${post.category || 'Mission Briefing'}</span>
-                            <h3 style="color: var(--text-primary); margin: var(--space-sm) 0;">${post.title}</h3>
-                            <div style="display: flex; align-items: center; gap: 10px; color: var(--text-tertiary); font-size: 0.875rem;">
-                                <i class="fas fa-user-astronaut"></i>
-                                <span>${post.author || 'Mission Control'}</span>
-                                <i class="fas fa-calendar-alt" style="margin-left: 15px;"></i>
-                                <span>${new Date(post.created_at).toLocaleDateString()}</span>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 30px; margin-top: 20px;">
+                        <div>
+                            <img src="${developer.image || 'https://images.unsplash.com/photo-1534796636910-9c1825470300?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}" 
+                                 alt="${developer.name}" 
+                                 style="width: 100%; border-radius: var(--radius-lg); margin-bottom: 20px;">
+                            
+                            <div style="margin-bottom: 20px;">
+                                <h4 style="color: var(--secondary); margin-bottom: 10px;">${developer.role}</h4>
+                                ${developer.experience ? `<p style="color: var(--text-tertiary);"><i class="fas fa-clock"></i> ${developer.experience} years experience</p>` : ''}
+                                ${developer.email ? `<p style="color: var(--text-tertiary);"><i class="fas fa-envelope"></i> ${developer.email}</p>` : ''}
                             </div>
-                        </div>
-                        
-                        <div style="margin-bottom: var(--space-lg);">
-                            <h4 style="color: var(--secondary); margin-bottom: var(--space-sm);">Briefing Summary</h4>
-                            <p style="color: var(--text-primary); line-height: 1.6; font-size: 1.1rem;">${post.excerpt || ''}</p>
+                            
+                            ${socialLinksHTML ? `
+                                <div style="margin-bottom: 20px;">
+                                    <h4 style="color: var(--text-primary); margin-bottom: 10px;">Contact</h4>
+                                    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                                        ${socialLinksHTML}
+                                    </div>
+                                </div>
+                            ` : ''}
+                            
+                            <div>
+                                <h4 style="color: var(--text-primary); margin-bottom: 10px;">Skills</h4>
+                                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                    ${skillsHTML}
+                                </div>
+                            </div>
                         </div>
                         
                         <div>
-                            <h4 style="color: var(--secondary); margin-bottom: var(--space-sm);">Full Briefing</h4>
-                            <div style="color: var(--text-primary); line-height: 1.7;">
-                                ${post.content ? post.content.replace(/\n/g, '<br>') : 'Briefing details classified.'}
+                            <div style="margin-bottom: 30px;">
+                                <h3 style="color: var(--text-primary); margin-bottom: 15px;">About</h3>
+                                <p style="color: var(--text-secondary); line-height: 1.6;">${developer.bio}</p>
+                            </div>
+                            
+                            <div>
+                                <h3 style="color: var(--text-primary); margin-bottom: 15px;">Comments (${comments.length})</h3>
+                                <div style="max-height: 300px; overflow-y: auto; background: rgba(100, 255, 218, 0.05); border-radius: var(--radius); padding: 10px; margin-bottom: 20px;">
+                                    ${commentsHTML}
+                                </div>
+                                
+                                <div>
+                                    <h4 style="color: var(--text-primary); margin-bottom: 10px;">Add Comment</h4>
+                                    <form id="developer-comment-form">
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" id="comment-name" placeholder="Your name" required style="margin-bottom: 10px;">
+                                        </div>
+                                        <div class="form-group">
+                                            <textarea class="form-control" id="comment-message" rows="3" placeholder="Your comment" required style="margin-bottom: 10px;"></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-paper-plane"></i> Post Comment
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
-                        
-                        <button class="btn btn-primary" onclick="this.parentElement.parentElement.querySelector('.modal-close').click()" style="width: 100%; margin-top: 30px;">
-                            <i class="fas fa-check"></i> Close Briefing
-                        </button>
                     </div>
                 </div>
-            `;
-            
-            document.body.appendChild(modal);
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.remove();
-                }
-            });
-            
-            // Setup image click inside modal
-            setTimeout(() => {
-                modal.querySelector('.clickable-image')?.addEventListener('click', (e) => {
-                    const img = e.target;
-                    this.showFullscreenImage(
-                        img.dataset.image || img.src,
-                        img.dataset.title || img.alt,
-                        img.dataset.description || ''
-                    );
-                });
-            }, 100);
+            </div>
+        `;
+        
+        // Remove existing modal if any
+        const existingModal = document.getElementById('developer-detail-modal');
+        if (existingModal) {
+            existingModal.remove();
         }
+        
+        // Add new modal to body
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        
+        // Show modal
+        const modal = document.getElementById('developer-detail-modal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            
+            // Setup comment form submission
+            const commentForm = document.getElementById('developer-comment-form');
+            if (commentForm) {
+                commentForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    
+                    const name = document.getElementById('comment-name').value.trim();
+                    const message = document.getElementById('comment-message').value.trim();
+                    
+                    if (!name || !message) {
+                        this.showNotification('Please fill in all fields', 'error');
+                        return;
+                    }
+                    
+                    const comment = {
+                        name,
+                        message
+                    };
+                    
+                    const saved = await this.saveDeveloperComment(developer.id, comment);
+                    if (saved) {
+                        this.showNotification('Comment posted successfully!', 'success');
+                        document.getElementById('comment-name').value = '';
+                        document.getElementById('comment-message').value = '';
+                        this.showDeveloperDetail(developer.id); // Refresh the modal
+                    } else {
+                        this.showNotification('Error posting comment', 'error');
+                    }
+                });
+            }
+        }
+    }
+
+    hideDeveloperDetail() {
+        const modal = document.getElementById('developer-detail-modal');
+        if (modal) {
+            modal.remove();
+        }
+        this.state.currentDeveloperDetail = null;
+    }
+
+    async addDeveloperComment(developerId, comment) {
+        return await this.saveDeveloperComment(developerId, comment);
     }
 
     // Reset methods
@@ -3470,6 +3501,7 @@ class SpaceTeamApp {
             blogPosts: this.state.blogPosts,
             messages: this.state.messages,
             settings: this.state.settings,
+            developerComments: this.state.developerComments,
             exportedAt: new Date().toISOString()
         };
         
@@ -3504,6 +3536,7 @@ class SpaceTeamApp {
         this.state.blogPosts = [];
         this.state.messages = [];
         this.state.settings = { ...CONFIG.defaults };
+        this.state.developerComments = {};
         
         // Reset counters
         this.state.developerIdCounter = 1;
@@ -3511,6 +3544,7 @@ class SpaceTeamApp {
         this.state.websiteIdCounter = 1;
         this.state.blogIdCounter = 1;
         this.state.messageIdCounter = 1;
+        this.state.commentIdCounter = 1;
         
         // Clear localStorage
         localStorage.removeItem('spaceteam_developers');
@@ -3519,6 +3553,7 @@ class SpaceTeamApp {
         localStorage.removeItem('spaceteam_blog');
         localStorage.removeItem('spaceteam_messages');
         localStorage.removeItem('spaceteam_settings');
+        localStorage.removeItem('spaceteam_comments');
         
         // Clear Supabase data
         if (window.supabaseClient && CONFIG.supabaseUrl !== 'https://your-project.supabase.co') {
@@ -3620,9 +3655,10 @@ document.addEventListener('DOMContentLoaded', () => {
         window.deleteBlogPost = (id) => app.deleteBlogPost(id);
         window.deleteMessage = (id) => app.deleteMessage(id);
         window.viewMessage = (id) => app.viewMessage(id);
+        window.showDeveloperDetail = (id) => app.showDeveloperDetail(id);
+        window.hideDeveloperDetail = () => app.hideDeveloperDetail();
         window.exportData = () => app.exportData();
         window.resetData = () => app.resetData();
-        window.previewImage = (inputId) => app.previewImage(inputId);
         
     } catch (error) {
         console.error('Failed to initialize application:', error);
@@ -3633,3 +3669,4 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(errorDiv);
     }
 });
+[file content end]

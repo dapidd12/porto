@@ -1,3 +1,5 @@
+[file name]: config.js
+[file content begin]
 // Configuration for SpaceTeam | Dev - ENHANCED VERSION
 const CONFIG = {
     // Supabase Configuration - UPDATE WITH YOUR CREDENTIALS
@@ -9,10 +11,10 @@ const CONFIG = {
     adminPassword: 'SpaceTeam2024!',
     
     // Gemini AI Configuration - SET YOUR API KEY IN PRODUCTION
-    geminiApiKey: '', // Empty or fill with your API key
+    geminiApiKey: '', // Kosongkan atau isi dengan API key Anda
     
     // AI System Prompt
-    aiSystemPrompt: "You are the SpaceTeam AI assistant. Provide helpful responses about web development, projects, and services. Keep responses professional and space-themed.",
+    aiSystemPrompt: "You are the SpaceTeam AI assistant. Provide helpful responses about web development, projects, services, and our team members. Keep responses professional and space-themed.",
     
     // Default language
     defaultLanguage: 'id', // 'id' for Indonesian, 'en' for English
@@ -26,14 +28,14 @@ const CONFIG = {
         contactEmail: 'mission@spaceteam.dev',
         contactPhone: '+62 821-3830-5820',
         runningText: {
-            en: '🚀 SpaceTeam | Dev • 💻 Full-Stack Development • 🎨 UI/UX Design • 📱 Mobile Applications • 🌌 Cutting-edge Technology • 🔧 Cloud Systems • 🤖 AI Integration',
-            id: '🚀 SpaceTeam | Dev • 💻 Pengembangan Full-Stack • 🎨 Desain UI/UX • 📱 Aplikasi Mobile • 🌌 Teknologi Terkini • 🔧 Sistem Cloud • 🤖 Integrasi AI'
+            en: '🚀 SpaceTeam | Dev • 💻 Full-Stack Development • 🎨 UI/UX Design • 📱 Mobile Applications • 🌌 Cutting-edge Technology • 🔧 Cloud Systems • 🤖 AI Integration • 💬 Developer Comments • 🌐 Portfolio Websites',
+            id: '🚀 SpaceTeam | Dev • 💻 Pengembangan Full-Stack • 🎨 Desain UI/UX • 📱 Aplikasi Mobile • 🌌 Teknologi Terkini • 🔧 Sistem Cloud • 🤖 Integrasi AI • 💬 Komentar Developer • 🌐 Website Portofolio'
         },
         chatEnabled: true,
-        darkMode: true
+        darkMode: false
     },
     
-    // Language translations
+    // Language translations - UPDATED WITH NEW FEATURES
     translations: {
         en: {
             // Navigation
@@ -62,6 +64,8 @@ const CONFIG = {
             sectionTeamSubtitle: 'Meet our elite team of space engineers, each specialized in different tech galaxies.',
             sectionSkills: 'Tech Galaxy Map',
             sectionSkillsSubtitle: 'Our expertise spans across multiple technology constellations',
+            btnViewDetails: 'View Details',
+            btnAddComment: 'Add Comment',
             
             // Projects Section
             sectionProjects: 'Mission Log',
@@ -105,6 +109,9 @@ const CONFIG = {
             formSecurityKey: 'Security Key *',
             btnLaunchTransmission: 'Launch Transmission',
             btnAccessControl: 'Access Control',
+            formCommentName: 'Your Name *',
+            formCommentMessage: 'Your Comment *',
+            btnPostComment: 'Post Comment',
             
             // Stats Section
             statCompleted: 'Missions Completed',
@@ -129,7 +136,7 @@ const CONFIG = {
             footerCopyright: 'All systems operational.',
             
             // Chat
-            chatGreeting: 'Greetings, astronaut! I\'m your SpaceTeam AI assistant. How can I assist with your mission today? You can ask about our services, mission logs, or request a briefing.',
+            chatGreeting: 'Greetings, astronaut! I\'m your SpaceTeam AI assistant. How can I assist with your mission today? You can ask about our services, mission logs, team members, or request a briefing.',
             chatPlaceholder: 'Type your transmission...',
             chatSend: 'Transmit',
             
@@ -161,19 +168,30 @@ const CONFIG = {
             emptyWebsites: 'No Websites Deployed',
             emptyWebsitesText: 'No website projects have been deployed yet.',
             
+            // Developer Comments
+            developerComments: 'Comments',
+            noComments: 'No comments yet. Be the first to comment!',
+            addComment: 'Add Comment',
+            
+            // Social Media Labels
+            socialGithub: 'GitHub',
+            socialInstagram: 'Instagram',
+            socialTwitter: 'Twitter/X',
+            socialLinkedin: 'LinkedIn',
+            socialWhatsapp: 'WhatsApp',
+            socialTelegram: 'Telegram',
+            socialFacebook: 'Facebook',
+            socialWebsite: 'Website/Portfolio',
+            
             // Notifications
             notificationSuccess: 'Success',
             notificationError: 'Error',
             notificationWarning: 'Warning',
             notificationInfo: 'Info',
-            
-            // Admin Actions
-            edit: 'Edit',
-            delete: 'Delete',
-            save: 'Save',
-            cancel: 'Cancel',
-            preview: 'Preview',
-            update: 'Update'
+            commentPosted: 'Comment posted successfully!',
+            commentError: 'Error posting comment',
+            developerUpdated: 'Developer updated successfully!',
+            developerAdded: 'Developer added successfully!'
         },
         
         id: {
@@ -203,6 +221,8 @@ const CONFIG = {
             sectionTeamSubtitle: 'Temukan tim elit insinyur antariksa kami, masing-masing ahli di galaksi teknologi yang berbeda.',
             sectionSkills: 'Peta Galaksi Teknologi',
             sectionSkillsSubtitle: 'Keahlian kami mencakup berbagai konstelasi teknologi',
+            btnViewDetails: 'Lihat Detail',
+            btnAddComment: 'Tambah Komentar',
             
             // Projects Section
             sectionProjects: 'Log Misi',
@@ -246,6 +266,9 @@ const CONFIG = {
             formSecurityKey: 'Kunci Keamanan *',
             btnLaunchTransmission: 'Luncurkan Transmisi',
             btnAccessControl: 'Akses Kontrol',
+            formCommentName: 'Nama Anda *',
+            formCommentMessage: 'Komentar Anda *',
+            btnPostComment: 'Kirim Komentar',
             
             // Stats Section
             statCompleted: 'Misi Selesai',
@@ -270,7 +293,7 @@ const CONFIG = {
             footerCopyright: 'Semua sistem beroperasi.',
             
             // Chat
-            chatGreeting: 'Salam, astronot! Saya adalah asisten AI SpaceTeam Anda. Bagaimana saya bisa membantu misi Anda hari ini? Anda dapat bertanya tentang layanan kami, log misi, atau meminta pengarahan.',
+            chatGreeting: 'Salam, astronot! Saya adalah asisten AI SpaceTeam Anda. Bagaimana saya bisa membantu misi Anda hari ini? Anda dapat bertanya tentang layanan kami, log misi, anggota tim, atau meminta pengarahan.',
             chatPlaceholder: 'Ketik transmisi Anda...',
             chatSend: 'Kirim',
             
@@ -302,24 +325,35 @@ const CONFIG = {
             emptyWebsites: 'Belum Ada Website',
             emptyWebsitesText: 'Belum ada proyek website yang diluncurkan.',
             
+            // Developer Comments
+            developerComments: 'Komentar',
+            noComments: 'Belum ada komentar. Jadilah yang pertama berkomentar!',
+            addComment: 'Tambah Komentar',
+            
+            // Social Media Labels
+            socialGithub: 'GitHub',
+            socialInstagram: 'Instagram',
+            socialTwitter: 'Twitter/X',
+            socialLinkedin: 'LinkedIn',
+            socialWhatsapp: 'WhatsApp',
+            socialTelegram: 'Telegram',
+            socialFacebook: 'Facebook',
+            socialWebsite: 'Website/Portofolio',
+            
             // Notifications
             notificationSuccess: 'Sukses',
             notificationError: 'Error',
             notificationWarning: 'Peringatan',
             notificationInfo: 'Info',
-            
-            // Admin Actions
-            edit: 'Edit',
-            delete: 'Hapus',
-            save: 'Simpan',
-            cancel: 'Batal',
-            preview: 'Pratinjau',
-            update: 'Perbarui'
+            commentPosted: 'Komentar berhasil dikirim!',
+            commentError: 'Gagal mengirim komentar',
+            developerUpdated: 'Developer berhasil diperbarui!',
+            developerAdded: 'Developer berhasil ditambahkan!'
         }
     }
 };
 
-// Initialize Supabase client with enhanced error handling
+// Initialize Supabase client with better error handling
 let supabaseClient = null;
 try {
     if (CONFIG.supabaseUrl && CONFIG.supabaseKey && 
@@ -328,24 +362,15 @@ try {
         supabaseClient = supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey, {
             auth: {
                 persistSession: true,
-                autoRefreshToken: true,
-                detectSessionInUrl: true
-            },
-            db: {
-                schema: 'public'
-            },
-            global: {
-                headers: {
-                    'x-application-name': 'SpaceTeam-Dev'
-                }
+                autoRefreshToken: true
             }
         });
-        console.log('✅ Supabase client initialized successfully');
+        console.log('Supabase client initialized successfully');
     } else {
-        console.warn('⚠️ Supabase credentials not configured. Using localStorage mode.');
+        console.warn('Supabase credentials not configured. Using localStorage mode.');
     }
 } catch (error) {
-    console.error('❌ Supabase client initialization failed:', error);
+    console.error('Supabase client initialization failed:', error);
 }
 
 // Export configuration
@@ -354,32 +379,13 @@ window.supabaseClient = supabaseClient;
 
 // Add global error handler
 window.addEventListener('error', function(e) {
-    console.error('🔴 Global error caught:', e.error);
-    // You can add error reporting here (e.g., to Sentry, LogRocket)
+    console.error('Global error caught:', e.error);
+    // You can add error reporting here
 });
 
 // Add unhandled promise rejection handler
 window.addEventListener('unhandledrejection', function(e) {
-    console.error('🔴 Unhandled promise rejection:', e.reason);
+    console.error('Unhandled promise rejection:', e.reason);
     // You can add error reporting here
 });
-
-// Add performance monitoring
-if (window.performance) {
-    window.addEventListener('load', function() {
-        const perfData = window.performance.timing;
-        const pageLoadTime = perfData.loadEventEnd - perfData.navigationStart;
-        console.log(`📊 Page loaded in ${pageLoadTime}ms`);
-    });
-}
-
-// Add service worker registration (optional)
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js').then(function(registration) {
-            console.log('⚡ ServiceWorker registered:', registration.scope);
-        }).catch(function(error) {
-            console.log('❌ ServiceWorker registration failed:', error);
-        });
-    });
-}
+[file content end]
